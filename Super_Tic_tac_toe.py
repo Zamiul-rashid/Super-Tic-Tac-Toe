@@ -42,7 +42,7 @@ class tic_tac_toe:
         for win in wins:
             if self.board[win[0]//3][win[0]%3] == self.board[win[1]//3][win[1]%3] == self.board[win[2]//3][win[2]%3]:
                 return self.board[win[1]//3][win[1]%3]    
-            return None
+        return None
         
     def play (self,num,C_P):
         self.board[num//3][num%3]=C_P
@@ -78,12 +78,13 @@ class super_tic_tac_toe:
         for win in wins:
             if self.sboard[win[0]//3][win[0]%3].won == self.sboard[win[1]//3][win[1]%3].won == self.sboard[win[2]//3][win[2]%3].won:
                 return self.sboard[win[1]//3][win[1]%3].won    
-            return None
+        return None
 
 def playgame():
     player = "X" 
     boardno = 4
     Tic = super_tic_tac_toe()
+    win_board = []
     while True:
         cls()
         logoDisplay()
@@ -91,16 +92,21 @@ def playgame():
         print()
         if Tic.checkWin() != None :
             """Print winner"""
-            print(f"{player} is the winner !!!")
+            print(f"{Tic.checkWin()} is the winner !!!")
             
             break
+        while Tic.get_Board(boardno).won != None :
+            boardno = int(input(f"Please enter a board other then {boardno} : "))
+        # if Tic.checkWin() != None :
+        #     """Print winner"""
+        #     print(f"{player} is the winner !!!")
+            
+        #     break
         
         Inp = int(input(f"{player} Input : "))
-        if Tic.get_Board(Inp).won != None :
-        #    print(f"Please choose a board other then {Inp}")
-           boardno = int(input(f"Please choose a board other then {Inp}"))
-           Inp = int(input(f"{player} Input : "))
+     
         Tic.get_Board(boardno).play(Inp,player)
+        
         boardno = Inp
         
         
@@ -110,5 +116,6 @@ playgame()
         
     
   
-    
+def test_game():
+    x = [(0,0),(6,0),(2,0),(4,1),(0,"b2",4),(4,2),(6,4),(8,0),("b8",4,"b2",8),(6,8),(2,"Winner!!")]    
 
