@@ -9,12 +9,17 @@ def clearConsole():
 
 
 class tic_tac_toe:
+    
     def __init__(self):
         self.board = [
-        ['0','1','2'],
-        ['3','4','5'],
-        ['6','7','8'],
-    ]
+            
+            ['0','1','2'],
+            ['3','4','5'],
+            ['6','7','8'],
+        ]
+            
+        self.won = None
+        
     def showboard (self,lineno = None ):
         if lineno == None :
             for line in self.board:
@@ -22,18 +27,20 @@ class tic_tac_toe:
                 print("---|---|---")
         else:
             return(" | ".join(self.board[lineno])) 
+    
+    def checkWin(self):
+        wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
+        for win in wins:
+            if self.board[win[0]//3][win[0]%3] == self.board[win[1]//3][win[1]%3] == self.board[win[2]//3][win[2]%3]:
+                return self.board[win[1]//3][win[1]%3]    
+            return None
+        
     def play (self,num,C_P):
         self.board[num//3][num%3]=C_P
-    # def checkWin(self , xState, zState):
-    #     wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
-    #     for win in wins:
-    #         if(sum(xState[win[0]], xState[win[1]], xState[win[2]]) == 3):
-    #             print("X Won the match")
-    #             return 1
-    #         if(sum(zState[win[0]], zState[win[1]], zState[win[2]]) == 3):
-    #             print("O Won the match")
-    #             return 0
-    #     return -1                   
+            
+        self.won = self.checkWin() 
+                     
+                
         
 class super_tic_tac_toe:
     def __init__(self) :
