@@ -1,15 +1,23 @@
 import os
+def cls():
+    os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 
-def clearConsole():
-    command = 'clear'
-    if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
-        command = 'cls'
-    os.system(command)
-
+def logoDisplay():
+    print(
+        """
+   ____                                             
+  / __/_ _____  ___ ____                            
+ _\ \/ // / _ \/ -_) __/                            
+/___/\_,_/ .__/\__/_/                               
+ _______/_/       ______              ______        
+/_  __(_)___ ___ /_  __/__ _____ ___ /_  __/__  ___ 
+ / / / / __//___/ / / / _ `/ __//___/ / / / _ \/ -_)
+/_/ /_/\__/      /_/  \_,_/\__/      /_/  \___/\__/ 
+"""
+    )
 
 
 class tic_tac_toe:
-    
     def __init__(self):
         self.board = [
             
@@ -26,7 +34,7 @@ class tic_tac_toe:
                 print("","  | ".join(line))
                 print("---|---|---")
         else:
-            return(" | ".join(self.board[lineno])) 
+            return(" │ ".join(self.board[lineno])) 
     
     def checkWin(self):
         wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
@@ -50,16 +58,17 @@ class super_tic_tac_toe:
             [tic_tac_toe(),tic_tac_toe(),tic_tac_toe()],
         ]
     def showboard (self,lineno = None ):    
+        print("╔"+"═"*(12*3-1)+"╗")
         for i in range(3):
             for k in range(3):  
-                print(' ',end="")
+                print('║ ',end="")
                 for j in range(3):
-                    print(self.sboard[i][j].showboard(k),end=" || ")
+                    print(self.sboard[i][j].showboard(k),end=" ║ ")
                 print()
                 if k == 2 :
-                    print("===|===|===||"*3)
+                    print("╬"+"═"*(12*3-1)+"╬")
                 else:
-                    print("---|---|---||"*3)
+                    print("║" + "---┼---┼---║"*3)
     def get_Board(self,boardno):
         return self.sboard[boardno//3][boardno%3]
 
@@ -67,7 +76,8 @@ player = "X"
 boardno = 4
 Tic = super_tic_tac_toe()
 while True:
-    clearConsole()
+    cls()
+    logoDisplay()
     Tic.showboard()
     print()
     Inp = int(input(f"{player} Input : "))
@@ -79,5 +89,4 @@ while True:
         
   
     
-
 
