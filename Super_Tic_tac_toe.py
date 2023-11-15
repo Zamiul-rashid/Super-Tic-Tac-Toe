@@ -97,11 +97,7 @@ def playgame():
             break
         while Tic.get_Board(boardno).won != None :
             boardno = int(input(f"Please enter a board other then {boardno} : "))
-        # if Tic.checkWin() != None :
-        #     """Print winner"""
-        #     print(f"{player} is the winner !!!")
-            
-        #     break
+
         
         Inp = int(input(f"{player} Input : "))
      
