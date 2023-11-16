@@ -130,8 +130,8 @@ def playgame():
         boardno = Inp
         player = "O" if player == "X" else "X"
 
-if __name__ == "__main__":
-    playgame()
+# if __name__ == "__main__":
+#     playgame()
 
     
 
