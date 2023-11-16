@@ -51,6 +51,6 @@ Enjoy playing Super Tic Tac Toe!
 - This game is designed for console-based interaction and does not have a graphical user interface.
 - It's a strategic game that requires planning and a good understanding of the game's mechanics to win.
 
-For any inquiries or issues related to the game, feel free to contact the developer at [zamiulrashid1@gmail.com](mailto:zamiulrashid1@gmail.com).
+For any inquiries or issues related to the game, feel free to contact the developer at [zamiulrashid1@gmail.com , abyashrirproyas@gmail.com](mailto:zamiulrashid1@gmail.com,mailto:abyashrirproyas@gmail.com).
 
 Have fun!
