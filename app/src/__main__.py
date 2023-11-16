@@ -4,7 +4,7 @@ def cls():
     os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 
 disabled = '\033[02m'
-highlight_color = '\033[47m'
+highlight_color = '\033[47m'+'\033[30m'
 X_color = '\033[01m'+'\033[93m'
 Y_color = '\033[01m'+'\033[36m'
 RESET = "\033[0m"
@@ -129,11 +129,12 @@ def playgame():
         
         boardno = Inp
         player = "O" if player == "X" else "X"
-        
-playgame()
-        
+
+if __name__ == "__main__":
+    playgame()
+
     
-  
-def test_game():
-    x = [(0,0),(6,0),(2,0),(4,1),(0,"b2",4),(4,2),(6,4),(8,0),("b8",4,"b2",8),(6,8),(2,"Winner!!")]    
+
+# Testing sequence
+# [(0,0),(6,0),(2,0),(4,1),(0,"b2",4),(4,2),(6,4),(8,0),("b8",4,"b2",8),(6,8),(2,"Winner!!")]    
 

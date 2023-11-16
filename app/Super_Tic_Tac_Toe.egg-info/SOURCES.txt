@@ -1,0 +1,8 @@
+LICENSE.txt
+README.md
+setup.py
+app/Super_Tic_Tac_Toe.egg-info/PKG-INFO
+app/Super_Tic_Tac_Toe.egg-info/SOURCES.txt
+app/Super_Tic_Tac_Toe.egg-info/dependency_links.txt
+app/Super_Tic_Tac_Toe.egg-info/requires.txt
+app/Super_Tic_Tac_Toe.egg-info/top_level.txt
