@@ -14,4 +14,4 @@ This Python console-based game offers a twist on the classic Tic Tac Toe by intr
 - Provides a challenging gameplay experience requiring strategic moves to win.
 - Follows the rules of Super Tic Tac Toe for an engaging and enjoyable gaming session.
 
-Enjoy playing Super Tic Tac Toe! For any inquiries or issues, contact the developer at [zamiulrashid1@gmail.com](mailto:zamiulrashid1@gmail.com).
+Enjoy playing Super Tic Tac Toe! For any inquiries or issues, contact the developer at [zamiulrashid1@gmail.com , abyashrirproyas@gmail.com](mailto:zamiulrashid1@gmail.com,mailto:abyashrirproyas@gmail.com).
