@@ -47,10 +47,10 @@ class tic_tac_toe:
     def checkWin(self):
         wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
         for win in wins:
-            if self.board[win[0]//3][win[0]%3] == self.board[win[1]//3][win[1]%3] == self.board[win[2]//3][win[2]%3]:
-                return self.board[win[1]//3][win[1]%3]    
+            if self.board[win[0]//3][win[0]%3] == self.board[win[1]//3][win[1]%3] == self.board[win[2]//3][win[2]%3]:#Comparing the 
+                return self.board[win[1]//3][win[1]%3]                                          # elements of the board to check for winner
         return None
-        
+
     def play (self,num,C_P):
         self.board[num//3][num%3]=C_P
         self.won = self.checkWin() 
@@ -110,7 +110,7 @@ def playgame():
     player = "X" 
     boardno = 4
     Tic = super_tic_tac_toe()
-
+    ele_check = tic_tac_toe()
     while True:
         cls()
         logoDisplay()
@@ -129,13 +129,16 @@ def playgame():
                 if Inp not in range(9):
                     print("Please enter a valid input")
                     continue
+                if Tic.get_Board(boardno).board[Inp//3][Inp%3] in ["X","O"]:
+                    print("The box is already filled")
+                    continue
                 break
             except:
                 print("Please enter a valid input")
                 continue        
-        # the above loop will force the user to enter a valid input.
+        # the above loop will force the user to enter a valid input.INPUT PARADOX SOLVED 
               
-     
+         
         Tic.get_Board(boardno).play(Inp,player)
         
         boardno = Inp
