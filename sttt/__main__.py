@@ -1,5 +1,5 @@
 import os
-
+"""...Fix input bug..."""
 def cls():
     os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 
@@ -106,6 +106,7 @@ class super_tic_tac_toe:
         return None
 
 def playgame():
+    x = 1
     player = "X" 
     boardno = 4
     Tic = super_tic_tac_toe()
@@ -121,17 +122,27 @@ def playgame():
             break
         while Tic.get_Board(boardno).won != None :
             boardno = int(input(f"Please enter a board other then {boardno+1} : "))-1
-
-        
-        Inp = int(input(f"{(X_color if player == 'X' else Y_color)+player} Input : {RESET}"))-1
+        #The input peradox problem 
+        while True :
+            try:
+                Inp = int(input(f"{(X_color if player == 'X' else Y_color)+player} Input : {RESET}"))-1
+                if Inp not in range(9):
+                    print("Please enter a valid input")
+                    continue
+                break
+            except:
+                print("Please enter a valid input")
+                continue        
+        # the above loop will force the user to enter a valid input.
+              
      
         Tic.get_Board(boardno).play(Inp,player)
         
         boardno = Inp
         player = "O" if player == "X" else "X"
 
-# if __name__ == "__main__":
-#     playgame()
+if __name__ == "__main__":
+    playgame()
 
     
 
