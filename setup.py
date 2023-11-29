@@ -5,7 +5,7 @@ with open("sttt/README.md", "r") as f:
 
 setup(
     name="STTT",
-    version="0.8",
+    version="0.9",
     description='CLI implementation of the game "Super Tic Tac Toe" written in python',
     packages=['sttt'],
     long_description=long_description,
