@@ -122,20 +122,22 @@ def playgame():
             break
         while Tic.get_Board(boardno).won != None :
             boardno = int(input(f"Please enter a board other then {boardno+1} : "))-1
-        #The input peradox problem 
+        #The input peradox problem
         while True :
             try:
                 Inp = int(input(f"{(X_color if player == 'X' else Y_color)+player} Input : {RESET}"))-1
                 if Inp not in range(9):
-                    print("Please enter a valid input")
+                    print(f"{Inp+1} is not on the board")
                     continue
                 if Tic.get_Board(boardno).board[Inp//3][Inp%3] in ["X","O"]:
                     print("The box is already filled")
                     continue
                 break
+            except KeyboardInterrupt:
+                exit()
             except:
-                print("Please enter a valid input")
-                continue        
+                print(f"Invalid input!")
+                continue 
         # the above loop will force the user to enter a valid input.INPUT PARADOX SOLVED 
               
          
