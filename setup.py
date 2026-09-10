@@ -25,4 +25,5 @@ setup(
     ]
     },
     python_requires=">=3.10",
+    extras_require={"ai": ["torch>=2.6", "numpy>=1.24"]},
 )
