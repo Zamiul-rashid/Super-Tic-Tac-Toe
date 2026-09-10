@@ -86,5 +86,18 @@ class Tests(unittest.TestCase):
         np.testing.assert_array_equal(encode(s),encode(swapped))
         self.assertEqual(s.legal_actions(),swapped.legal_actions())
 
+    def test_resnet(self):
+        from sttt.learning import ResNet, create_model, load_model
+        model = create_model('resnet')
+        self.assertIsInstance(model, ResNet)
+        param_count = sum(p.numel() for p in model.parameters())
+        self.assertGreater(param_count, 1_500_000)
+        self.assertLess(param_count, 2_500_000)
+        s = State()
+        p, v = model.evaluate(s)
+        self.assertEqual(p.shape, (81,))
+        self.assertAlmostEqual(float(p.sum()), 1.0, places=5)
+        self.assertTrue(-1.0 <= v <= 1.0)
+
 if __name__ == '__main__':
     unittest.main()

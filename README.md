@@ -33,6 +33,49 @@ python -m sttt.ai play --checkpoint runs/default/latest.pt
 python -m sttt.ai evaluate --checkpoint runs/default/latest.pt --games 20
 ```
 
+### Saved evaluation results and visualizer
+
+Each evaluation automatically writes three matching files to the checkpoint's
+`evaluations/` directory. Pass `--output runs/my-tests` to choose another directory.
+Unique run IDs keep repeated tests from overwriting each other.
+
+- `eval-<id>.json`: settings, checkpoint SHA-256 and iteration, aggregate results,
+  results by starting side, and individual games.
+- `eval-<id>_games.csv`: one row per completed game with outcome, score, starting
+  side, move count, elapsed seconds and agent search seconds. Settings repeat on
+  each row so exports can be combined later.
+- `eval-<id>_summary.csv`: one row per evaluation, including wins/draws/losses,
+  win rate, score rate and average game length/time.
+
+Score rate means `(wins + 0.5 * draws) / completed games`; rates in exports are
+fractions from 0 to 1. Exports update after each game. Ctrl+C saves completed games
+with `status=interrupted`; unfinished games are excluded. The current evaluator
+tests general playing strength against random or simple tactical policies, with
+adaptation disabled. Compare the same opponent and search budget, use several
+seeds, and balance starting sides (an even game count).
+
+Install plotting dependencies into the Conda environment and generate charts:
+
+```bash
+conda activate sttt
+python -m pip install -r requirements.txt
+python -m sttt.visualize runs/starter --output runs/charts
+```
+
+The visualizer recursively reads evaluation JSON and `metrics.jsonl`, producing
+`evaluation.png` (outcomes, score by side, cumulative test score, game lengths)
+and `training.png` (loss, replay size, iteration time). It also accepts several
+run directories or individual JSON files for comparisons. CSV exports are for
+spreadsheet/external analysis; the visualizer reads the richer JSON exports.
+Reports remain separate and are numbered chronologically; the terminal prints
+their checkpoint paths and run IDs. These are descriptive charts, not proof of
+statistically significant improvement. Cumulative score is evaluation progress,
+not learning during the test; falling training loss alone does not prove strength.
+
+Use `--show` to open Matplotlib windows with zoom/pan and image saving (requires
+a desktop display). PNG generation works offline and without a display or GPU.
+Rerun the command after new evaluations; existing chart PNGs are replaced.
+
 For a quick pipeline test use `train --iterations 1 --games 2 --simulations 8
 --steps 4 --output runs/smoke`. Use `--device cpu` if CUDA is unavailable.
 Training prints time and loss per iteration and saves `metrics.jsonl`, `latest.pt`
