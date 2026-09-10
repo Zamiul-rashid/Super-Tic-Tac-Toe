@@ -9,7 +9,7 @@ import numpy as np
 import torch
 from .env import State
 from .learning import ResNet, create_model, encode, load_model
-from .opponent import Opponent, policies
+from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
 from .bots import TacticalBot, AlphaBetaBot
@@ -231,8 +231,9 @@ def evaluate(args):
                 elif bot is not None:
                     action = bot.choose(state, opponent_rng)
                 else:
-                    p = policies(state)[0 if args.opponent == 'random' else 4]
-                    action = int(opponent_rng.choice(81,p=p))
+                    policy_idx = NAMES.index(args.opponent) if args.opponent in NAMES else 4
+                    p = policies(state)[policy_idx]
+                    action = int(opponent_rng.choice(81, p=p))
                 tree.advance(action)
                 if opponent_tree is not None:
                     opponent_tree.advance(action)
@@ -286,7 +287,7 @@ def main():
     p.add_argument('--no-adapt',action='store_true')
     e = commands.add_parser('evaluate')
     e.add_argument('--games',type=positive,default=20)
-    e.add_argument('--opponent', choices=['random','legacy-tactical','tactical','alphabeta','checkpoint'], default='alphabeta')
+    e.add_argument('--opponent', choices=['random', 'center', 'corners', 'local-win', 'global-win', 'legacy-tactical', 'tactical', 'alphabeta', 'checkpoint'], default='alphabeta')
     e.add_argument('--opponent-checkpoint')
     e.add_argument('--opponent-depth', type=positive, default=3)
     e.add_argument('--opponent-nodes', type=positive, default=3000)
