@@ -2,9 +2,11 @@
 
 ## Learning AI (4 GB GPU preset)
 
-The learning agent uses a 161k-parameter policy/value network, self-play and PUCT
-search. GPU training defaults to batches of 128; replay and sequential search stay
-on CPU. The original two-human console game remains available through `sttt`.
+The learning agent uses a 1.77M-parameter residual policy/value network by default
+(`--arch mlp` selects the original 161k network). Existing checkpoints load with
+their original architecture. CPU workers build search trees; one inference owner
+evaluates batches on the GPU, then performs training updates between iterations.
+The original two-human console game remains available through `sttt`.
 
 ```bash
 conda create -n sttt python=3.14 pip -y
@@ -33,6 +35,132 @@ python -m sttt.ai play --checkpoint runs/default/latest.pt
 python -m sttt.ai evaluate --checkpoint runs/default/latest.pt --games 20
 ```
 
+### Batched search, pruning, and the 4 GB GPU
+
+Continue the existing large model in a new output directory:
+
+```bash
+python -m sttt.ai train --resume runs/large_256/latest.pt \
+  --output runs/batched_256 --device cuda --workers 8 \
+  --iterations 100 --games 8 --simulations 256 \
+  --leaf-batch 16 --inference-batch 128 --inference-wait-ms 2 \
+  --batch 128 --eval-every 25 --eval-games 20 --eval-simulations 512
+```
+
+This adds 800 games. Checkpoints are saved every iteration and alpha-beta
+evaluations every 25 iterations. To continue this new run later, resume from
+`runs/batched_256/latest.pt`, not the original checkpoint again. Set
+`--eval-every 0` to omit periodic evaluations. An evaluation interrupt stops that
+test; a training interrupt stops training and leaves the last completed checkpoint.
+
+- `--workers`: persistent spawned CPU processes playing separate games; no CUDA
+  models or contexts are created in them.
+- `--leaf-batch`: pending leaf positions collected within each search tree (16 by
+  default). Virtual losses spread these requests across branches and are cleared
+  after inference, including on errors.
+- `--inference-batch`: maximum positions in one forward pass (128 by default).
+  The owner combines worker requests, waiting at most `--inference-wait-ms` for
+  additional requests. Underfilled batches run immediately when necessary.
+- `--batch`: training minibatch size; separate from search inference batching.
+  Replay remains in system RAM. Use `--device cpu` for a CUDA-free fallback.
+
+Workers stay alive across iterations, but search trees are recreated for each
+game and never reused after a network update. JSONL logs include actual mean/max
+inference batch size, inference positions/time, self-play time, search depth,
+completed simulations, retained visits and peak PyTorch-allocated GPU memory.
+The allocator metric excludes some driver/runtime memory. High GPU utilization
+is not guaranteed: tree traversal, IPC, encoding and checkpoint writes still take
+CPU time. Measure games/second as well as batch occupancy.
+
+Search includes two distinct mechanisms:
+
+1. **Soft suppression:** PUCT still values promising branches. After eight visits,
+   a branch whose estimated value trails a better sampled branch gets a smaller
+   exploration bonus (never below 20% of its original bonus). No action is deleted.
+   Every 64 selections at a node, the least recently checked eligible branch is
+   revisited. Legal moves retain a small positive prior. The suppression rule is
+   an experimental heuristic; use ablations to check whether it helps strength.
+2. **Exact proof propagation:** only terminal game outcomes create proofs. A node
+   is a proven win if any child is a proven loss for the next player. It becomes
+   a proven draw/loss only once all legal children are solved. Proven losing moves
+   are skipped while non-losing or unresolved alternatives exist. Search stops
+   early when the root is solved, and the returned policy includes only moves
+   that achieve its proven result. Neural values are never treated as proofs.
+
+This is an MCTS solver extension, not an implementation of the full PN-MCTS
+paper's proof-number selection formula. Research references are
+[MCTS-Solver](https://staff.ru.is/yngvi/pdf/WinandsBS08.pdf),
+[Batch Monte Carlo Tree Search](https://arxiv.org/abs/2104.04278), and
+[Proof Number Based Monte-Carlo Tree Search](https://arxiv.org/abs/2303.09449).
+The batched implementation uses virtual losses and a shared inference owner; it
+does not reproduce every heuristic or the transposition table in Batch MCTS.
+Turn off features independently with
+`--no-soft-pruning`, `--no-proofs`, and `--no-reuse` for ablations. Reuse retains
+the played subtree and frees siblings after both players' moves; visits from that
+subtree contribute to the next policy. `--simulations` limits **new** simulations
+per move; exact solving may finish earlier. Reported `hard_pruned_choices` counts
+excluded choices across selections, not unique pruned nodes.
+
+For human play, batched GPU search can also evaluate multiple pending branches:
+
+```bash
+python -m sttt.ai play --checkpoint runs/large_256/latest.pt \
+  --device cuda --simulations 5000 --leaf-batch 64 --no-adapt
+```
+
+With adaptation enabled, minimax proof pruning is disabled: a forced loss against
+perfect opposition may still win against a fallible human. Updating the human
+profile invalidates expected-response tree statistics, so that tree resets.
+Soft suppression and inference batching still operate. For fully reusable,
+proof-aware competitive search, use `--no-adapt` as above.
+
+Batching changes selection order and can change playing strength at a fixed
+simulation budget. Keep the leaf batch fixed in comparisons and test both equal
+simulation budgets and equal wall-clock budgets before claiming a speed/strength gain.
+
+### Stronger test opponents and checkpoint comparisons
+
+The default evaluation opponent is now `alphabeta`. Available opponents:
+
+| Opponent | Behavior |
+| --- | --- |
+| `random` | Uniform legal moves |
+| `legacy-tactical` | Original stochastic local/global-win-biased baseline |
+| `tactical` | Takes global wins, screens immediate global losses, searches two plies to block threats and assess routing |
+| `alphabeta` | Iterative-deepening negamax with alpha-beta pruning, global/local line evaluation and move ordering |
+| `checkpoint` | Another neural checkpoint using reusable MCTS |
+
+Alpha-beta defaults to `--opponent-depth 3 --opponent-nodes 3000`. The node cap
+covers recursive search; immediate-win/reply-safety checks and move ordering have
+additional cost. It returns the last completed depth when the budget is exhausted.
+Its horizon evaluations are heuristics, not guarantees of optimal play.
+
+Run one checkpoint across multiple budgets and seeds (a separate report per pair):
+
+```bash
+python -m sttt.ai evaluate --checkpoint runs/large_256/latest.pt \
+  --opponent alphabeta --games 100 --seeds 0 1 2 \
+  --simulation-budgets 128 512 1024 5000 --leaf-batch 16 --device cuda
+
+python -m sttt.ai evaluate --checkpoint runs/batched_256/latest.pt \
+  --opponent checkpoint --opponent-checkpoint runs/large_256/latest.pt \
+  --simulations 512 --opponent-simulations 512 --games 100 --seeds 0 1 2
+```
+
+The first command runs 1,200 evaluation games and can take substantial time.
+Agent and opponent random streams are separate for each game. Starting sides
+alternate; use even game counts. By default, each pair shares two seeded random
+opening moves, with the tested agent playing X once and O once. Openings are fixed
+across budgets and recorded as zero-based action indices in JSON/CSV. This avoids
+counting identical deterministic checkpoint games as independent evidence. Use
+`--opening-moves 0` for empty-board tests, or up to 8 for more opening diversity;
+compare runs with the same opening settings. Paired games are not statistically
+independent, so uncertainty analysis should account for pairs.
+Tests measure general competitive strength with
+adaptation disabled. Proof/soft-pruning/reuse flags apply to the tested agent;
+the checkpoint opponent keeps default search settings. The reports record search
+version/config, device, batching, opponent budgets and opponent checkpoint hash.
+
 ### Saved evaluation results and visualizer
 
 Each evaluation automatically writes three matching files to the checkpoint's
@@ -50,8 +178,9 @@ Unique run IDs keep repeated tests from overwriting each other.
 Score rate means `(wins + 0.5 * draws) / completed games`; rates in exports are
 fractions from 0 to 1. Exports update after each game. Ctrl+C saves completed games
 with `status=interrupted`; unfinished games are excluded. The current evaluator
-tests general playing strength against random or simple tactical policies, with
-adaptation disabled. Compare the same opponent and search budget, use several
+tests general playing strength against the selected opponent, with adaptation
+disabled. New tactical reports are labeled `tactical-v2`; legacy reports are not
+directly comparable to this stronger baseline. Compare the same opponent and search budget, use several
 seeds, and balance starting sides (an even game count).
 
 Install plotting dependencies into the Conda environment and generate charts:
@@ -94,8 +223,8 @@ changes the sampled opponent responses in search. Use `--profile profiles/name.j
 for another player and `--no-adapt` to compare behavior without that profile.
 The neural network learns from self-play; human observations update the separate
 profile, not the network weights. The current experts are deliberately limited;
-this version does not yet include a recurrent opponent encoder, batched parallel
-search, symmetry augmentation or population training. Historical weights support
+this version does not yet include a recurrent opponent encoder,
+symmetry augmentation or population training. Historical weights support
 later comparisons. Winning strength and adaptation gains require evaluation;
 a smoke-trained checkpoint is only evidence that the pipeline runs.
 

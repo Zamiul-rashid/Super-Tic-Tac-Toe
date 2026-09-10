@@ -50,10 +50,16 @@ def write_report(report, directory):
     metadata = {key: report[key] for key in (
         'schema_version', 'run_id', 'created_at', 'checkpoint', 'checkpoint_sha256',
         'iteration', 'opponent', 'simulations', 'seed', 'requested_games', 'adaptation', 'status')}
-    game_columns = ['game', 'agent_side', 'outcome', 'score', 'moves', 'seconds',
-                    'agent_moves', 'agent_search_seconds']
+    for key in ('search_version', 'search_config', 'leaf_batch', 'device', 'opening_moves', 'opponent_depth',
+                'opponent_nodes', 'opponent_simulations', 'opponent_checkpoint', 'opponent_checkpoint_sha256'):
+        value = report.get(key)
+        metadata[key] = json.dumps(value, sort_keys=True) if isinstance(value, dict) else value
+    game_columns = ['game', 'agent_side', 'opening_pair', 'opening_actions', 'outcome', 'score', 'moves', 'seconds',
+                    'agent_moves', 'agent_search_seconds', 'completed_simulations', 'neural_positions',
+                    'max_depth', 'hard_pruned_choices', 'soft_rechecks', 'retained_visits']
     exports = [('_games.csv', [*metadata, *game_columns],
-                [{**metadata, **g} for g in report['games']]),
+                [{**metadata, **{key: json.dumps(value) if isinstance(value, list) else value
+                                for key, value in g.items()}} for g in report['games']]),
                ('_summary.csv', [*metadata, *report['summary']],
                 [{**metadata, **report['summary']}])]
     for suffix, fields, rows in exports:

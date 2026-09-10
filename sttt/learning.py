@@ -14,13 +14,25 @@ def encode(state):
 
 class BasePolicyValue(nn.Module):
     @torch.inference_mode()
+    def evaluate_many(self, states):
+        if not states:
+            return []
+        if any(s.result is not None for s in states):
+            raise ValueError('Neural evaluation expects nonterminal positions')
+        x = torch.from_numpy(np.stack([encode(s) for s in states]))
+        mask = np.zeros((len(states), 81), dtype=bool)
+        for i, state in enumerate(states):
+            mask[i, state.legal_actions()] = True
+        device = next(self.parameters()).device
+        logits, values = self(x.to(device))
+        logits = logits.masked_fill(~torch.from_numpy(mask).to(device), -torch.inf)
+        probabilities = logits.softmax(-1).cpu().numpy().astype(np.float64)
+        probabilities /= probabilities.sum(axis=1, keepdims=True)
+        return list(zip(probabilities, values.cpu().numpy().tolist()))
+
+    @torch.inference_mode()
     def evaluate(self, state):
-        p, v = self(torch.from_numpy(encode(state)).unsqueeze(0).to(next(self.parameters()).device))
-        legal = state.legal_actions()
-        probs = np.zeros(81, dtype=np.float64)
-        probs[legal] = p[0, legal].softmax(0).cpu().numpy()
-        probs /= probs.sum()
-        return probs, v.item()
+        return self.evaluate_many([state])[0]
 
 class Network(BasePolicyValue):
     """Legacy 160k-parameter 2-layer MLP."""
