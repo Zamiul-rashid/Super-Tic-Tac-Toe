@@ -1,0 +1,18 @@
+{
+  "engines": {
+    "codingame-legend": {
+      "source": "Place a verified Legend bot executable or wrapper at engines/bin/codingame-legend",
+      "command": ["engines/bin/codingame-legend"],
+      "protocol": "codingame",
+      "timeout": 5.0,
+      "fallback": "raise"
+    },
+    "utttai": {
+      "source": "https://github.com/arnowaczynski/utttai",
+      "command": ["engines/bin/utttai-wrapper"],
+      "protocol": "action_index",
+      "timeout": 5.0,
+      "fallback": "raise"
+    }
+  }
+}

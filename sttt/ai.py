@@ -16,6 +16,7 @@ from .population import sample_match, augment_batch
 from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
+from .engine_registry import create_configured_engine, load_engine_registry
 
 def positive(value):
     value = int(value)
@@ -323,6 +324,7 @@ def tournament_cmd(args):
         print(scoreboard_text)
         return sweep_summary
 
+    engine_registry = load_engine_registry(args.engine_config) if getattr(args, 'engine_config', None) else {}
     participants = {}
     if getattr(args, 'checkpoint', None):
         ckpt_bot = CheckpointBot(
@@ -334,7 +336,7 @@ def tournament_cmd(args):
 
     opp_list = getattr(args, 'opponents', None) or []
     for opp in opp_list:
-        bot = opp if isinstance(opp, Bot) else create_bot(opp)
+        bot = opp if isinstance(opp, Bot) else (create_configured_engine(opp, engine_registry) or create_bot(opp))
         name = bot.name
         if name in participants:
             suffix = 2
@@ -445,6 +447,7 @@ def main():
     tourn.add_argument('--opening-plies', type=int, default=2, help='Opening plies in [0, 4] (default: 2)')
     tourn.add_argument('--seed', type=int, default=42, help='Random seed (default: 42)')
     tourn.add_argument('--output', help='Report directory (default: runs/<run>/tournaments/ or runs/tournaments/)')
+    tourn.add_argument('--engine-config', help='JSON registry of named external engines')
     tourn.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='cpu')
     for sub in (p,e):
         sub.add_argument('--device', choices=['auto','cpu','cuda'], default='cpu')

@@ -35,6 +35,23 @@ python -m sttt.ai play --checkpoint runs/default/latest.pt
 python -m sttt.ai evaluate --checkpoint runs/default/latest.pt --games 20
 ```
 
+### External-engine tournaments
+
+The testing branch includes a strict external-process adapter and named engine
+registry. Third-party binaries are not vendored. Configure verified local
+commands in `engines/registry.json`, based on `engines/registry.example.json`:
+
+```bash
+python -m sttt.ai tournament --checkpoint runs/big_run/latest.pt \
+  --engine-config engines/registry.json \
+  --opponents codingame-legend utttai --games 20 --simulations 512 \
+  --output runs/big_run/tournaments/top-engines-20
+```
+
+Missing executables, timeouts, crashes and illegal moves fail a configured
+engine matchup instead of silently substituting a built-in bot. See
+`engines/README.md` for the supported wire protocols.
+
 ### Batched search, pruning, and the 4 GB GPU
 
 Continue the existing large model in a new output directory:
