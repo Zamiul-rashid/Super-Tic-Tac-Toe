@@ -1,4 +1,4 @@
-"""Run with python -m sttt.ai train|play|evaluate."""
+"""Run with python -m sttt.ai train|play|evaluate|tournament."""
 import argparse
 from collections import deque
 from dataclasses import asdict
@@ -12,8 +12,9 @@ from .learning import ResNet, create_model, encode, load_model
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
-from .bots import TacticalBot, AlphaBetaBot
-from .reports import new_report, write_report
+from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
+from .reports import new_report, write_report, write_tournament_report
+from .tournament import run_tournament, run_simulation_sweep
 
 def positive(value):
     value = int(value)
@@ -261,6 +262,125 @@ def evaluate(args):
     print(json.dumps(report['summary']))
     return report
 
+
+def tournament_cmd(args):
+    device = resolve_device(getattr(args, 'device', 'cpu'))
+    if getattr(args, 'output', None):
+        output_dir = Path(args.output)
+    elif getattr(args, 'checkpoint', None):
+        output_dir = Path(args.checkpoint).parent / 'tournaments'
+    else:
+        output_dir = Path('runs/tournaments')
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if getattr(args, 'simulation_budgets', None):
+        checkpoint_path = args.checkpoint if getattr(args, 'checkpoint', None) else ""
+        opp_specs = args.opponents if getattr(args, 'opponents', None) else ["tactical", "alphabeta"]
+        sweep_summary = run_simulation_sweep(
+            checkpoint_path=checkpoint_path,
+            opponent_specs=opp_specs,
+            budgets=args.simulation_budgets,
+            games=args.games,
+            opening_plies=args.opening_plies,
+            seed=args.seed,
+            device=device,
+            output_dir=output_dir,
+        )
+        lines = [
+            "=" * 110,
+            "                               SIMULATION BUDGET SCALING BENCHMARK",
+            "=" * 110,
+            f"{'Budget':<10} {'Bayesian Elo (95% CI)':<25} {'Glicko-2 (±RD)':<22} {'Win Rate':<10} {'Score Rate':<12} {'W':<5} {'D':<5} {'L':<5} {'Games':<6}",
+            "-" * 110,
+        ]
+        for row in sweep_summary.get("scaling", []):
+            b = row["budget"]
+            elo_str = f"{row['elo']:.1f} [±{row['elo_ci95']:.1f}]"
+            g_str = f"{row['glicko2']:.1f} (±{row['glicko2_rd']:.1f})"
+            win_pct = f"{row['win_rate'] * 100:.1f}%"
+            score_pct = f"{row['score_rate'] * 100:.1f}%"
+            lines.append(
+                f"{b:<10} {elo_str:<25} {g_str:<22} {win_pct:<10} {score_pct:<12} {row['wins']:<5} {row['draws']:<5} {row['losses']:<5} {row['games']:<6}"
+            )
+        lines.append("=" * 110)
+        scoreboard_text = "\n".join(lines)
+        (output_dir / "scoreboard.txt").write_text(scoreboard_text + "\n", encoding="utf-8")
+        print(scoreboard_text)
+        return sweep_summary
+
+    participants = {}
+    if getattr(args, 'checkpoint', None):
+        ckpt_bot = CheckpointBot(
+            path=args.checkpoint,
+            simulations=args.simulations,
+            device=device,
+        )
+        participants[ckpt_bot.name] = ckpt_bot
+
+    opp_list = getattr(args, 'opponents', None) or []
+    for opp in opp_list:
+        bot = opp if isinstance(opp, Bot) else create_bot(opp)
+        name = bot.name
+        if name in participants:
+            suffix = 2
+            while f"{name}_{suffix}" in participants:
+                suffix += 1
+            name = f"{name}_{suffix}"
+        participants[name] = bot
+
+    if len(participants) < 2:
+        for default_bot in ("alphabeta", "tactical"):
+            if len(participants) >= 2:
+                break
+            b = create_bot(default_bot)
+            if b.name not in participants:
+                participants[b.name] = b
+
+    tourn = run_tournament(
+        bots=participants,
+        games_per_matchup=args.games,
+        opening_plies=args.opening_plies,
+        seed=args.seed,
+    )
+    ratings_dict = {}
+    for p in tourn["participants"]:
+        elo_r = tourn["elo_ratings"].get(p)
+        glicko_r = tourn["glicko_ratings"].get(p)
+        ratings_dict[p] = {
+            "elo": round(float(elo_r.elo), 2) if elo_r is not None else 1500.0,
+            "elo_ci95": round(float(elo_r.error_margin), 2) if elo_r is not None else 0.0,
+            "glicko2": round(float(glicko_r.rating), 2) if glicko_r is not None else 1500.0,
+            "glicko2_rd": round(float(glicko_r.rd), 2) if glicko_r is not None else 350.0,
+            "volatility": round(float(glicko_r.volatility), 4) if glicko_r is not None else 0.06,
+            "games": elo_r.games if elo_r is not None else 0,
+            "wins": elo_r.wins if elo_r is not None else 0,
+            "draws": elo_r.draws if elo_r is not None else 0,
+            "losses": elo_r.losses if elo_r is not None else 0,
+            "win_rate": round(elo_r.wins / elo_r.games, 4) if elo_r and elo_r.games > 0 else 0.0,
+            "score_rate": round((elo_r.wins + 0.5 * elo_r.draws) / elo_r.games, 4) if elo_r and elo_r.games > 0 else 0.0,
+        }
+    tourn["ratings"] = ratings_dict
+    tourn["matchups"] = [
+        {
+            "game_id": r.game_id,
+            "pair_id": r.pair_id,
+            "opening_plies": r.opening_plies,
+            "opening_moves": list(r.opening_moves),
+            "player_x": r.player_x,
+            "player_o": r.player_o,
+            "winner": r.winner,
+            "moves": r.moves,
+        }
+        for r in tourn["results"]
+    ]
+    write_tournament_report(tourn, output_dir)
+    print(tourn["scoreboard"])
+    return tourn
+
+
+tournament = tournament_cmd
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command',required=True)
@@ -298,6 +418,16 @@ def main():
     e.add_argument('--simulation-budgets', nargs='+', type=positive,
                    help='Run separate reports for each search budget')
     e.add_argument('--output',help='Report directory (default: checkpoint directory/evaluations)')
+    tourn = commands.add_parser('tournament', help='Execute automated round-robin tournament or simulation sweep')
+    tourn.add_argument('--checkpoint', help='Path to checkpoint model (optional)')
+    tourn.add_argument('--opponents', nargs='+', help='Bot identifiers (e.g. alphabeta, tactical, corners, etc.)')
+    tourn.add_argument('--games', type=positive, default=50, help='Games per matchup in [20, 500] (default: 50)')
+    tourn.add_argument('--simulations', type=positive, default=512, help='MCTS simulation budget (default: 512)')
+    tourn.add_argument('--simulation-budgets', nargs='+', type=positive, help='Simulation budgets for scaling sweep')
+    tourn.add_argument('--opening-plies', type=int, default=2, help='Opening plies in [0, 4] (default: 2)')
+    tourn.add_argument('--seed', type=int, default=42, help='Random seed (default: 42)')
+    tourn.add_argument('--output', help='Report directory (default: runs/<run>/tournaments/ or runs/tournaments/)')
+    tourn.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='cpu')
     for sub in (p,e):
         sub.add_argument('--device', choices=['auto','cpu','cuda'], default='cpu')
         sub.add_argument('--checkpoint',required=True)
@@ -317,6 +447,11 @@ def main():
         parser.error('Evaluation interval and inference wait must be nonnegative and finite')
     if args.command == 'evaluate' and not 0 <= args.opening_moves <= 8:
         parser.error('Opening moves must be between 0 and 8')
+    if args.command == 'tournament':
+        if not 20 <= args.games <= 500:
+            parser.error('Games per matchup must be between 20 and 500')
+        if not 0 <= args.opening_plies <= 4:
+            parser.error('Opening plies must be between 0 and 4')
     try:
         if args.command == 'evaluate':
             for seed in args.seeds or [args.seed]:
@@ -325,7 +460,7 @@ def main():
                     if evaluate(args)['status'] != 'complete':
                         return  # Ctrl+C ends the whole sweep, not just one budget.
         else:
-            {'train':train,'play':play}[args.command](args)
+            {'train': train, 'play': play, 'evaluate': evaluate, 'tournament': tournament_cmd}[args.command](args)
     except (KeyboardInterrupt,EOFError):
         print('\nStopped. Completed training iterations and observed human moves are saved.')
 
