@@ -5,3 +5,5 @@ STTT.egg-info
 .venv/
 runs/
 profiles/
+.agent/
+.agents

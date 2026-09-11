@@ -12,6 +12,7 @@ from .learning import ResNet, create_model, encode, load_model
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
+from .population import sample_match, augment_batch
 from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
@@ -47,6 +48,8 @@ def train(args):
         model = create_model(arch)
         saved = {}
     model.to(device)
+    if 'numpy_rng_state' in saved:
+        rng.bit_generator.state = saved['numpy_rng_state']
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
     if 'optimizer' in saved:
         optimizer.load_state_dict(saved['optimizer'])
@@ -63,7 +66,12 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
     for iteration in range(start_iteration + 1, start_iteration + args.iterations + 1):
         started = time.monotonic()
         seeds = rng.integers(0, 10**9, size=args.games)
-        results, inference_stats = pool.run(model, seeds, args.simulations, search_config(args), args.leaf_batch)
+        matches = None
+        if getattr(args, 'population', False):
+            history = getattr(args, 'population_checkpoints', None) or str(output)
+            matches = [sample_match(seed, history) for seed in seeds]
+        results, inference_stats = pool.run(model, seeds, args.simulations, search_config(args), args.leaf_batch,
+                                           matches=matches)
         selfplay_seconds = time.monotonic() - started
         for game_idx, (trajectory, outcome, stats) in enumerate(results):
             for state, pi in trajectory:
@@ -71,7 +79,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 mask[state.legal_actions()] = True
                 replay.append((torch.from_numpy(encode(state)), torch.from_numpy(pi),
                                torch.from_numpy(mask), float(outcome * state.turn)))
-            print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} moves', flush=True)
+            print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} training positions, '
+                  f'opponent={stats["match"]["kind"]}', flush=True)
 
         model.train()
         losses = []
@@ -79,6 +88,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
             batch = [replay[int(i)] for i in indices]
             x, pi, mask = [torch.stack([row[k] for row in batch]).to(device) for k in range(3)]
+            if getattr(args, 'augment_symmetry', False):
+                x, pi, mask = augment_batch(x, pi, mask, rng)
             z = torch.tensor([row[3] for row in batch], device=device)
             logits, value = model(x)
             logits = logits.masked_fill(~mask, -1e9)
@@ -90,18 +101,22 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             losses.append(loss.item())
         checkpoint = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(),
                       'iteration': iteration, 'replay': list(replay), 'arch': arch,
-                      'training_config': vars(args), 'search_config': asdict(search_config(args))}
+                      'training_config': vars(args), 'search_config': asdict(search_config(args)),
+                      'numpy_rng_state': rng.bit_generator.state}
         temporary = output / 'latest.tmp'
         torch.save(checkpoint, temporary)
         temporary.replace(output / 'latest.pt')
         # Small historical weights retained separately for evaluation and milestones.
         save_snapshot = (getattr(args, 'save_every', 50) and iteration % args.save_every == 0) or (args.eval_every and iteration % args.eval_every == 0)
         if save_snapshot:
-            torch.save({'model': model.state_dict(), 'iteration': iteration, 'arch': arch}, output / f'model-{iteration:04d}.pt')
+            snapshot = output / f'model-{iteration:04d}.pt'
+            torch.save({'model': model.state_dict(), 'iteration': iteration, 'arch': arch}, snapshot.with_suffix('.tmp'))
+            snapshot.with_suffix('.tmp').replace(snapshot)
         report = {'iteration': iteration, 'positions': len(replay), 'loss': float(np.mean(losses)),
                   'seconds': round(time.monotonic() - started, 2), 'selfplay_seconds': selfplay_seconds,
                   'games': args.games, 'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
                   'search_config': asdict(search_config(args)), **inference_stats,
+                  'population_matches': [r[2]['match'] for r in results],
                   'completed_simulations': sum(r[2]['completed_simulations'] for r in results),
                   'max_search_depth': max(r[2]['max_depth'] for r in results),
                   'soft_rechecks': sum(r[2]['soft_rechecks'] for r in results),
@@ -393,6 +408,9 @@ def main():
     t.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     t.add_argument('--output', default='runs/default')
     t.add_argument('--resume')
+    t.add_argument('--population', action='store_true', help='Randomized self-play, history and bot mixture')
+    t.add_argument('--augment-symmetry', action='store_true', help='Random rotations/reflections of training positions')
+    t.add_argument('--population-checkpoints', help='Directory of frozen model-*.pt opponents; defaults to output')
     t.add_argument('--inference-batch', type=positive, default=128,
                    help='Maximum positions evaluated together by the inference owner')
     t.add_argument('--inference-wait-ms', type=float, default=2.,

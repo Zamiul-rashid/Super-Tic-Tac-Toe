@@ -7,9 +7,11 @@ import multiprocessing as mp
 from multiprocessing.connection import wait
 import time
 import traceback
+from dataclasses import asdict
 import numpy as np
 from .env import State
 from .search import TreeSearch
+from .population import MatchSpec, make_opponent
 
 
 class RemoteEvaluator:
@@ -29,13 +31,31 @@ class RemoteEvaluator:
         return self.evaluate_many([state])[0]
 
 
-def play_game(evaluator, simulations, seed, config, leaf_batch):
+def play_game(evaluator, simulations, seed, config, leaf_batch, match=None):
     rng = np.random.default_rng(seed)
     tree = TreeSearch(evaluator, rng, config)
     state, trajectory = State(), []
+    match = match or MatchSpec()
+    opponent = make_opponent(match)
+    opponent_rng = np.random.default_rng(np.random.SeedSequence([int(seed), 731]))
+    for _ in range(match.opening_moves):
+        if state.result is not None:
+            break
+        state = state.play(int(opponent_rng.choice(state.legal_actions())))
+    ply = match.opening_moves
     totals = dict(completed_simulations=0, neural_positions=0, max_depth=0,
                   hard_pruned_choices=0, soft_rechecks=0, retained_visits=0)
     while state.result is None:
+        if opponent is not None and state.turn != match.learner_side:
+            if opponent_rng.random() < match.epsilon:
+                action = int(opponent_rng.choice(state.legal_actions()))
+                opponent.reset()
+            else:
+                action = opponent.choose(state, opponent_rng)
+            tree.advance(action)
+            state = state.play(action)
+            ply += 1
+            continue
         pi = tree.run(state, simulations, batch_size=leaf_batch, noise=True)
         for key in totals:
             totals[key] = (max(totals[key], tree.stats[key]) if key == 'max_depth'
@@ -43,9 +63,14 @@ def play_game(evaluator, simulations, seed, config, leaf_batch):
         trajectory.append((state, pi))
         # Normalize in float64 to avoid categorical sampler tolerance differences.
         p = pi.astype(float); p /= p.sum()
-        action = int(rng.choice(81, p=p)) if len(trajectory) < 16 else int(pi.argmax())
+        action = int(rng.choice(81, p=p)) if ply < 15 else int(pi.argmax())
         tree.advance(action)
         state = state.play(action)
+        ply += 1
+    if opponent is not None:
+        opponent.close()
+    totals['match'] = asdict(match)
+    totals['plies'] = ply
     return trajectory, state.result, totals
 
 
@@ -59,8 +84,8 @@ def _worker(connection):
             message = connection.recv()
             if message[0] == 'stop':
                 break
-            _, index, simulations, seed, config, leaf_batch = message
-            trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch)
+            _, index, simulations, seed, config, leaf_batch, match = message
+            trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch, match)
             connection.send(('game', index, trajectory, outcome, stats))
     except (EOFError, BrokenPipeError):
         pass
@@ -112,10 +137,12 @@ class SelfPlayPool:
         for connection in self.connections:
             connection.close()
 
-    def run(self, model, seeds, simulations, config, leaf_batch):
+    def run(self, model, seeds, simulations, config, leaf_batch, matches=None):
         """Collect one iteration with fixed model weights. Queue waiting is bounded."""
         if not len(seeds):
             raise ValueError('At least one game is required')
+        if matches is not None and len(matches) != len(seeds):
+            raise ValueError('One match specification is required per seed')
         model.eval()
         results, active = {}, set()
         next_game = 0
@@ -125,7 +152,8 @@ class SelfPlayPool:
         def dispatch(connection):
             nonlocal next_game
             if next_game < len(seeds):
-                connection.send(('start', next_game, simulations, int(seeds[next_game]), config, leaf_batch))
+                match = matches[next_game] if matches is not None else None
+                connection.send(('start', next_game, simulations, int(seeds[next_game]), config, leaf_batch, match))
                 next_game += 1
                 active.add(connection)
 

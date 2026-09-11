@@ -251,6 +251,8 @@ def run_matchup(
                 moves=moves_odd,
             )
         )
+        if (k + 1) % 10 == 0 or (k + 1) == num_pairs:
+            print(f"[{p_a} vs {p_b}] Completed {2*(k+1)}/{validated_games} games...", flush=True)
 
     return results
 
