@@ -853,6 +853,14 @@ def create_bot(spec: str | Bot, **kwargs) -> Bot:
         node_budget = kwargs.get("node_budget", 3000)
         return AlphaBetaBot(depth=depth, node_budget=node_budget, name=kwargs.get("name"))
 
+    if s == "cpp-alphabeta" or s.startswith("cpp-alphabeta:") or s.startswith("cpp-ab:"):
+        from .cpp_env import CppAlphaBetaBot
+        parts = s.split(":")
+        depth = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else kwargs.get("depth", 3)
+        node_budget = int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else kwargs.get("node_budget", 50000000)
+        name = kwargs.get("name", f"cpp-alphabeta-d{depth}")
+        return CppAlphaBetaBot(depth=depth, node_budget=node_budget, name=name)
+
     if s == "openspiel-mcts" or s == "openspiel":
         kw = dict(kwargs)
         sims = kw.pop("simulations", 100)

@@ -197,3 +197,12 @@ class CppAlphaBetaBot:
             return int(rng.choice(legal) if rng is not None else legal[0])
         return action
 
+    def advance(self, action: int) -> None:
+        pass
+
+    def reset(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
