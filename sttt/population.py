@@ -151,8 +151,8 @@ def sample_match(seed, checkpoint_dir=None, engine_registry=None, kind=None):
             kind = 'self'
 
     if kind == 'alphabeta':
-        depth = int(rng.choice([3, 4, 5]))
-        nodes = int(rng.choice([6000, 12000, 24000]))
+        depth = int(rng.choice([3, 4, 5, 6]))
+        nodes = int(rng.choice([50000, 100000, 250000]))
         epsilon = float(rng.uniform(0., .05))
     elif kind == 'tactical':
         depth, nodes = 2, int(rng.choice([6000, 10000, 16000]))
@@ -217,6 +217,12 @@ def make_opponent(spec):
     if spec.kind == 'self':
         return None
     if spec.kind == 'alphabeta':
+        try:
+            from .cpp_env import CppAlphaBetaBot, is_cpp_available
+            if is_cpp_available():
+                return CppAlphaBetaBot(depth=spec.depth, node_budget=spec.nodes)
+        except ImportError:
+            pass
         return AlphaBetaBot(depth=spec.depth, node_budget=spec.nodes)
     if spec.kind == 'tactical':
         bot = TacticalBot(name=f'tactical-{spec.nodes}')

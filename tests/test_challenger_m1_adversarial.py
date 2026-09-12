@@ -204,7 +204,7 @@ class ChallengerAdversarialM1Tests(unittest.TestCase):
             model_path = Path(tmpdir) / "tree_test.pt"
             torch.save({"model": create_model("mlp").state_dict(), "arch": "mlp"}, model_path)
 
-            bot = CheckpointBot(model_path, simulations=200, device="cpu")
+            bot = CheckpointBot(model_path, simulations=200, device="cpu", backend="python")
 
             # 1. Advance before any choose() does not crash and leaves tree None
             bot.advance(4)

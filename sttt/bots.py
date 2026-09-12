@@ -665,6 +665,7 @@ class CheckpointBot(Bot):
         config: SearchConfig | None = None,
         name: str | None = None,
         checkpoint_path: str | Path | None = None,
+        backend: str = "auto",
     ):
         p = path or checkpoint_path
         if p is None:
@@ -680,6 +681,7 @@ class CheckpointBot(Bot):
         self.simulations = simulations
         self.leaf_batch = leaf_batch
         self.config = config or SearchConfig()
+        self.backend = backend
         iteration = self.checkpoint_data.get("iteration")
         self._name = name or (f"ckpt-iter{iteration:04d}" if iteration is not None else self.path.stem)
         self.tree: TreeSearch | None = None
@@ -702,11 +704,13 @@ class CheckpointBot(Bot):
         if not legal:
             raise ValueError("Cannot choose a move in a terminal state")
 
-        try:
-            from .cpp_env import CppTreeSearch, is_cpp_available
-            _HAS_CPP = is_cpp_available()
-        except ImportError:
-            _HAS_CPP = False
+        _HAS_CPP = False
+        if self.backend in ("auto", "cpp"):
+            try:
+                from .cpp_env import CppTreeSearch, is_cpp_available
+                _HAS_CPP = is_cpp_available()
+            except ImportError:
+                _HAS_CPP = False
 
         if _HAS_CPP:
             if self.tree is None:
