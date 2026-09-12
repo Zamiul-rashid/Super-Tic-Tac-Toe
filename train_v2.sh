@@ -29,7 +29,8 @@ fi
   --backend cpp \
   --fp16 \
   --workers 8 \
-  --iterations 3000 \
+  --iterations 2000 \
+  --max-iterations 2000 \
   --games 16 \
   --simulations 512 \
   --batch 512 \
@@ -51,5 +52,15 @@ fi
   2>&1 | tee -a runs/run_v2/train.log
 
 result=${PIPESTATUS[0]}
+if [[ "$result" -eq 0 ]]; then
+  echo "" | tee -a runs/run_v2/train.log
+  echo "==========================================================================" | tee -a runs/run_v2/train.log
+  echo "      TRAINING REACHED 2,000 ITERATIONS! LAUNCHING GRAND TOURNAMENT       " | tee -a runs/run_v2/train.log
+  echo "==========================================================================" | tee -a runs/run_v2/train.log
+  /home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python scripts/run_v2_vs_bigrun_comparison.py \
+    --checkpoint runs/run_v2/latest.pt \
+    --output runs/tournaments/run_v2_vs_bigrun \
+    2>&1 | tee -a runs/run_v2/train.log
+fi
 echo "Training exited with status ${result}." | tee -a runs/run_v2/train.log
 exit "$result"

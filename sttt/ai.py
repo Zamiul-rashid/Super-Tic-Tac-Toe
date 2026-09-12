@@ -110,7 +110,9 @@ def _utttai_command_parts(engine_registry):
 def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool, engine_registry=None):
     start_iteration = saved.get('iteration', 0)
     population_games = saved.get('population_games', 0)
-    for iteration in range(start_iteration + 1, start_iteration + args.iterations + 1):
+    max_iter = getattr(args, 'max_iterations', None)
+    end_iteration = min(start_iteration + args.iterations, max_iter) if max_iter else (start_iteration + args.iterations)
+    for iteration in range(start_iteration + 1, end_iteration + 1):
         started = time.monotonic()
         seeds = rng.integers(0, 10**9, size=args.games)
         matches = None
@@ -513,6 +515,8 @@ def main():
     t.add_argument('--eval-every', type=int, default=0, help='Evaluate every N iterations; 0 disables')
     t.add_argument('--eval-games', type=positive, default=20)
     t.add_argument('--eval-simulations', type=positive, default=512)
+    t.add_argument('--max-iterations', type=positive, default=None,
+                   help='Stop training once total cumulative iterations reach N')
     p = commands.add_parser('play')
     p.add_argument('--profile',default='profiles/player.json')
     p.add_argument('--side',choices=['X','O'],default='X')
