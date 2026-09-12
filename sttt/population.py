@@ -28,15 +28,15 @@ SYMMETRIES = symmetry_indices()
 # opponents so that every strong family gets a measurable training signal.
 # history + best = 20%, AlphaBeta + tactical + threat = 15%.
 POPULATION_WEIGHTS = {
-    'self': .35,
-    'history': .15,
+    'self': .30,
+    'utttai': .25,
+    'alphabeta': .25,
+    'history': .10,
     'best': .05,
-    'alphabeta': .08,
-    'tactical': .04,
-    'threat': .03,
-    'openspiel': .15,
-    'utttai': .10,
-    'style': .05,
+    'tactical': .02,
+    'openspiel': .01,
+    'threat': .01,
+    'style': .01,
 }
 
 
@@ -151,9 +151,9 @@ def sample_match(seed, checkpoint_dir=None, engine_registry=None, kind=None):
             kind = 'self'
 
     if kind == 'alphabeta':
-        depth = int(rng.choice([3, 4, 5, 6]))
-        nodes = int(rng.choice([50000, 100000, 250000]))
-        epsilon = float(rng.uniform(0., .05))
+        depth = int(rng.choice([3, 4, 5, 6, 7, 8]))
+        nodes = int(rng.choice([100000, 250000, 500000]))
+        epsilon = float(rng.uniform(0., .02))
     elif kind == 'tactical':
         depth, nodes = 2, int(rng.choice([6000, 10000, 16000]))
         epsilon = float(rng.uniform(0., .12))

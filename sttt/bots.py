@@ -7,6 +7,7 @@ from pathlib import Path
 import select
 import shlex
 import subprocess
+import sys
 import time
 import numpy as np
 import torch
@@ -906,6 +907,18 @@ def create_bot(spec: str | Bot, **kwargs) -> Bot:
         default_name = f"openspiel-{algo}" if sims == 100 else f"openspiel-{algo}-{sims}"
         name = kw.pop("name", default_name)
         return OpenSpielBot(algorithm=algo, simulations=sims, name=name, **kw)
+
+    if s == "utttai" or s.startswith("utttai:"):
+        kw = dict(kwargs)
+        sims = 128
+        if s.startswith("utttai:"):
+            parts = s.split(":", 1)
+            if len(parts) > 1 and parts[1].isdigit():
+                sims = int(parts[1])
+        sims = kw.pop("simulations", sims)
+        name = kw.pop("name", f"utttai-{sims}")
+        cmd = [sys.executable, "-m", "sttt.utttai_wrapper", "--protocol", "state_json", "--simulations", str(sims)]
+        return ExternalProcessBot(command=cmd, protocol="state_json", name=name, **kw)
 
     if s in NAMES:
         return StyleBot(style=s, deterministic=kwargs.get("deterministic", False), name=kwargs.get("name"))

@@ -154,9 +154,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             if getattr(args, 'augment_symmetry', False):
                 x, pi, mask = augment_batch(x, pi, mask, rng)
             z = torch.tensor([row[3] for row in batch], device=device)
-            logits, value = model(x)
-            logits = logits.masked_fill(~mask, -1e9)
-            loss = -(pi * logits.log_softmax(-1)).sum(-1).mean() + (value - z).square().mean()
+            optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=use_fp16):
                 logits, value = model(x)
                 mask_val = -1e4 if use_fp16 else -1e9
@@ -164,10 +162,6 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 log_p = logits.log_softmax(-1)
                 log_p = torch.where(mask, log_p, torch.zeros_like(log_p))
                 loss = -(pi * log_p).sum(-1).mean() + (value - z).square().mean()
-            optimizer.zero_grad(set_to_none=True)
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
-            optimizer.step()
             if scaler:
                 scaler.scale(loss).backward()
                 scaler.unscale_(optimizer)

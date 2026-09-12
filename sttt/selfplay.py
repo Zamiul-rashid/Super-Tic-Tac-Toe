@@ -86,7 +86,7 @@ def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cp
         trajectory.append((state, pi))
         # Normalize in float64 to avoid categorical sampler tolerance differences.
         p = pi.astype(float); p /= p.sum()
-        action = int(rng.choice(81, p=p)) if ply < 15 else int(pi.argmax())
+        action = int(rng.choice(81, p=p)) if ply < 8 else int(pi.argmax())
         tree.advance(action)
         if opponent is not None:
             opponent.advance(action)

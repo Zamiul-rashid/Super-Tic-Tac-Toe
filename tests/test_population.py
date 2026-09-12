@@ -28,7 +28,7 @@ class PopulationTests(unittest.TestCase):
                              {'self', 'history', 'alphabeta', 'tactical', 'threat',
                               'openspiel', 'utttai', 'style'})
             self.assertEqual({s.learner_side for s in specs}, {-1, 1})
-            self.assertEqual({s.depth for s in specs}, {1, 2, 3, 4, 5, 6})
+            self.assertEqual({s.depth for s in specs}, {1, 2, 3, 4, 5, 6, 7, 8})
             self.assertTrue(all(s.checkpoint.endswith('model-0001.pt') for s in specs if s.kind == 'history'))
 
     def test_iteration_schedule_has_meaningful_quotas(self):
