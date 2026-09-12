@@ -33,7 +33,11 @@ def coord_to_action(row: int, col: int) -> int:
 
 
 def sttt_to_openspiel_action(action: int) -> int:
-    """Convert global sttt action index (0..80) to OpenSpiel action index (0..80)."""
+    """Legacy flat-grid coordinate mapping, not official OpenSpiel decisions.
+
+    Official OpenSpiel uses board/cell actions; use OpenSpielBot or the state
+    replay helpers for that engine. Kept only for old flat-grid consumers.
+    """
     if not (0 <= action < 81):
         raise ValueError(f"Invalid sttt action {action}: must be in range 0..80")
     row, col = action_to_coord(action)
@@ -41,7 +45,7 @@ def sttt_to_openspiel_action(action: int) -> int:
 
 
 def openspiel_to_sttt_action(action: int) -> int:
-    """Convert OpenSpiel action index (0..80) to global sttt action index (0..80)."""
+    """Inverse legacy flat-grid mapping; not the official decision protocol."""
     if not (0 <= action < 81):
         raise ValueError(f"Invalid OpenSpiel action {action}: must be in range 0..80")
     row, col = divmod(action, 9)

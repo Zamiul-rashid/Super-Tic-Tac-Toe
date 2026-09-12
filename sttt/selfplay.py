@@ -34,7 +34,6 @@ class RemoteEvaluator:
 def play_game(evaluator, simulations, seed, config, leaf_batch, match=None):
     rng = np.random.default_rng(seed)
     tree = TreeSearch(evaluator, rng, config)
-    state, trajectory = State(), []
     match = match or MatchSpec()
     opponent = make_opponent(match)
     try:
