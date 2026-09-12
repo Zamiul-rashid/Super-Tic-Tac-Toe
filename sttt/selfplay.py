@@ -13,6 +13,14 @@ from .env import State
 from .search import TreeSearch
 from .population import MatchSpec, make_opponent
 
+try:
+    from .cpp_env import FastState as CppFastState, CppTreeSearch, is_cpp_available
+    _HAS_CPP = is_cpp_available()
+except ImportError:
+    _HAS_CPP = False
+    CppFastState = None
+    CppTreeSearch = None
+
 
 class RemoteEvaluator:
     def __init__(self, connection, timeout=120):
@@ -31,20 +39,24 @@ class RemoteEvaluator:
         return self.evaluate_many([state])[0]
 
 
-def play_game(evaluator, simulations, seed, config, leaf_batch, match=None):
+def play_game(evaluator, simulations, seed, config, leaf_batch, match=None, use_cpp=False):
     rng = np.random.default_rng(seed)
-    tree = TreeSearch(evaluator, rng, config)
+    if use_cpp and _HAS_CPP and CppTreeSearch is not None:
+        tree = CppTreeSearch(evaluator, rng, config)
+    else:
+        tree = TreeSearch(evaluator, rng, config)
     match = match or MatchSpec()
     opponent = make_opponent(match)
     try:
-        return _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent)
+        return _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cpp=use_cpp and _HAS_CPP)
     finally:
         if opponent is not None:
             opponent.close()
 
 
-def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent):
-    state, trajectory = State(), []
+def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cpp=False):
+    state = CppFastState() if (use_cpp and CppFastState is not None) else State()
+    trajectory = []
     opponent_rng = np.random.default_rng(np.random.SeedSequence([int(seed), 731]))
     for _ in range(match.opening_moves):
         if state.result is not None:
@@ -95,8 +107,8 @@ def _worker(connection):
             message = connection.recv()
             if message[0] == 'stop':
                 break
-            _, index, simulations, seed, config, leaf_batch, match = message
-            trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch, match)
+            _, index, simulations, seed, config, leaf_batch, match, use_cpp = message
+            trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch, match, use_cpp=use_cpp)
             connection.send(('game', index, trajectory, outcome, stats))
     except (EOFError, BrokenPipeError):
         pass
@@ -148,7 +160,7 @@ class SelfPlayPool:
         for connection in self.connections:
             connection.close()
 
-    def run(self, model, seeds, simulations, config, leaf_batch, matches=None):
+    def run(self, model, seeds, simulations, config, leaf_batch, matches=None, use_cpp=False):
         """Collect one iteration with fixed model weights. Queue waiting is bounded."""
         if not len(seeds):
             raise ValueError('At least one game is required')
@@ -164,7 +176,7 @@ class SelfPlayPool:
             nonlocal next_game
             if next_game < len(seeds):
                 match = matches[next_game] if matches is not None else None
-                connection.send(('start', next_game, simulations, int(seeds[next_game]), config, leaf_batch, match))
+                connection.send(('start', next_game, simulations, int(seeds[next_game]), config, leaf_batch, match, use_cpp))
                 next_game += 1
                 active.add(connection)
 

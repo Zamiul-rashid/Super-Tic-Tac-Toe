@@ -19,7 +19,14 @@ class BasePolicyValue(nn.Module):
             return []
         if any(s.result is not None for s in states):
             raise ValueError('Neural evaluation expects nonterminal positions')
-        x = torch.from_numpy(np.stack([encode(s) for s in states]))
+        try:
+            from .cpp_env import encode_batch as _cpp_encode_batch, is_cpp_available
+            if is_cpp_available():
+                x = torch.from_numpy(_cpp_encode_batch(states).copy())
+            else:
+                x = torch.from_numpy(np.stack([encode(s) for s in states]))
+        except ImportError:
+            x = torch.from_numpy(np.stack([encode(s) for s in states]))
         mask = np.zeros((len(states), 81), dtype=bool)
         for i, state in enumerate(states):
             mask[i, state.legal_actions()] = True

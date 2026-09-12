@@ -147,6 +147,62 @@ class TestCppMCTS(unittest.TestCase):
         with self.assertRaises(ValueError):
             tree.run(terminal_s, simulations=64)
 
+    def test_rng_seed_independence(self):
+        """Two CppTreeSearch instances with different seeds must produce different policies under noise."""
+        state = State()
+        cfg = SearchConfig(proofs=False)
+        tree1 = CppTreeSearch(model=None, rng=np.random.default_rng(1), config=cfg)
+        tree2 = CppTreeSearch(model=None, rng=np.random.default_rng(999), config=cfg)
+        pi1 = tree1.run(state, simulations=64, batch_size=1, noise=True)
+        pi2 = tree2.run(state, simulations=64, batch_size=1, noise=True)
+        self.assertFalse(np.allclose(pi1, pi2, atol=1e-6),
+                         "Different seeds produced identical policies — RNG seed is ignored!")
+
+    def test_stats_no_leak(self):
+        """Reading stats repeatedly must not leak Python object references."""
+        import gc
+        tree = CppTreeSearch(model=None)
+        tree.run(State(), simulations=64)
+        gc.collect()
+        before = len(gc.get_objects())
+        for _ in range(5000):
+            _ = tree.stats
+        gc.collect()
+        after = len(gc.get_objects())
+        self.assertLess(after - before, 500,
+                        f"Stats leaked references: {after - before} objects after 5000 reads")
+
+    def test_advance_invalid_action_raises(self):
+        """Calling advance with out-of-range action must raise ValueError, not crash."""
+        tree = CppTreeSearch(model=None)
+        tree.run(State(), simulations=16)
+        with self.assertRaises(ValueError):
+            tree.advance(81)
+        with self.assertRaises(ValueError):
+            tree.advance(-1)
+
+    def test_nan_value_mid_batch_does_not_corrupt_inflight(self):
+        """A NaN value mid-batch must raise ValueError and not leave negative in_flight."""
+        class PartialNanEvaluator:
+            def evaluate_many(self, states):
+                res = []
+                for i, _ in enumerate(states):
+                    p = np.ones(81, dtype=np.float64) / 81
+                    v = float('nan') if i > 0 else 0.0
+                    res.append((p, v))
+                return res
+
+            def evaluate(self, state):
+                return self.evaluate_many([state])[0]
+
+        tree = CppTreeSearch(model=PartialNanEvaluator())
+        state = State()
+        with self.assertRaises(ValueError):
+            tree.run(state, simulations=64, batch_size=8)
+        if tree.root is not None:
+            self.assertEqual(tree.root.in_flight, 0, f"in_flight was corrupted to {tree.root.in_flight}")
+
 
 if __name__ == "__main__":
     unittest.main()
+

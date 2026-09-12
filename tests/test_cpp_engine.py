@@ -548,7 +548,39 @@ class TestDifferentialParityAndEdgeCases(unittest.TestCase):
         with self.assertRaises(ValueError):
             FastState(boards=[0] * 8 + [5])
 
+    def test_11_hash_consistency_with_python_state(self):
+        """FastState, CppState, and Python State must have equal hashes when states are equal."""
+        py = State()
+        fs = FastState()
+        cs = CppState()
+        self.assertEqual(py, fs)
+        self.assertEqual(py, cs)
+        self.assertEqual(hash(py), hash(fs))
+        self.assertEqual(hash(py), hash(cs))
+        self.assertIn(fs, {py})
+        self.assertIn(cs, {py})
+        self.assertIn(py, {fs})
+
+        # Play several moves and check hash consistency at each step
+        rng = np.random.default_rng(42)
+        for _ in range(20):
+            legal = py.legal_actions()
+            if not legal:
+                break
+            m = int(rng.choice(legal))
+            py = py.play(m)
+            fs = fs.play(m)
+            cs = cs.play(m)
+            self.assertEqual(py, fs)
+            self.assertEqual(py, cs)
+            self.assertEqual(hash(py), hash(fs))
+            self.assertEqual(hash(py), hash(cs))
+            self.assertIn(fs, {py})
+            self.assertIn(cs, {py})
+
 
 if __name__ == "__main__":
     unittest.main()
+
+
 

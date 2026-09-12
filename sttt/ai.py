@@ -18,6 +18,13 @@ from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
 from .engine_registry import create_configured_engine, load_engine_registry
 
+try:
+    from .cpp_env import encode_batch as cpp_encode_batch, is_cpp_available
+    _HAS_CPP = is_cpp_available()
+except ImportError:
+    _HAS_CPP = False
+    cpp_encode_batch = None
+
 def positive(value):
     value = int(value)
     if value < 1:
@@ -41,6 +48,13 @@ def train(args):
     torch.manual_seed(args.seed)
     rng = np.random.default_rng(args.seed)
     device = resolve_device(args.device)
+    backend = getattr(args, 'backend', 'auto')
+    use_cpp = (backend == 'cpp' or (backend == 'auto' and _HAS_CPP))
+    if backend == 'cpp' and not _HAS_CPP:
+        raise RuntimeError('C++ backend requested (--backend cpp) but sttt_cpp is not available. Run "make -C cpp" first.')
+    args._use_cpp = use_cpp
+    if use_cpp:
+        print('Using C++ bitboard engine for self-play search', flush=True)
     if args.resume:
         model, saved = load_model(args.resume)
         arch = 'resnet' if isinstance(model, ResNet) else 'mlp'
@@ -99,17 +113,29 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         if getattr(args, 'population', False):
             history = getattr(args, 'population_checkpoints', None) or str(output)
             matches = sample_matches(seeds, history, engine_registry, offset=population_games)
-        results, inference_stats = pool.run(model, seeds, args.simulations, search_config(args), args.leaf_batch,
-                                           matches=matches)
+        use_cpp = getattr(args, '_use_cpp', False)
+        results, inference_stats = pool.run(
+            model, seeds, args.simulations, search_config(args), args.leaf_batch,
+            matches=matches, use_cpp=use_cpp
+        )
         selfplay_seconds = time.monotonic() - started
         if matches is not None:
             population_games += len(matches)
         for game_idx, (trajectory, outcome, stats) in enumerate(results):
-            for state, pi in trajectory:
-                mask = np.zeros(81, dtype=bool)
-                mask[state.legal_actions()] = True
-                replay.append((torch.from_numpy(encode(state)), torch.from_numpy(pi),
-                               torch.from_numpy(mask), float(outcome * state.turn)))
+            if trajectory and use_cpp and _HAS_CPP and cpp_encode_batch is not None:
+                traj_states = [s for s, _ in trajectory]
+                encoded_batch = cpp_encode_batch(traj_states)
+                for i, (state, pi) in enumerate(trajectory):
+                    mask = np.zeros(81, dtype=bool)
+                    mask[state.legal_actions()] = True
+                    replay.append((torch.from_numpy(encoded_batch[i].copy()), torch.from_numpy(pi),
+                                   torch.from_numpy(mask), float(outcome * state.turn)))
+            else:
+                for state, pi in trajectory:
+                    mask = np.zeros(81, dtype=bool)
+                    mask[state.legal_actions()] = True
+                    replay.append((torch.from_numpy(encode(state)), torch.from_numpy(pi),
+                                   torch.from_numpy(mask), float(outcome * state.turn)))
             print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} training positions, '
                   f'opponent={stats["match"]["kind"]}', flush=True)
 
@@ -439,6 +465,8 @@ def main():
         t.add_argument('--'+name,type=positive,default=default)
     t.add_argument('--arch', choices=['resnet', 'mlp'], default='resnet')
     t.add_argument('--workers', type=positive, default=8)
+    t.add_argument('--backend', choices=['auto', 'cpp', 'python'], default='auto',
+                   help='Search backend: cpp uses C++ bitboard engine, python uses pure Python (default: auto)')
     t.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     t.add_argument('--output', default='runs/default')
     t.add_argument('--resume')

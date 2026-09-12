@@ -16,6 +16,27 @@ python -m pip install -e . --no-deps
 python -m unittest discover -s tests -v
 ```
 
+### High-Performance C++ Bitboard Engine
+
+Build the native C++ extension for hardware-accelerated bitboard rules, MCTS search, and batch encoding:
+
+```bash
+make -C cpp clean && make -C cpp
+```
+
+Self-play training automatically uses the C++ backend when compiled (`--backend auto`):
+
+```bash
+python -m sttt.ai train --output runs/default
+```
+
+You can explicitly select the backend:
+
+```bash
+python -m sttt.ai train --backend cpp --output runs/cpp_run     # C++ bitboard engine & MCTS arena
+python -m sttt.ai train --backend python --output runs/py_run   # Pure Python reference fallback
+```
+
 First training run (160 games; a starting experiment, not a strength guarantee):
 
 ```bash
@@ -139,13 +160,13 @@ simulation budgets and equal wall-clock budgets before claiming a speed/strength
 
 The default evaluation opponent is now `alphabeta`. Available opponents:
 
-| Opponent | Behavior |
-| --- | --- |
-| `random` | Uniform legal moves |
-| `legacy-tactical` | Original stochastic local/global-win-biased baseline |
-| `tactical` | Takes global wins, screens immediate global losses, searches two plies to block threats and assess routing |
-| `alphabeta` | Iterative-deepening negamax with alpha-beta pruning, global/local line evaluation and move ordering |
-| `checkpoint` | Another neural checkpoint using reusable MCTS |
+| Opponent          | Behavior                                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| `random`          | Uniform legal moves                                                                                        |
+| `legacy-tactical` | Original stochastic local/global-win-biased baseline                                                       |
+| `tactical`        | Takes global wins, screens immediate global losses, searches two plies to block threats and assess routing |
+| `alphabeta`       | Iterative-deepening negamax with alpha-beta pruning, global/local line evaluation and move ordering        |
+| `checkpoint`      | Another neural checkpoint using reusable MCTS                                                              |
 
 Alpha-beta defaults to `--opponent-depth 3 --opponent-nodes 3000`. The node cap
 covers recursive search; immediate-win/reply-safety checks and move ordering have

@@ -616,10 +616,26 @@ static PyObject* PyFastTreeSearch_run(PyFastTreeSearch* self, PyObject* args, Py
                 engine->stats.inference_batches++;
                 engine->stats.neural_positions += static_cast<int32_t>(pending.size());
 
+                // First validate all outputs before modifying tree or releasing paths
+                struct ValidatedOutput {
+                    float val;
+                    float policy[81];
+                };
+                std::vector<ValidatedOutput> parsed(pending.size());
+
                 for (size_t i = 0; i < pending.size(); ++i) {
                     PyObject* pair = PySequence_Fast_GET_ITEM(seq, i);
-                    PyObject* py_pol = PyTuple_GetItem(pair, 0);
-                    PyObject* py_val = PyTuple_GetItem(pair, 1);
+                    PyObject* py_pol = PyTuple_Check(pair) ? PyTuple_GetItem(pair, 0) : NULL;
+                    PyObject* py_val = PyTuple_Check(pair) ? PyTuple_GetItem(pair, 1) : NULL;
+
+                    if (!py_pol || !py_val) {
+                        Py_DECREF(seq);
+                        Py_DECREF(outputs);
+                        for (auto& path : pending) engine->release(path);
+                        Py_XDECREF(cleanup);
+                        PyErr_SetString(PyExc_ValueError, "Evaluator output must be a tuple of (policy, value)");
+                        return NULL;
+                    }
 
                     float val = static_cast<float>(PyFloat_AsDouble(py_val));
                     if (PyErr_Occurred() || !std::isfinite(val) || val < -1.00001f || val > 1.00001f) {
@@ -642,15 +658,18 @@ static PyObject* PyFastTreeSearch_run(PyFastTreeSearch* self, PyObject* args, Py
                         return NULL;
                     }
 
-                    float policy_buf[81];
                     for (int k = 0; k < 81; ++k) {
-                        policy_buf[k] = static_cast<float>(PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pol_seq, k)));
+                        parsed[i].policy[k] = static_cast<float>(PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pol_seq, k)));
                     }
                     Py_DECREF(pol_seq);
+                    parsed[i].val = val;
+                }
 
+                // All outputs validated; now expand, backup, and release
+                for (size_t i = 0; i < pending.size(); ++i) {
                     int32_t leaf = pending[i].back();
-                    engine->expand(leaf, policy_buf, 81);
-                    engine->backup(pending[i], val);
+                    engine->expand(leaf, parsed[i].policy, 81);
+                    engine->backup(pending[i], parsed[i].val);
                     engine->release(pending[i]);
                 }
 
