@@ -94,7 +94,7 @@ class MatchSpec:
     bot_seed: int = 0
     engine_command: tuple[str, ...] = ()
     engine_protocol: str = 'action_index'
-    engine_timeout: float = 5.
+    engine_timeout: float = 30.
     engine_cwd: str = ''
     engine_fallback: str = 'raise'
     engine_name: str = ''
@@ -111,7 +111,7 @@ def _engine_fields(engine_registry, seed, simulations):
         command = tuple(command)
     return dict(bot_seed=int(seed), engine_command=command,
                 engine_protocol=str(config.get('protocol', 'action_index')),
-                engine_timeout=float(config.get('timeout', 5.)),
+                engine_timeout=float(config.get('timeout', 30.)),
                 engine_cwd=str(config.get('cwd') or ''),
                 engine_fallback=str(config.get('fallback', 'raise')),
                 engine_name=str(config.get('name', 'utttai')))
@@ -245,7 +245,7 @@ def make_opponent(spec):
                    for part in spec.engine_command]
         return ExternalProcessBot(command=command, timeout=spec.engine_timeout,
                                   protocol=spec.engine_protocol,
-                                  fallback='raise',
+                                  fallback=spec.engine_fallback,
                                   cwd=spec.engine_cwd or None,
                                   name=spec.engine_name or f'utttai-low-{spec.simulations}')
     raise ValueError(f'Unknown training opponent: {spec.kind}')

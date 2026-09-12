@@ -14,7 +14,7 @@ echo "          LAUNCHING RUN_V2: CLEAN SLATE ELITE TRAINING RUN               "
 echo "=========================================================================="
 echo "Config: Fresh ResNet (~1.8M params), FP16 AMP, C++ Bitboard Engine & MCTS"
 echo "Population: 25% utttai (2320 Elo), 25% Alpha-Beta (d3-d8), 30% Self-Play"
-echo "Buffer: 200,000 | Batch: 512 | Simulations: 512 | Workers: 8"
+echo "Buffer: 200,000 | Batch: 512 | Simulations: 512 | Workers: 8 | Games: 16"
 echo "=========================================================================="
 
 RESUME_ARG=""

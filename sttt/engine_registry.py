@@ -32,8 +32,8 @@ def _validate(name: str, spec: dict, base: Path) -> dict:
     if protocol not in ("codingame", "action", "action_index", "state_json"):
         raise ValueError(f"Engine '{name}' has unsupported protocol '{protocol}'")
     timeout = float(spec.get("timeout", 5.0))
-    if not 0 < timeout <= 5:
-        raise ValueError(f"Engine '{name}' timeout must be in (0, 5] seconds")
+    if not 0 < timeout <= 60:
+        raise ValueError(f"Engine '{name}' timeout must be in (0, 60] seconds")
     cwd = spec.get("cwd")
     if cwd and not Path(cwd).is_absolute():
         cwd = str((base / cwd).resolve())

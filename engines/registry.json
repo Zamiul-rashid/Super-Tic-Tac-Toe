@@ -2,11 +2,21 @@
   "engines": {
     "utttai": {
       "source": "https://github.com/arnowaczynski/utttai/tree/622dae66b18198f6f12aef0a0bccd5bd40de2d8e",
-      "command": ["{python}", "-m", "sttt.utttai_wrapper", "--protocol", "state_json", "--simulations", "{simulations}", "--seed", "{seed}"],
+      "command": [
+        "{python}",
+        "-m",
+        "sttt.utttai_wrapper",
+        "--protocol",
+        "state_json",
+        "--simulations",
+        "{simulations}",
+        "--seed",
+        "{seed}"
+      ],
       "cwd": "..",
       "protocol": "state_json",
       "simulations": 128,
-      "timeout": 5.0,
+      "timeout": 30.0,
       "fallback": "raise"
     }
   }
