@@ -33,6 +33,9 @@ if _CPP_AVAILABLE:
     FastNode = getattr(sttt_cpp, "FastNode", None)
     FastTreeSearch = getattr(sttt_cpp, "FastTreeSearch", None)
     CppTreeSearch = FastTreeSearch
+    # NOTE: CppTreeSearch does NOT support the `opponent` parameter for adaptive
+    # opponent modeling. When opponent modeling is needed (e.g., human play mode),
+    # use Python TreeSearch from sttt.search instead.
     benchmark_rollouts = sttt_cpp.benchmark_rollouts
     benchmark_mcts = getattr(sttt_cpp, "benchmark_mcts", None)
     alphabeta_search = sttt_cpp.alphabeta

@@ -1,16 +1,18 @@
 # Super Tic-Tac-Toe: Project Handover & Engineering Documentation
 
-**Date:** September 12, 2026  
-**Active Development Branches:** 
+**Date:** September 12, 2026
+**Active Development Branches:**
+
 - `cpp` (High-Performance C++ Bitboard Engine & C++ MCTS Search Engine, commits `be29e46` and `ead0133`)
 - `testing` (Google DeepMind OpenSpiel Adapter & 4-Way Benchmark Tournament, commit `bc63578`)
-**Target Python Environment:** Conda environment at `/home/entropy/miniconda3/envs/sttt/bin/python`
+  **Target Python Environment:** Conda environment at `/home/entropy/miniconda3/envs/sttt/bin/python`
 
 ---
 
 ## 1. Executive Summary & Project Status
 
 ### 1.1 Key Milestones Achieved
+
 1. **Google DeepMind `open_spiel` Integration (Branch `testing`):**
    - Built the `OpenSpielBot` adapter with coordinate bijections between `sttt` (0..80) and OpenSpiel UTTT subgame structures.
    - Conducted a 4-way, 120-game paired benchmark tournament.
@@ -37,12 +39,14 @@
 ## 2. Chunk 1: Standalone C++ Bitboard Engine (Ready for Use)
 
 ### 2.1 File Map
+
 - **C++ Core:** [`cpp/include/sttt_core.hpp`](file:///home/entropy/Code/Super-Tic-Tac-Toe/cpp/include/sttt_core.hpp) (Header-only state & bitwise rules)
 - **C-API Wrapper:** [`cpp/include/sttt_c_api.h`](file:///home/entropy/Code/Super-Tic-Tac-Toe/cpp/include/sttt_c_api.h), [`cpp/src/sttt_c_api.cpp`](file:///home/entropy/Code/Super-Tic-Tac-Toe/cpp/src/sttt_c_api.cpp)
 - **Python C-Extension:** [`cpp/src/python_module.cpp`](file:///home/entropy/Code/Super-Tic-Tac-Toe/cpp/src/python_module.cpp) (Defines `sttt_cpp` module)
 - **High-Level Python Wrapper:** [`sttt/cpp_env.py`](file:///home/entropy/Code/Super-Tic-Tac-Toe/sttt/cpp_env.py) (Exposes `FastState`, `CppState`, `encode_batch`)
 
 ### 2.2 Memory Layout
+
 ```cpp
 #pragma pack(push, 1)
 struct BoardState {
@@ -61,6 +65,7 @@ static_assert(sizeof(BoardState) == 46, "BoardState must be 46 bytes");
 ```
 
 ### 2.3 Python Quickstart & Integration Guide
+
 ```python
 from sttt.cpp_env import FastState, CppState, encode_batch, alphabeta_search
 import numpy as np
@@ -93,12 +98,14 @@ assert restored == state  # Bidirectional equality with Python State
 ## 3. Chunk 2: C++ MCTS Search Engine
 
 ### 3.1 File Map
+
 - **MCTS Header:** [`cpp/include/sttt_mcts.hpp`](file:///home/entropy/Code/Super-Tic-Tac-Toe/cpp/include/sttt_mcts.hpp) (Arena allocator, PUCT descent, proofs, virtual loss)
 - **MCTS C++ Module:** [`cpp/src/mcts.cpp`](file:///home/entropy/Code/Super-Tic-Tac-Toe/cpp/src/mcts.cpp)
 - **Python Search Interface:** [`sttt/cpp_env.py`](file:///home/entropy/Code/Super-Tic-Tac-Toe/sttt/cpp_env.py#L125-L160) (`CppTreeSearch`)
 - **Unit & Differential Tests:** [`tests/test_cpp_mcts.py`](file:///home/entropy/Code/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py) (7 tests)
 
 ### 3.2 Python MCTS Usage
+
 ```python
 from sttt.cpp_env import CppTreeSearch
 from sttt.search import SearchConfig
@@ -124,26 +131,28 @@ pi = tree_neural.run(root_state, simulations=512, batch_size=16)
 Conducted on Intel Core i7-12650H (10 Cores, 16 Threads, AVX2, BMI2):
 
 ### 4.1 State Primitives & Rollout Benchmarks
-| Benchmark Operation | Pure Python (`sttt.env.State`) | C++ via Python (`sttt_cpp`) | C++ Pure Native (`bench_main`) | Speedup Multiplier |
-| :--- | :---: | :---: | :---: | :---: |
-| **Legal Move Generation** | 316,400 calls/s | 4,026,031 calls/s | 148,100,000 calls/s | **12.7x** (Py) / **468x** (Native) |
-| **Move Execution (`play`)** | 211,112 moves/s | 23,758,500 moves/s | 322,580,645 moves/s | **112.5x** (Py) / **>1,500x** (Native) |
-| **Move In-Place (`play_inplace`)** | N/A (immutable) | 14,135,536 moves/s | 322,580,645 moves/s | **67.0x** (Py) / **>1,500x** (Native) |
-| **Feature Encoding ($B=64$)** | 98,112 states/s | 8,612,550 states/s | 45,454,545 states/s | **87.8x** (Py) / **463x** (Native) |
-| **Zero-Sum Heuristic Eval** | 70,521 evals/s | 11,173,852 evals/s | ~35,000,000 evals/s | **158.4x** (Py) / **>490x** (Native) |
-| **Random Rollouts (1 thread)** | 5,509 games/s | 753,800 games/s | 692,075 games/s | **136.8x speedup** |
-| **Random Rollouts (10 threads)** | ~5,509 games/s | 5,039,529 games/s | 5,070,484 games/s | **914.7x speedup** |
-| **Alpha-Beta Search (depth 3)** | 58.21 ms / move | 0.12 ms / move | 0.10 ms / move | **506.0x speedup** |
+
+| Benchmark Operation                | Pure Python (`sttt.env.State`) | C++ via Python (`sttt_cpp`) | C++ Pure Native (`bench_main`) |           Speedup Multiplier           |
+| :--------------------------------- | :----------------------------: | :-------------------------: | :----------------------------: | :------------------------------------: |
+| **Legal Move Generation**          |        316,400 calls/s         |      4,026,031 calls/s      |      148,100,000 calls/s       |   **12.7x** (Py) / **468x** (Native)   |
+| **Move Execution (`play`)**        |        211,112 moves/s         |     23,758,500 moves/s      |      322,580,645 moves/s       | **112.5x** (Py) / **>1,500x** (Native) |
+| **Move In-Place (`play_inplace`)** |        N/A (immutable)         |     14,135,536 moves/s      |      322,580,645 moves/s       | **67.0x** (Py) / **>1,500x** (Native)  |
+| **Feature Encoding ($B=64$)**      |        98,112 states/s         |     8,612,550 states/s      |      45,454,545 states/s       |   **87.8x** (Py) / **463x** (Native)   |
+| **Zero-Sum Heuristic Eval**        |         70,521 evals/s         |     11,173,852 evals/s      |      ~35,000,000 evals/s       |  **158.4x** (Py) / **>490x** (Native)  |
+| **Random Rollouts (1 thread)**     |         5,509 games/s          |       753,800 games/s       |        692,075 games/s         |           **136.8x speedup**           |
+| **Random Rollouts (10 threads)**   |         ~5,509 games/s         |      5,039,529 games/s      |       5,070,484 games/s        |           **914.7x speedup**           |
+| **Alpha-Beta Search (depth 3)**    |        58.21 ms / move         |       0.12 ms / move        |         0.10 ms / move         |           **506.0x speedup**           |
 
 ### 4.2 MCTS Search Engine Scaling
-| MCTS Configuration | Throughput (Simulations/sec) | 512-Sim Latency | Speedup vs Python |
-| :--- | :---: | :---: | :---: |
-| **Python `TreeSearch` Baseline** | 10,751 sims/s | 41.58 ms | 1.0x (Baseline) |
-| **C++ `CppTreeSearch` (Python Model)** | 210,030 sims/s | 2.48 ms | **19.5x** |
-| **C++ Native MCTS (1 Thread)** | 520,324 sims/s | 0.51 ms | **48.4x (81.6x lower latency)** |
-| **C++ Native MCTS (4 Threads)** | 1,577,909 sims/s | 0.18 ms | **146.8x** |
-| **C++ Native MCTS (8 Threads)** | 2,904,437 sims/s | 0.11 ms | **270.2x** |
-| **C++ Native MCTS (10 Threads)** | 3,221,329 sims/s | 0.09 ms | **299.6x** |
+
+| MCTS Configuration                     | Throughput (Simulations/sec) | 512-Sim Latency |        Speedup vs Python        |
+| :------------------------------------- | :--------------------------: | :-------------: | :-----------------------------: |
+| **Python `TreeSearch` Baseline**       |        10,751 sims/s         |    41.58 ms     |         1.0x (Baseline)         |
+| **C++ `CppTreeSearch` (Python Model)** |        210,030 sims/s        |     2.48 ms     |            **19.5x**            |
+| **C++ Native MCTS (1 Thread)**         |        520,324 sims/s        |     0.51 ms     | **48.4x (81.6x lower latency)** |
+| **C++ Native MCTS (4 Threads)**        |       1,577,909 sims/s       |     0.18 ms     |           **146.8x**            |
+| **C++ Native MCTS (8 Threads)**        |       2,904,437 sims/s       |     0.11 ms     |           **270.2x**            |
+| **C++ Native MCTS (10 Threads)**       |       3,221,329 sims/s       |     0.09 ms     |           **299.6x**            |
 
 ---
 
@@ -165,6 +174,7 @@ Conducted on Intel Core i7-12650H (10 Cores, 16 Threads, AVX2, BMI2):
 ## 6. How to Build & Run
 
 ### 6.1 Building C++ Binaries
+
 ```bash
 # Using Makefile
 make -C cpp clean && make -C cpp
@@ -178,6 +188,7 @@ python setup.py build_ext --inplace
 ```
 
 ### 6.2 Running Benchmarks (Memory Guarded)
+
 ```bash
 # State & rollout feasibility benchmark
 ulimit -v 18874368 && /home/entropy/miniconda3/envs/sttt/bin/python -m sttt.benchmarks.feasibility_benchmark
@@ -190,6 +201,7 @@ ulimit -v 18874368 && /home/entropy/miniconda3/envs/sttt/bin/python -m sttt.benc
 ```
 
 ### 6.3 Running Unit Tests
+
 ```bash
 # Core bitboard tests (29 tests)
 /home/entropy/miniconda3/envs/sttt/bin/python -m unittest tests/test_cpp_engine.py

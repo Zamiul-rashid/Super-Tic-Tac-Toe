@@ -130,3 +130,11 @@ Integrity mode: development
 - [ ] C++ extension builds cleanly in `/home/entropy/miniconda3/envs/sttt` with zero compiler warnings/errors.
 - [ ] Benchmark script measures >= 50x throughput speedup on game rollouts vs pure Python.
 - [ ] Memory footprint per state is minimal (< 64 bytes per state in C++).
+
+## Follow-up — 2026-09-12T11:34:14Z
+
+Resume active execution following server restart.
+
+Current state:
+1. Branch `cpp` contains the clean compilation of `sttt_cpp` with `-Werror`, 46-byte packed `BoardState`, 100% 251/251 passing tests, and verified benchmarks (136x single-thread, 914x 10-thread rollout speedups) in commit `be29e46`.
+2. Resume the verification audit and proceed with Phase 2: Implement the C++ MCTS search engine and node arena to accelerate neural self-play simulations.

@@ -342,13 +342,31 @@ static PyObject* PyFastState_richcompare(PyObject* v, PyObject* w, int op) {
 
 static Py_hash_t PyFastState_hash(PyObject* self) {
     PyFastState* s = (PyFastState*)self;
-    uint64_t h = 14695981039346656037ULL;
-    const uint8_t* p = reinterpret_cast<const uint8_t*>(&s->state);
-    for (size_t i = 0; i < sizeof(BoardState); ++i) {
-        h ^= p[i];
-        h *= 1099511628211ULL;
+    // Build the same tuple Python State.__hash__ uses:
+    // hash((cells, boards, turn, forced, result))
+    PyObject* cells = PyFastState_get_cells(s, NULL);
+    PyObject* boards = PyFastState_get_boards(s, NULL);
+    PyObject* result_obj;
+    if (s->state.result == RESULT_ONGOING) {
+        Py_INCREF(Py_None);
+        result_obj = Py_None;
+    } else {
+        result_obj = PyLong_FromLong(s->state.result);
     }
-    return static_cast<Py_hash_t>(h);
+    PyObject* key = Py_BuildValue("(OOiiO)",
+        cells, boards, (int)s->state.turn, (int)s->state.forced, result_obj);
+    Py_hash_t h = -1;
+    if (key) {
+        h = PyObject_Hash(key);
+        Py_DECREF(key);
+    }
+    Py_XDECREF(cells);
+    Py_XDECREF(boards);
+    Py_XDECREF(result_obj);
+    if (h == -1 && !PyErr_Occurred()) {
+        h = -2;  // Python convention: -1 is reserved for errors
+    }
+    return h;
 }
 
 static PyObject* PyFastState_repr(PyFastState* self) {

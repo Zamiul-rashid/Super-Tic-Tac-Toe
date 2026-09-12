@@ -263,7 +263,17 @@ static int PyFastTreeSearch_init(PyFastTreeSearch* self, PyObject* args, PyObjec
     if (self->engine) {
         delete self->engine;
     }
-    self->engine = new MCTSEngine(cfg);
+    // Extract seed from Python rng to ensure independent exploration per worker
+    uint64_t engine_seed = 42;
+    if (rng != NULL && rng != Py_None) {
+        PyObject* py_seed = PyObject_CallMethod(rng, "integers", "lL", (long)0, (long long)(1LL << 62));
+        if (py_seed) {
+            engine_seed = (uint64_t)PyLong_AsLongLong(py_seed);
+            Py_DECREF(py_seed);
+        }
+        PyErr_Clear();
+    }
+    self->engine = new MCTSEngine(cfg, engine_seed);
     if (self->has_agent_side) {
         self->engine->agent_side = static_cast<int8_t>(self->agent_side);
     }
@@ -282,10 +292,22 @@ static PyObject* PyFastTreeSearch_advance(PyFastTreeSearch* self, PyObject* args
     if (!PyArg_ParseTuple(args, "i", &action)) {
         return NULL;
     }
+    if (action < 0 || action >= 81) {
+        PyErr_Format(PyExc_ValueError, "Action %d is out of range [0, 81)", action);
+        return NULL;
+    }
     if (self->engine) {
         self->engine->advance(static_cast<uint8_t>(action));
     }
     Py_RETURN_NONE;
+}
+
+// Helper: set a dictionary item and decrement the value reference.
+static int dict_set_steal(PyObject* dict, const char* key, PyObject* val) {
+    if (!val) return -1;
+    int rc = PyDict_SetItemString(dict, key, val);
+    Py_DECREF(val);
+    return rc;
 }
 
 static PyObject* PyFastTreeSearch_get_stats(PyFastTreeSearch* self, void* /*closure*/) {
@@ -296,18 +318,19 @@ static PyObject* PyFastTreeSearch_get_stats(PyFastTreeSearch* self, void* /*clos
     PyObject* d = PyDict_New();
     if (!d) return NULL;
 
-    PyDict_SetItemString(d, "completed_simulations", PyLong_FromLong(st.completed_simulations));
-    PyDict_SetItemString(d, "neural_positions", PyLong_FromLong(st.neural_positions));
-    PyDict_SetItemString(d, "inference_batches", PyLong_FromLong(st.inference_batches));
-    PyDict_SetItemString(d, "max_depth", PyLong_FromLong(st.max_depth));
-    PyDict_SetItemString(d, "hard_pruned_choices", PyLong_FromLong(st.hard_pruned_choices));
-    PyDict_SetItemString(d, "soft_rechecks", PyLong_FromLong(st.soft_rechecks));
-    PyDict_SetItemString(d, "retained_visits", PyLong_FromLong(st.retained_visits));
+    dict_set_steal(d, "completed_simulations", PyLong_FromLong(st.completed_simulations));
+    dict_set_steal(d, "neural_positions", PyLong_FromLong(st.neural_positions));
+    dict_set_steal(d, "inference_batches", PyLong_FromLong(st.inference_batches));
+    dict_set_steal(d, "max_depth", PyLong_FromLong(st.max_depth));
+    dict_set_steal(d, "hard_pruned_choices", PyLong_FromLong(st.hard_pruned_choices));
+    dict_set_steal(d, "soft_rechecks", PyLong_FromLong(st.soft_rechecks));
+    dict_set_steal(d, "retained_visits", PyLong_FromLong(st.retained_visits));
 
     if (st.root_solved == RESULT_ONGOING) {
-        PyDict_SetItemString(d, "root_solved", Py_None);
+        Py_INCREF(Py_None);
+        dict_set_steal(d, "root_solved", Py_None);
     } else {
-        PyDict_SetItemString(d, "root_solved", PyLong_FromLong(st.root_solved));
+        dict_set_steal(d, "root_solved", PyLong_FromLong(st.root_solved));
     }
     return d;
 }
@@ -740,11 +763,11 @@ static PyObject* py_benchmark_mcts(PyObject* /*self*/, PyObject* args) {
     double sims_per_sec = (total_duration.count() > 0) ? (total_completed / total_duration.count()) : 0.0;
 
     PyObject* res = PyDict_New();
-    PyDict_SetItemString(res, "total_simulations", PyLong_FromLong(total_completed));
-    PyDict_SetItemString(res, "batch_size", PyLong_FromLong(batch_size));
-    PyDict_SetItemString(res, "num_threads", PyLong_FromLong(num_threads));
-    PyDict_SetItemString(res, "elapsed_seconds", PyFloat_FromDouble(total_duration.count()));
-    PyDict_SetItemString(res, "simulations_per_sec", PyFloat_FromDouble(sims_per_sec));
+    dict_set_steal(res, "total_simulations", PyLong_FromLong(total_completed));
+    dict_set_steal(res, "batch_size", PyLong_FromLong(batch_size));
+    dict_set_steal(res, "num_threads", PyLong_FromLong(num_threads));
+    dict_set_steal(res, "elapsed_seconds", PyFloat_FromDouble(total_duration.count()));
+    dict_set_steal(res, "simulations_per_sec", PyFloat_FromDouble(sims_per_sec));
 
     return res;
 }
