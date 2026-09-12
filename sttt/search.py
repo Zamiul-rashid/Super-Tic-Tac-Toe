@@ -213,3 +213,9 @@ class TreeSearch:
 def search(state, model, simulations, rng, opponent=None, noise=False):
     """Compatibility entry point. Use TreeSearch for reuse and batched evaluation."""
     return TreeSearch(model, rng, opponent=opponent).run(state, simulations, noise=noise)
+
+
+try:
+    from .cpp_env import CppTreeSearch
+except ImportError:
+    CppTreeSearch = None

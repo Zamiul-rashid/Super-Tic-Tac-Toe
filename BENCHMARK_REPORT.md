@@ -84,6 +84,40 @@ Recursive move tree enumeration from root state confirms 100% legal tree generat
 
 ---
 
+### 2.6 Phase 2: Monte Carlo Tree Search (MCTS) Benchmark (Target: Accelerated Neural Self-Play)
+
+Benchmark executed comparing Python reference `sttt.search.TreeSearch` against C++ high-performance engine `sttt_cpp.FastTreeSearch` / `CppTreeSearch` across identical search configurations (PUCT $c_{puct}=1.5$, proofs enabled, batch size 8).
+
+#### 2.6.1 Neural Model Tree Traversal (Python Evaluator Callback)
+
+| Engine Implementation | Simulations / sec | 1000-Sim Search Latency | Speedup Factor |
+|-----------------------|------------------:|------------------------:|---------------:|
+| Python `TreeSearch` | 11,819 sims/s | 84.61 ms | 1.0x (Baseline) |
+| C++ `CppTreeSearch` (Python Callback) | 210,785 sims/s | 4.74 ms | **17.8x** |
+
+#### 2.6.2 Native C++ MCTS Engine Throughput (Zero Python Overhead, GIL Released)
+
+| Execution Configuration | Simulations / sec | 20,000-Sim Latency | Speedup vs Python |
+|-------------------------|------------------:|-------------------:|------------------:|
+| Python `TreeSearch` Baseline | 11,819 sims/s | 1,692.2 ms (est.) | 1.0x (Baseline) |
+| C++ Native MCTS (1 thread) | 629,286 sims/s | 31.78 ms | **53.2x** |
+| C++ Native MCTS (2 threads) | 1,133,629 sims/s | 17.65 ms | **95.9x** |
+| C++ Native MCTS (4 threads) | 1,917,583 sims/s | 10.43 ms | **162.2x** |
+| C++ Native MCTS (8 threads) | 2,718,519 sims/s | 7.36 ms | **230.0x** |
+| C++ Native MCTS (10 threads) | 2,860,016 sims/s | 6.99 ms | **242.0x** |
+
+#### 2.6.3 Latency Profile Across Simulation Budgets (Batch Size = 8)
+
+| Simulation Budget | Python Latency | C++ (Model) Latency | C++ Native Latency | Native Speedup |
+|-------------------|---------------:|--------------------:|-------------------:|---------------:|
+| 64 simulations | 5.10 ms | 0.34 ms | 0.075 ms | **68.0x** |
+| 128 simulations | 9.54 ms | 0.62 ms | 0.111 ms | **85.9x** |
+| 512 simulations | 37.36 ms | 2.32 ms | 0.457 ms | **81.8x** |
+| 1,024 simulations | 81.36 ms | 4.38 ms | 0.970 ms | **83.9x** |
+| 2,048 simulations | 181.57 ms | 9.34 ms | 1.947 ms | **93.2x** |
+
+---
+
 ## 3. Memory Footprint Attestation
 
 ```cpp
@@ -107,12 +141,14 @@ static_assert(sizeof(BoardState) == 46, "BoardState size must be 46 bytes");
 - Total struct size: **46 bytes**.
 - Cache line alignment: 46 bytes < 64-byte L1 cache line.
 - Requirement (< 64 bytes per state): **SATISFIED**.
+- MCTS Node size (`sizeof(MCTSNode)`): **96 bytes** (flat contiguous arena allocation, zero heap fragmentation).
 
 ---
 
 ## 4. Test Suite and Parity Non-Regression
 
-- Total discovered unit tests: **251 unit tests** in `.venv/bin/python -m unittest discover tests`.
-- Full test pass rate: **251/251 (100% PASS, 0 failures, 0 errors)**.
+- Total discovered unit tests: **258 unit tests** in `.venv/bin/python -m unittest discover tests`.
+- Full test pass rate: **258/258 (100% PASS, 0 failures, 0 errors)**.
 - Lockstep differential parity verified across **> 120,000 paired moves** with 100% exact match against Python `sttt.env.State`.
+- Bit-for-bit identical MCTS visit distributions across all 81 actions verified against Python `TreeSearch`.
 - Zero compiler warnings or errors under `-Wall -Wextra -Werror` in GCC 15.

@@ -30,12 +30,20 @@ def is_cpp_available() -> bool:
 
 if _CPP_AVAILABLE:
     FastState = sttt_cpp.FastState
+    FastNode = getattr(sttt_cpp, "FastNode", None)
+    FastTreeSearch = getattr(sttt_cpp, "FastTreeSearch", None)
+    CppTreeSearch = FastTreeSearch
     benchmark_rollouts = sttt_cpp.benchmark_rollouts
+    benchmark_mcts = getattr(sttt_cpp, "benchmark_mcts", None)
     alphabeta_search = sttt_cpp.alphabeta
     cpp_evaluate = sttt_cpp.evaluate
 else:
     FastState = None
+    FastNode = None
+    FastTreeSearch = None
+    CppTreeSearch = None
     benchmark_rollouts = None
+    benchmark_mcts = None
     alphabeta_search = None
     cpp_evaluate = None
 

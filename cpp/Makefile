@@ -8,11 +8,11 @@ all: libsttt_core.so bench_main sttt_cpp.so
 libsttt_core.so: src/sttt_c_api.cpp include/sttt_core.hpp include/sttt_search.hpp include/sttt_c_api.h
 	$(CXX) $(CXXFLAGS) -shared -o libsttt_core.so src/sttt_c_api.cpp
 
-bench_main: benchmarks/bench_main.cpp include/sttt_core.hpp include/sttt_search.hpp
+bench_main: benchmarks/bench_main.cpp include/sttt_core.hpp include/sttt_search.hpp include/sttt_mcts.hpp
 	$(CXX) $(CXXFLAGS) -o bench_main benchmarks/bench_main.cpp
 
-sttt_cpp.so: src/python_module.cpp src/sttt_c_api.cpp include/sttt_core.hpp include/sttt_search.hpp
-	$(CXX) $(CXXFLAGS) -I$(PY_INCLUDE) -shared -o sttt_cpp.so src/python_module.cpp src/sttt_c_api.cpp
+sttt_cpp.so: src/python_module.cpp src/sttt_c_api.cpp src/mcts.cpp include/sttt_core.hpp include/sttt_search.hpp include/sttt_mcts.hpp
+	$(CXX) $(CXXFLAGS) -I$(PY_INCLUDE) -shared -o sttt_cpp.so src/python_module.cpp src/sttt_c_api.cpp src/mcts.cpp
 
 clean:
 	rm -f libsttt_core.so bench_main sttt_cpp.so

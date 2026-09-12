@@ -15,7 +15,7 @@ typedef struct {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-static PyTypeObject PyFastStateType = {
+PyTypeObject PyFastStateType = {
     PyVarObject_HEAD_INIT(NULL, 0)
 };
 #pragma GCC diagnostic pop
@@ -379,7 +379,7 @@ static PyObject* py_benchmark_rollouts(PyObject* /*self*/, PyObject* args) {
     return Py_BuildValue("dKd d", elapsed, total_moves, games_per_sec, moves_per_sec);
 }
 
-static const BoardState* extract_board_state(PyObject* state_obj, PyObject** cleanup) {
+const BoardState* extract_board_state(PyObject* state_obj, PyObject** cleanup) {
     *cleanup = NULL;
     if (PyObject_TypeCheck(state_obj, &PyFastStateType)) {
         return &((PyFastState*)state_obj)->state;
@@ -391,6 +391,23 @@ static const BoardState* extract_board_state(PyObject* state_obj, PyObject** cle
             return &((PyFastState*)fast_obj)->state;
         }
         Py_XDECREF(fast_obj);
+    }
+    if (PyObject_HasAttrString(state_obj, "cells") && PyObject_HasAttrString(state_obj, "boards")) {
+        PyObject* cells = PyObject_GetAttrString(state_obj, "cells");
+        PyObject* boards = PyObject_GetAttrString(state_obj, "boards");
+        PyObject* turn = PyObject_GetAttrString(state_obj, "turn");
+        PyObject* forced = PyObject_GetAttrString(state_obj, "forced");
+        PyObject* result = PyObject_GetAttrString(state_obj, "result");
+        PyObject* args = PyTuple_Pack(5, cells, boards, turn, forced, result);
+        Py_XDECREF(cells); Py_XDECREF(boards); Py_XDECREF(turn); Py_XDECREF(forced); Py_XDECREF(result);
+        if (args) {
+            PyObject* fast_obj = PyObject_CallObject((PyObject*)&PyFastStateType, args);
+            Py_DECREF(args);
+            if (fast_obj) {
+                *cleanup = fast_obj;
+                return &((PyFastState*)fast_obj)->state;
+            }
+        }
     }
     return NULL;
 }
@@ -503,6 +520,8 @@ static struct PyModuleDef sttt_cpp_module = {
     NULL, NULL, NULL, NULL
 };
 
+extern "C" void init_mcts_module(PyObject* m);
+
 PyMODINIT_FUNC PyInit_sttt_cpp(void) {
     PyFastStateType.tp_name = "sttt_cpp.FastState";
     PyFastStateType.tp_basicsize = sizeof(PyFastState);
@@ -530,5 +549,8 @@ PyMODINIT_FUNC PyInit_sttt_cpp(void) {
         Py_DECREF(m);
         return NULL;
     }
+
+    init_mcts_module(m);
+
     return m;
 }

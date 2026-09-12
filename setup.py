@@ -6,10 +6,13 @@ with open("sttt/README.md", "r") as f:
 
 ext_modules = []
 if os.path.exists("cpp/src/python_module.cpp") and os.path.exists("cpp/src/sttt_c_api.cpp"):
+    ext_sources = ["cpp/src/python_module.cpp", "cpp/src/sttt_c_api.cpp"]
+    if os.path.exists("cpp/src/mcts.cpp"):
+        ext_sources.append("cpp/src/mcts.cpp")
     ext_modules.append(
         Extension(
             "sttt_cpp",
-            sources=["cpp/src/python_module.cpp", "cpp/src/sttt_c_api.cpp"],
+            sources=ext_sources,
             include_dirs=["cpp/include"],
             extra_compile_args=["-O3", "-march=native", "-Wall", "-Wextra", "-Werror", "-std=c++17", "-fPIC", "-pthread"],
             extra_link_args=["-pthread"],

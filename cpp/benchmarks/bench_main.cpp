@@ -1,5 +1,6 @@
 #include "sttt_core.hpp"
 #include "sttt_search.hpp"
+#include "sttt_mcts.hpp"
 #include <iostream>
 #include <iomanip>
 #include <chrono>
@@ -160,6 +161,25 @@ void bench_alphabeta() {
     }
 }
 
+void bench_mcts() {
+    BoardState root = BoardState::initial();
+    MCTSConfig cfg;
+    cfg.proofs = true;
+    cfg.reuse = true;
+    MCTSEngine engine(cfg);
+    std::cout << "[Benchmark] C++ MCTS Engine (Heuristic Search):\n";
+    for (int sims : {1000, 5000, 20000, 50000}) {
+        auto t0 = high_resolution_clock::now();
+        engine.run_heuristic(root, sims, 8);
+        auto t1 = high_resolution_clock::now();
+        double sec = duration<double>(t1 - t0).count();
+        std::cout << "  " << sims << " simulations (batch=8): "
+                  << std::setprecision(4) << sec << "s ("
+                  << std::fixed << std::setprecision(1) << (sims / sec) << " sims/s, max_depth="
+                  << engine.stats.max_depth << ")\n";
+    }
+}
+
 int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
@@ -181,6 +201,8 @@ int main(int argc, char* argv[]) {
         std::cout << "---------------------------------------------------------\n";
     }
     bench_alphabeta();
+    std::cout << "---------------------------------------------------------\n";
+    bench_mcts();
     std::cout << "=========================================================\n";
     return 0;
 }

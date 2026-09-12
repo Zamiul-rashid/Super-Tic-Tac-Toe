@@ -30,6 +30,7 @@ if (Python3_FOUND)
     Python3_add_library(sttt_cpp MODULE
         cpp/src/python_module.cpp
         cpp/src/sttt_c_api.cpp
+        cpp/src/mcts.cpp
     )
     target_include_directories(sttt_cpp PRIVATE ${Python3_INCLUDE_DIRS} cpp/include)
     target_link_libraries(sttt_cpp PRIVATE ${Python3_LIBRARIES} pthread)

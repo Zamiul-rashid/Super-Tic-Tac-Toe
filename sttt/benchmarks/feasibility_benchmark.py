@@ -6,6 +6,14 @@ import sys
 import subprocess
 from pathlib import Path
 
+# Enforce strict 16-18GB memory cap
+try:
+    import resource
+    _MAX_MEM_BYTES = 17 * 1024 * 1024 * 1024  # 17 GiB
+    resource.setrlimit(resource.RLIMIT_AS, (_MAX_MEM_BYTES, _MAX_MEM_BYTES))
+except Exception:
+    pass
+
 # Ensure paths
 repo_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(repo_root))
