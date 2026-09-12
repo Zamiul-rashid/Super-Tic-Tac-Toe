@@ -31,6 +31,11 @@ class BasePolicyValue(nn.Module):
         for i, state in enumerate(states):
             mask[i, state.legal_actions()] = True
         device = next(self.parameters()).device
+        logits, values = self(x.to(device))
+        logits = logits.masked_fill(~torch.from_numpy(mask).to(device), -torch.inf)
+        probabilities = logits.softmax(-1).cpu().numpy().astype(np.float64)
+        probabilities /= probabilities.sum(axis=1, keepdims=True)
+        return list(zip(probabilities, values.cpu().numpy().tolist()))
         use_fp16 = getattr(self, 'use_fp16', False) and device.type == 'cuda'
         with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=use_fp16):
             logits, values = self(x.to(device))
