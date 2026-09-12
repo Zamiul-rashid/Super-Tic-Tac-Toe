@@ -32,13 +32,34 @@ if _CPP_AVAILABLE:
     FastState = sttt_cpp.FastState
     benchmark_rollouts = sttt_cpp.benchmark_rollouts
     alphabeta_search = sttt_cpp.alphabeta
+    cpp_evaluate = sttt_cpp.evaluate
 else:
     FastState = None
     benchmark_rollouts = None
     alphabeta_search = None
+    cpp_evaluate = None
 
 
 from .env import State
+import numpy as np
+
+
+def encode_batch(states) -> np.ndarray:
+    """Encode a sequence of FastState, CppState, or State into a (N, 289) float32 numpy array."""
+    if not _CPP_AVAILABLE:
+        raise RuntimeError("C++ bitboard engine (sttt_cpp) is not compiled or available")
+    if not states:
+        return np.empty((0, 289), dtype=np.float32)
+    converted = []
+    need_convert = False
+    for s in states:
+        if isinstance(s, (FastState, CppState)):
+            converted.append(s)
+        else:
+            converted.append(to_fast_state(s))
+            need_convert = True
+    raw = sttt_cpp.encode_batch(converted if need_convert else states)
+    return np.frombuffer(raw, dtype=np.float32).reshape(len(states), 289)
 
 
 def to_python_state(fast_state: FastState) -> State:
@@ -105,8 +126,21 @@ class CppState:
         nxt = self._fast.play(action)
         return CppState(_fast=nxt)
 
+    def play_inplace(self, action: int) -> CppState:
+        self._fast.play_inplace(action)
+        return self
+
     def encode(self) -> list[float]:
         return self._fast.encode()
+
+    def encode_bytes(self) -> bytes:
+        return self._fast.encode_bytes()
+
+    def evaluate(self) -> float:
+        return self._fast.evaluate()
+
+    def value(self) -> float:
+        return self._fast.evaluate()
 
     def render(self) -> str:
         return self._fast.render()
@@ -114,12 +148,8 @@ class CppState:
     def __eq__(self, other) -> bool:
         if isinstance(other, CppState):
             return self._fast == other._fast
-        if isinstance(other, State):
-            return (self.cells == other.cells and
-                    self.boards == other.boards and
-                    self.turn == other.turn and
-                    self.forced == other.forced and
-                    self.result == other.result)
+        if isinstance(other, (State, FastState)):
+            return self._fast == other
         return False
 
     def __hash__(self) -> int:
@@ -127,3 +157,32 @@ class CppState:
 
     def __repr__(self) -> str:
         return repr(self._fast)
+
+    def __reduce__(self):
+        return (CppState, (self.cells, self.boards, self.turn, self.forced, self.result))
+
+
+class CppAlphaBetaBot:
+    """High-speed C++ Alpha-Beta bot executing millions of nodes/sec."""
+
+    def __init__(self, depth=3, node_budget=100000, name=None):
+        if not _CPP_AVAILABLE:
+            raise RuntimeError("C++ engine not available. Run 'make -C cpp' first.")
+        self.depth = depth
+        self.node_budget = node_budget
+        self._name = name or f"cpp-alphabeta-d{depth}"
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def choose(self, state, rng=None) -> int:
+        if state.result is not None or not state.legal_actions():
+            raise ValueError("Cannot choose a move in a terminal state")
+        fast_s = state._fast if isinstance(state, CppState) else to_fast_state(state)
+        action, _ = alphabeta_search(fast_s, self.depth, self.node_budget)
+        if action < 0:
+            legal = state.legal_actions()
+            return int(rng.choice(legal) if rng is not None else legal[0])
+        return action
+

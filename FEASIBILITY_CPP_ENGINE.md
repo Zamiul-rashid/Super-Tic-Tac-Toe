@@ -22,14 +22,16 @@ Benchmarks conducted on 12th Gen Intel Core i7-12650H (10 physical cores / 16 th
 
 | Operation | Pure Python (`sttt.env.State`) | C++ via Python Binding (`sttt_cpp.FastState`) | C++ Pure Native (`cpp/bench_main`) | Max Speedup Multiplier |
 | :--- | :--- | :--- | :--- | :--- |
-| **Legal Move Generation** | 326,796 calls/s | 3,906,861 calls/s | 159,343,000 calls/s | **487x** |
-| **Move Execution (`play`)** | 225,424 moves/s | 26,165,743 moves/s | 454,545,000 moves/s | **2,016x** |
-| **Move In-Place (`play_inplace`)**| N/A (immutable) | 15,639,036 moves/s | 454,545,000 moves/s | **2,016x** |
-| **Neural Feature Encoding (289 floats)** | 97,696 states/s | 546,203 states/s | 55,555,000 states/s | **569x** |
-| **Random Rollouts (1 Core)** | 5,801 games/s (341k moves/s) | N/A | 757,833 games/s (44.6M moves/s) | **130.6x** |
-| **Random Rollouts (10 Cores)** | ~5,801 games/s (GIL limited) | 5,222,085 games/s (307.6M moves/s)| 5,231,678 games/s (308.2M moves/s) | **900.1x** |
-| **Alpha-Beta Search (depth 3)** | 50.4 ms / move | 0.12 ms / move | 0.09 ms / move | **422.3x** |
-| **Move Tree Enumeration (Perft d=5)**| ~1.2 s (extrapolated) | N/A | 0.00073 s (640M nodes/s) | **>1,600x** |
+| **Legal Move Generation** | 272,635 calls/s | 4,196,488 calls/s | 141,895,000 calls/s | **520x** |
+| **Move Execution (`play`)** | 200,306 moves/s | 24,172,953 moves/s | 303,030,000 moves/s | **1,513x** |
+| **Move In-Place (`play_inplace`)**| N/A (immutable) | 13,303,971 moves/s | 303,030,000 moves/s | **1,513x** |
+| **Neural Feature Encoding (289 floats)** | 80,147 states/s | 458,194 states/s | 43,478,000 states/s | **542x** |
+| **Batched Neural Encoding (Batch=64)** | 83,140 states/s | 11,181,389 states/s | 43,478,000 states/s | **134.5x** |
+| **Zero-Sum Heuristic Evaluation** | 62,310 evals/s | 8,108,917 evals/s | ~15,000,000 evals/s | **130.1x** |
+| **Random Rollouts (1 Core)** | 5,068 games/s (298k moves/s) | N/A | 672,166 games/s (39.6M moves/s) | **132.6x** |
+| **Random Rollouts (10 Cores)** | ~5,068 games/s (GIL limited) | 4,315,931 games/s (254.3M moves/s)| 4,569,640 games/s (269.2M moves/s) | **851.7x** |
+| **Alpha-Beta Search (depth 3)** | 59.2 ms / move | 0.16 ms / move | 0.10 ms / move | **374.4x** |
+| **Move Tree Enumeration (Perft d=5)**| ~1.2 s (extrapolated) | N/A | 0.00096 s (491M nodes/s) | **>1,250x** |
 
 ---
 
@@ -140,22 +142,49 @@ A complete state occupies **46 bytes** and can be copied in 6 CPU cycles using 6
 
 The implementation is located in `cpp/` and integrated into `sttt/`:
 
-1. **`cpp/include/sttt_core.hpp`**: Core bitboard engine, lookup tables, and fast arithmetic.
-2. **`cpp/include/sttt_search.hpp`**: Random rollouts, evaluation heuristic, and Alpha-Beta searcher.
+1. **`cpp/include/sttt_core.hpp`**: Core bitboard engine, lookup tables, fast move generation, and state layout.
+2. **`cpp/include/sttt_search.hpp`**: Random rollouts, evaluation heuristic matching `sttt.bots.value()`, and Alpha-Beta searcher.
 3. **`cpp/include/sttt_c_api.h` & `cpp/src/sttt_c_api.cpp`**: C-ABI shared library (`libsttt_core.so`) for multi-language linking and multi-threaded benchmarking.
-4. **`cpp/src/python_module.cpp`**: CPython native C-extension (`sttt_cpp.so`) exposing `FastState`, `benchmark_rollouts()`, and `alphabeta()`.
+4. **`cpp/src/python_module.cpp`**: CPython native C-extension (`sttt_cpp.so`) exposing `FastState` (with full pickle serialization, evaluate, and encode methods), `benchmark_rollouts()`, `alphabeta()`, `evaluate()`, and `encode_batch()`.
 5. **`cpp/benchmarks/bench_main.cpp`**: Standalone benchmark binary compiling with `-O3 -march=native`.
-6. **`sttt/cpp_env.py`**: High-level Python bridge providing `CppState` (a drop-in replacement for `sttt.env.State`) and conversion utilities.
-7. **`sttt/benchmarks/feasibility_benchmark.py`**: Comparative benchmark tool evaluating Python vs C++ across multiple workloads.
-8. **`tests/test_cpp_engine.py`**: 12 comprehensive unit tests including a 2,000-game lockstep verification test.
+6. **`sttt/cpp_env.py`**: High-level Python bridge providing `CppState` (a drop-in replacement for `sttt.env.State`), `CppAlphaBetaBot` (a tournament-ready C++ search bot), `encode_batch()`, and state conversion utilities.
+7. **`sttt/benchmarks/feasibility_benchmark.py`**: Comparative benchmark tool evaluating Python vs C++ across 7 workloads.
+8. **`tests/test_cpp_engine.py`**: 19 comprehensive unit tests covering 2,000 lockstep games, boundary cases, pickle roundtrips, heuristic alignment, and batch encoding.
 
 ---
 
-## 5. Path to Production: MCTS & Self-Play Integration
+## 5. Robustness Verification & Bug Fixes
+
+During deep verification and boundary testing, multiple critical edge cases and bugs were uncovered and resolved:
+
+1. **Forced-Board Routing to Closed Boards:**
+   - *Issue:* When `forced != -1` but local board `forced` had already been closed (won or drawn), `get_legal_actions()` incorrectly generated legal moves inside the closed board, while `is_legal()` and Python's `State.legal_actions()` correctly identified 0 legal moves.
+   - *Fix:* Added `macro_closed() & (1 << forced)` check to `get_legal_actions()`, guaranteeing 100% equivalence with Python `State` under all forced-board scenarios.
+
+2. **Null/None Sequence Handling in Python Initializer:**
+   - *Issue:* Passing `boards=None` or calling `CppState(cells=[...])` raised `TypeError: boards must be a sequence of 9 ints`.
+   - *Fix:* Enhanced `PyFastState_init` to safely accept `None` for `cells` and `boards`, defaulting to `BoardState::initial()`, and added validation rejecting invalid cell/board integers.
+
+3. **Multiprocessing & Serialization Compatibility:**
+   - *Issue:* `pickle.dumps(FastState())` raised `TypeError: cannot pickle 'sttt_cpp.FastState' object`, preventing multi-process training worker pools.
+   - *Fix:* Implemented `__reduce__` in `PyFastState`, enabling flawless `pickle` and `copy.deepcopy` roundtrips for both `FastState` and `CppState`.
+
+4. **Cross-Type State Equality:**
+   - *Issue:* `FastState() == State()` returned `False` due to dataclass type inequality.
+   - *Fix:* Added duck-type field comparison in `PyFastState_richcompare`, allowing seamless `==` comparisons between `FastState`, `CppState`, and `State`.
+
+5. **Vectorized Batch Feature Encoding:**
+   - *Issue:* Evaluating policy/value networks previously required converting 289 float Python objects per state, bottlenecking batch inference.
+   - *Fix:* Implemented `sttt_cpp.encode_batch(states)`, filling contiguous C++ float buffers at **11.2 Million states/sec** (**134.5x faster** than Python `np.stack`).
+
+---
+
+## 6. Path to Production: MCTS & Self-Play Integration
 
 ### Phase 1 (Completed): Core Engine & Bitboard State
 - Implemented C++ bitboard core, verified 100% equivalence with Python `State`.
-- Implemented Python extension module `sttt_cpp`.
+- Implemented Python extension module `sttt_cpp` with full batching and pickle support.
+- Fully integrated `CppState` and `CppAlphaBetaBot`.
 
 ### Phase 2: MCTS Node & Tree Search in C++
 - Port `sttt.search.TreeSearch` to C++ (`cpp/src/mcts.cpp`):
@@ -167,5 +196,5 @@ The implementation is located in `cpp/` and integrated into `sttt/`:
 
 ### Phase 3: Headless Tournament & External Engine Interop
 - Re-run tournaments and bot evaluations directly inside C++:
-  - Alpha-Beta bot searches 10M nodes/sec (can search to depth 7-8 in real time).
+  - Alpha-Beta bot searches 10M-12M nodes/sec (can search to depth 7-8 in real time).
   - Can run 10,000 games between bots in under 2 seconds.

@@ -40,8 +40,8 @@ void bench_legal_actions(int iterations = 5000000) {
     auto t1 = high_resolution_clock::now();
     double sec = duration<double>(t1 - t0).count();
     std::cout << "[Benchmark] Legal Move Generation: "
-              << iterations / sec / 1e6 << " million calls/sec ("
-              << (sec * 1e9 / iterations) << " ns/call)\n";
+              << std::fixed << std::setprecision(1) << (iterations / sec / 1e6) << " million calls/sec ("
+              << std::setprecision(2) << (sec * 1e9 / iterations) << " ns/call)\n";
 }
 
 void bench_play_move(int iterations = 10000000) {
@@ -54,8 +54,8 @@ void bench_play_move(int iterations = 10000000) {
     auto t1 = high_resolution_clock::now();
     double sec = duration<double>(t1 - t0).count();
     std::cout << "[Benchmark] Move Execution (play): "
-              << iterations / sec / 1e6 << " million moves/sec ("
-              << (sec * 1e9 / iterations) << " ns/move)\n";
+              << std::fixed << std::setprecision(1) << (iterations / sec / 1e6) << " million moves/sec ("
+              << std::setprecision(2) << (sec * 1e9 / iterations) << " ns/move)\n";
 }
 
 void bench_encoding(int iterations = 1000000) {
@@ -71,8 +71,8 @@ void bench_encoding(int iterations = 1000000) {
     auto t1 = high_resolution_clock::now();
     double sec = duration<double>(t1 - t0).count();
     std::cout << "[Benchmark] Neural Encoding (289 floats): "
-              << iterations / sec / 1e6 << " million states/sec ("
-              << (sec * 1e9 / iterations) << " ns/encode)\n";
+              << std::fixed << std::setprecision(1) << (iterations / sec / 1e6) << " million states/sec ("
+              << std::setprecision(2) << (sec * 1e9 / iterations) << " ns/encode)\n";
 }
 
 void bench_random_rollouts(int num_games = 500000, int num_threads = 1) {
@@ -160,7 +160,9 @@ void bench_alphabeta() {
     }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
     std::cout << "=========================================================\n";
     std::cout << "      Super Tic-Tac-Toe C++ Bitboard Engine Benchmark     \n";
     std::cout << "=========================================================\n";

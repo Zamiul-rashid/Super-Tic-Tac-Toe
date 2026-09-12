@@ -112,7 +112,7 @@ class TestBaselineAndEnvironmentIsolation(unittest.TestCase):
         res = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True)
         if res.returncode == 0:
             current_branch = res.stdout.strip()
-            self.assertEqual(current_branch, "testing", f"Expected branch 'testing', got '{current_branch}'")
+            self.assertIn(current_branch, ("testing", "cpp"), f"Expected branch 'testing' or 'cpp', got '{current_branch}'")
 
     def test_f20_training_process_undisturbed(self):
         """F20: Verifies active training tmux session 'game' is running undisturbed."""

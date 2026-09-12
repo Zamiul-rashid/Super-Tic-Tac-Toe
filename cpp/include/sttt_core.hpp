@@ -94,7 +94,11 @@ struct BoardState {
         }
 
         int count = 0;
-        if (forced != -1) {
+        if (forced >= 0 && forced < 9) {
+            // If the forced board is closed (won or drawn), no moves on this board are legal
+            if (macro_closed() & (1 << forced)) {
+                return 0;
+            }
             // Forced to board 'forced'
             uint16_t open = ~(x_cells[forced] | o_cells[forced]) & 0x1FF;
             uint8_t base = static_cast<uint8_t>(forced * 9);
@@ -134,7 +138,7 @@ struct BoardState {
         uint8_t b = action / 9;
         uint8_t c = action % 9;
 
-        if (forced != -1 && forced != b) {
+        if (forced >= 0 && forced < 9 && forced != b) {
             return false;
         }
         if (macro_closed() & (1 << b)) {
@@ -278,7 +282,8 @@ struct BoardState {
         }
 
         // Forced one-hot (279..288)
-        out[279 + (forced + 1)] = 1.0f;
+        int forced_idx = (forced >= 0 && forced < 9) ? (forced + 1) : 0;
+        out[279 + forced_idx] = 1.0f;
     }
 
     bool operator==(const BoardState& o) const {
@@ -333,6 +338,8 @@ struct BoardState {
     }
 };
 #pragma pack(pop)
+
+static_assert(sizeof(BoardState) == 46, "BoardState size must be 46 bytes");
 
 // Fast pseudo-random number generator (XorShift64*)
 class FastRng {

@@ -161,6 +161,58 @@ def benchmark_alphabeta():
         print(f"-> AlphaBeta Speedup: {t_py / t_cpp:.1f}x")
 
 
+def benchmark_heuristic_eval(iterations=100_000):
+    print("\n--- 6. Zero-Sum Heuristic Evaluation ---")
+    from sttt.bots import value as py_value
+    s_py = State().play(40).play(38)
+    s_cpp = FastState().play(40).play(38)
+
+    t0 = time.perf_counter()
+    for _ in range(iterations):
+        _ = py_value(s_py)
+    t_py = time.perf_counter() - t0
+
+    t0 = time.perf_counter()
+    for _ in range(iterations):
+        _ = s_cpp.evaluate()
+    t_cpp = time.perf_counter() - t0
+
+    py_rate = iterations / t_py
+    cpp_rate = iterations / t_cpp
+    speedup = cpp_rate / py_rate
+
+    print(f"Python value(state): {py_rate:,.0f} evals/sec ({t_py*1e6/iterations:.2f} us/eval)")
+    print(f"C++ FastState.evaluate(): {cpp_rate:,.0f} evals/sec ({t_cpp*1e6/iterations:.2f} us/eval)")
+    print(f"-> Speedup: {speedup:.1f}x")
+    return speedup
+
+
+def benchmark_batched_encoding(batch_size=64, iterations=5_000):
+    print(f"\n--- 7. Batched Feature Encoding (Batch size {batch_size}) ---")
+    from sttt.cpp_env import encode_batch
+    states_py = [State().play(40).play(38) for _ in range(batch_size)]
+    states_cpp = [FastState().play(40).play(38) for _ in range(batch_size)]
+
+    t0 = time.perf_counter()
+    for _ in range(iterations):
+        _ = np.stack([py_encode(s) for s in states_py])
+    t_py = time.perf_counter() - t0
+
+    t0 = time.perf_counter()
+    for _ in range(iterations):
+        _ = encode_batch(states_cpp)
+    t_cpp = time.perf_counter() - t0
+
+    py_states_sec = (batch_size * iterations) / t_py
+    cpp_states_sec = (batch_size * iterations) / t_cpp
+    speedup = cpp_states_sec / py_states_sec
+
+    print(f"Python np.stack(encode): {py_states_sec:,.0f} states/sec ({t_py*1e3/iterations:.2f} ms/batch)")
+    print(f"C++ encode_batch: {cpp_states_sec:,.0f} states/sec ({t_cpp*1e3/iterations:.2f} ms/batch)")
+    print(f"-> Batched Speedup: {speedup:.1f}x")
+    return speedup
+
+
 def main():
     print("=" * 65)
     print("  Super Tic-Tac-Toe Python vs C++ Bitboard Feasibility Benchmark")
@@ -175,6 +227,8 @@ def main():
     benchmark_neural_encoding()
     run_rollout_benchmark()
     benchmark_alphabeta()
+    benchmark_heuristic_eval()
+    benchmark_batched_encoding()
 
     print("\n" + "=" * 65)
     print("Benchmark completed successfully.")

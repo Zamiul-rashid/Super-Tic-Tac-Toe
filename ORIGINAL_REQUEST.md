@@ -86,3 +86,47 @@ Integrity mode: development
 ### Non-Regression
 - [ ] All existing 206 unit tests on branch `testing` continue to pass without regression.
 - [ ] Active background training session in tmux remains undisturbed.
+
+## Follow-up — 2026-09-12T10:55:02Z
+
+Build an ultra-fast C++ bitboard game engine and rules subsystem with Python bindings on branch `cpp`, delivering orders-of-magnitude faster game rollouts, legal move generation, and MCTS simulation throughput than the Python baseline.
+
+Working directory: /home/entropy/Code/Super-Tic-Tac-Toe
+Integrity mode: development
+
+## Requirements
+
+### R1. Branch Isolation & Build Infrastructure (`cpp` branch)
+- Check out a dedicated `cpp` git branch branched cleanly from current codebase.
+- Ensure the active background training session in tmux `game:0` is completely untouched and uninterrupted.
+- Set up a robust CMake / `pybind11` (or `setuptools`) build pipeline configured for the Conda environment (`/home/entropy/miniconda3/envs/sttt`).
+
+### R2. High-Performance C++ Bitboard Game Engine
+- Represent Super Tic-Tac-Toe board state using 64-bit/16-bit bitboards for maximum cache locality and SIMD/bitwise efficiency.
+- Implement O(1) win checking via bitwise masks across subgrids and global grid.
+- Implement ultra-fast legal move mask computation and state transitions (`apply_move`, `undo_move` or lightweight copy-on-write).
+- Support random rollout playouts entirely in C++ with minimal branching and zero heap allocations.
+
+### R3. Python Bindings & Drop-In Compatibility
+- Expose the C++ engine to Python (via `pybind11`) as a high-performance drop-in replacement or accelerator for `sttt.env.State`.
+- Provide tensor/NumPy export functions for board representations compatible with the neural network's spatial input format.
+
+### R4. Differential Parity Verification
+- Implement a comprehensive differential test suite pitting C++ bitboard state transitions against Python `sttt.State` across 10,000+ random and edge-case game positions.
+- Verify 100% exact parity for: legal moves, active board constraints, local wins, global wins, and draw detection.
+
+### R5. Throughput Benchmarks & Profiling
+- Measure raw moves/second, random rollouts/second, and MCTS simulation rate comparing Python vs C++ bitboard engine.
+- Generate structured benchmark reports and comparison tables demonstrating the achieved speedup factor (targeting >= 50x speedup).
+
+## Acceptance Criteria
+
+### Correctness & Integrity
+- [ ] Dedicated git branch `cpp` created without disturbing active tmux training in `game:0`.
+- [ ] Differential test suite verifies 100% identical state transitions and terminal outcomes across >= 10,000 paired moves vs Python `sttt.State`.
+- [ ] All 251 existing Python unit tests continue to pass.
+
+### Performance & Compilation
+- [ ] C++ extension builds cleanly in `/home/entropy/miniconda3/envs/sttt` with zero compiler warnings/errors.
+- [ ] Benchmark script measures >= 50x throughput speedup on game rollouts vs pure Python.
+- [ ] Memory footprint per state is minimal (< 64 bytes per state in C++).

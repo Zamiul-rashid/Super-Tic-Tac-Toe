@@ -3,6 +3,8 @@
 #include "sttt_core.hpp"
 #include "sttt_search.hpp"
 #include "sttt_c_api.h"
+#include <vector>
+#include <exception>
 
 using namespace sttt;
 
@@ -11,9 +13,12 @@ typedef struct {
     BoardState state;
 } PyFastState;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 static PyTypeObject PyFastStateType = {
     PyVarObject_HEAD_INIT(NULL, 0)
 };
+#pragma GCC diagnostic pop
 
 static PyObject* PyFastState_new(PyTypeObject* type, PyObject* /*args*/, PyObject* /*kwds*/) {
     PyFastState* self = (PyFastState*)type->tp_alloc(type, 0);
@@ -36,11 +41,14 @@ static int PyFastState_init(PyFastState* self, PyObject* args, PyObject* kwds) {
         return -1;
     }
 
-    if (py_cells == NULL && py_boards == NULL) {
+    bool cells_given = (py_cells != NULL && py_cells != Py_None);
+    bool boards_given = (py_boards != NULL && py_boards != Py_None);
+
+    if (!cells_given && !boards_given) {
         self->state = BoardState::initial();
         self->state.turn = static_cast<int8_t>(turn);
         self->state.forced = static_cast<int8_t>(forced);
-        if (py_result != Py_None) {
+        if (py_result != Py_None && py_result != NULL) {
             self->state.result = static_cast<int8_t>(PyLong_AsLong(py_result));
         }
         return 0;
@@ -48,7 +56,7 @@ static int PyFastState_init(PyFastState* self, PyObject* args, PyObject* kwds) {
 
     std::memset(&self->state, 0, sizeof(BoardState));
 
-    if (py_cells != NULL) {
+    if (cells_given) {
         PyObject* seq = PySequence_Fast(py_cells, "cells must be a sequence of 81 ints");
         if (!seq) return -1;
         if (PySequence_Fast_GET_SIZE(seq) != 81) {
@@ -60,17 +68,25 @@ static int PyFastState_init(PyFastState* self, PyObject* args, PyObject* kwds) {
             for (int c = 0; c < 9; ++c) {
                 PyObject* item = PySequence_Fast_GET_ITEM(seq, b * 9 + c);
                 long val = PyLong_AsLong(item);
+                if (val == -1 && PyErr_Occurred()) {
+                    Py_DECREF(seq);
+                    return -1;
+                }
                 if (val == 1) {
                     self->state.x_cells[b] |= (1 << c);
                 } else if (val == -1) {
                     self->state.o_cells[b] |= (1 << c);
+                } else if (val != 0) {
+                    Py_DECREF(seq);
+                    PyErr_Format(PyExc_ValueError, "cells elements must be -1, 0, or 1; got %ld", val);
+                    return -1;
                 }
             }
         }
         Py_DECREF(seq);
     }
 
-    if (py_boards != NULL) {
+    if (boards_given) {
         PyObject* seq = PySequence_Fast(py_boards, "boards must be a sequence of 9 ints");
         if (!seq) return -1;
         if (PySequence_Fast_GET_SIZE(seq) != 9) {
@@ -81,12 +97,20 @@ static int PyFastState_init(PyFastState* self, PyObject* args, PyObject* kwds) {
         for (int b = 0; b < 9; ++b) {
             PyObject* item = PySequence_Fast_GET_ITEM(seq, b);
             long val = PyLong_AsLong(item);
+            if (val == -1 && PyErr_Occurred()) {
+                Py_DECREF(seq);
+                return -1;
+            }
             if (val == 1) {
                 self->state.macro_x |= (1 << b);
             } else if (val == -1) {
                 self->state.macro_o |= (1 << b);
             } else if (val == 2) {
                 self->state.macro_draw |= (1 << b);
+            } else if (val != 0) {
+                Py_DECREF(seq);
+                PyErr_Format(PyExc_ValueError, "boards elements must be -1, 0, 1, or 2; got %ld", val);
+                return -1;
             }
         }
         Py_DECREF(seq);
@@ -94,7 +118,7 @@ static int PyFastState_init(PyFastState* self, PyObject* args, PyObject* kwds) {
 
     self->state.turn = static_cast<int8_t>(turn);
     self->state.forced = static_cast<int8_t>(forced);
-    if (py_result == Py_None) {
+    if (py_result == Py_None || py_result == NULL) {
         self->state.result = RESULT_ONGOING;
     } else {
         self->state.result = static_cast<int8_t>(PyLong_AsLong(py_result));
@@ -198,32 +222,121 @@ static PyObject* PyFastState_encode(PyFastState* self, PyObject* Py_UNUSED(ignor
     return list;
 }
 
+static PyObject* PyFastState_encode_bytes(PyFastState* self, PyObject* Py_UNUSED(ignored)) {
+    float buf[289];
+    self->state.encode(buf);
+    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(buf), sizeof(buf));
+}
+
+static PyObject* PyFastState_evaluate(PyFastState* self, PyObject* Py_UNUSED(ignored)) {
+    float val = evaluate_state(self->state);
+    return PyFloat_FromDouble(val);
+}
+
 static PyObject* PyFastState_render(PyFastState* self, PyObject* Py_UNUSED(ignored)) {
     std::string s = self->state.render();
     return PyUnicode_FromStringAndSize(s.c_str(), s.size());
+}
+
+static PyObject* PyFastState_reduce(PyFastState* self, PyObject* Py_UNUSED(ignored)) {
+    PyObject* cells = PyFastState_get_cells(self, NULL);
+    PyObject* boards = PyFastState_get_boards(self, NULL);
+    PyObject* turn = PyFastState_get_turn(self, NULL);
+    PyObject* forced = PyFastState_get_forced(self, NULL);
+    PyObject* result = PyFastState_get_result(self, NULL);
+
+    PyObject* args = PyTuple_Pack(5, cells, boards, turn, forced, result);
+    Py_DECREF(cells);
+    Py_DECREF(boards);
+    Py_DECREF(turn);
+    Py_DECREF(forced);
+    Py_DECREF(result);
+
+    PyObject* res = PyTuple_Pack(2, (PyObject*)&PyFastStateType, args);
+    Py_DECREF(args);
+    return res;
 }
 
 static PyMethodDef PyFastState_methods[] = {
     {"legal_actions", (PyCFunction)PyFastState_legal_actions, METH_NOARGS, "Return list of legal actions (0..80)"},
     {"play", (PyCFunction)PyFastState_play, METH_VARARGS, "Play an action, returning a new FastState"},
     {"play_inplace", (PyCFunction)PyFastState_play_inplace, METH_VARARGS, "Play an action in-place on this FastState"},
-    {"encode", (PyCFunction)PyFastState_encode, METH_NOARGS, "Encode canonical 289 float features"},
+    {"encode", (PyCFunction)PyFastState_encode, METH_NOARGS, "Encode canonical 289 float features as list"},
+    {"encode_bytes", (PyCFunction)PyFastState_encode_bytes, METH_NOARGS, "Encode canonical 289 float features as raw bytes"},
+    {"evaluate", (PyCFunction)PyFastState_evaluate, METH_NOARGS, "Heuristic evaluation score in [-1, 1] matching sttt.bots.value()"},
+    {"value", (PyCFunction)PyFastState_evaluate, METH_NOARGS, "Alias for evaluate() matching sttt.bots.value()"},
     {"render", (PyCFunction)PyFastState_render, METH_NOARGS, "Render board as ASCII string"},
+    {"__reduce__", (PyCFunction)PyFastState_reduce, METH_NOARGS, "Pickle serialization support"},
     {NULL, NULL, 0, NULL}
 };
 
 static PyObject* PyFastState_richcompare(PyObject* v, PyObject* w, int op) {
-    if (!PyObject_TypeCheck(v, &PyFastStateType) || !PyObject_TypeCheck(w, &PyFastStateType)) {
+    if (op != Py_EQ && op != Py_NE) {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    PyFastState* a = (PyFastState*)v;
-    PyFastState* b = (PyFastState*)w;
-    bool eq = (a->state == b->state);
-    if (op == Py_EQ) {
-        if (eq) Py_RETURN_TRUE; else Py_RETURN_FALSE;
-    } else if (op == Py_NE) {
-        if (!eq) Py_RETURN_TRUE; else Py_RETURN_FALSE;
+
+    if (PyObject_TypeCheck(v, &PyFastStateType) && PyObject_TypeCheck(w, &PyFastStateType)) {
+        PyFastState* a = (PyFastState*)v;
+        PyFastState* b = (PyFastState*)w;
+        bool eq = (a->state == b->state);
+        if (op == Py_EQ) {
+            if (eq) Py_RETURN_TRUE; else Py_RETURN_FALSE;
+        } else {
+            if (!eq) Py_RETURN_TRUE; else Py_RETURN_FALSE;
+        }
     }
+
+    // Cross-comparison with Python State, CppState, or any state-like object
+    if (PyObject_TypeCheck(v, &PyFastStateType)) {
+        PyFastState* a = (PyFastState*)v;
+        if (PyObject_HasAttrString(w, "cells") && PyObject_HasAttrString(w, "boards") &&
+            PyObject_HasAttrString(w, "turn") && PyObject_HasAttrString(w, "forced") &&
+            PyObject_HasAttrString(w, "result")) {
+
+            PyObject* cells = PyFastState_get_cells(a, NULL);
+            PyObject* w_cells = PyObject_GetAttrString(w, "cells");
+            int eq_cells = PyObject_RichCompareBool(cells, w_cells, Py_EQ);
+            Py_DECREF(cells); Py_DECREF(w_cells);
+            if (eq_cells <= 0) {
+                if (op == Py_EQ) Py_RETURN_FALSE; else Py_RETURN_TRUE;
+            }
+
+            PyObject* boards = PyFastState_get_boards(a, NULL);
+            PyObject* w_boards = PyObject_GetAttrString(w, "boards");
+            int eq_boards = PyObject_RichCompareBool(boards, w_boards, Py_EQ);
+            Py_DECREF(boards); Py_DECREF(w_boards);
+            if (eq_boards <= 0) {
+                if (op == Py_EQ) Py_RETURN_FALSE; else Py_RETURN_TRUE;
+            }
+
+            PyObject* turn = PyFastState_get_turn(a, NULL);
+            PyObject* w_turn = PyObject_GetAttrString(w, "turn");
+            int eq_turn = PyObject_RichCompareBool(turn, w_turn, Py_EQ);
+            Py_DECREF(turn); Py_DECREF(w_turn);
+            if (eq_turn <= 0) {
+                if (op == Py_EQ) Py_RETURN_FALSE; else Py_RETURN_TRUE;
+            }
+
+            PyObject* forced = PyFastState_get_forced(a, NULL);
+            PyObject* w_forced = PyObject_GetAttrString(w, "forced");
+            int eq_forced = PyObject_RichCompareBool(forced, w_forced, Py_EQ);
+            Py_DECREF(forced); Py_DECREF(w_forced);
+            if (eq_forced <= 0) {
+                if (op == Py_EQ) Py_RETURN_FALSE; else Py_RETURN_TRUE;
+            }
+
+            PyObject* result = PyFastState_get_result(a, NULL);
+            PyObject* w_result = PyObject_GetAttrString(w, "result");
+            int eq_res = PyObject_RichCompareBool(result, w_result, Py_EQ);
+            Py_DECREF(result); Py_DECREF(w_result);
+            if (eq_res <= 0) {
+                if (op == Py_EQ) Py_RETURN_FALSE; else Py_RETURN_TRUE;
+            }
+
+            if (op == Py_EQ) Py_RETURN_TRUE; else Py_RETURN_FALSE;
+        }
+    }
+
     Py_RETURN_NOTIMPLEMENTED;
 }
 
@@ -266,6 +379,22 @@ static PyObject* py_benchmark_rollouts(PyObject* /*self*/, PyObject* args) {
     return Py_BuildValue("dKd d", elapsed, total_moves, games_per_sec, moves_per_sec);
 }
 
+static const BoardState* extract_board_state(PyObject* state_obj, PyObject** cleanup) {
+    *cleanup = NULL;
+    if (PyObject_TypeCheck(state_obj, &PyFastStateType)) {
+        return &((PyFastState*)state_obj)->state;
+    }
+    if (PyObject_HasAttrString(state_obj, "_fast")) {
+        PyObject* fast_obj = PyObject_GetAttrString(state_obj, "_fast");
+        if (fast_obj && PyObject_TypeCheck(fast_obj, &PyFastStateType)) {
+            *cleanup = fast_obj;
+            return &((PyFastState*)fast_obj)->state;
+        }
+        Py_XDECREF(fast_obj);
+    }
+    return NULL;
+}
+
 static PyObject* py_alphabeta(PyObject* /*self*/, PyObject* args) {
     PyObject* state_obj;
     int depth = 3;
@@ -275,25 +404,93 @@ static PyObject* py_alphabeta(PyObject* /*self*/, PyObject* args) {
         return NULL;
     }
 
-    if (!PyObject_TypeCheck(state_obj, &PyFastStateType)) {
-        PyErr_SetString(PyExc_TypeError, "Expected a FastState instance");
+    PyObject* cleanup = NULL;
+    const BoardState* bs = extract_board_state(state_obj, &cleanup);
+    if (!bs) {
+        PyErr_SetString(PyExc_TypeError, "Expected a FastState or CppState instance");
         return NULL;
     }
 
-    PyFastState* s = (PyFastState*)state_obj;
+    if (bs->is_terminal()) {
+        Py_XDECREF(cleanup);
+        PyErr_SetString(PyExc_ValueError, "Cannot choose a move in a terminal state");
+        return NULL;
+    }
+
     AlphaBetaSearcher searcher;
-    int action;
+    int action = -1;
 
-    Py_BEGIN_ALLOW_THREADS
-    action = searcher.choose_move(s->state, depth, budget);
-    Py_END_ALLOW_THREADS
+    try {
+        Py_BEGIN_ALLOW_THREADS
+        action = searcher.choose_move(*bs, depth, budget);
+        Py_END_ALLOW_THREADS
+    } catch (const std::exception& e) {
+        Py_XDECREF(cleanup);
+        PyErr_SetString(PyExc_RuntimeError, e.what());
+        return NULL;
+    }
 
+    Py_XDECREF(cleanup);
     return Py_BuildValue("iK", action, searcher.node_count);
+}
+
+static PyObject* py_evaluate(PyObject* /*self*/, PyObject* args) {
+    PyObject* state_obj;
+    if (!PyArg_ParseTuple(args, "O", &state_obj)) {
+        return NULL;
+    }
+
+    PyObject* cleanup = NULL;
+    const BoardState* bs = extract_board_state(state_obj, &cleanup);
+    if (!bs) {
+        PyErr_SetString(PyExc_TypeError, "Expected a FastState or CppState instance");
+        return NULL;
+    }
+
+    float val = evaluate_state(*bs);
+    Py_XDECREF(cleanup);
+    return PyFloat_FromDouble(val);
+}
+
+static PyObject* py_encode_batch(PyObject* /*self*/, PyObject* args) {
+    PyObject* seq_obj;
+    if (!PyArg_ParseTuple(args, "O", &seq_obj)) {
+        return NULL;
+    }
+
+    PyObject* seq = PySequence_Fast(seq_obj, "Expected a sequence of FastState or CppState objects");
+    if (!seq) return NULL;
+
+    Py_ssize_t n = PySequence_Fast_GET_SIZE(seq);
+    if (n == 0) {
+        Py_DECREF(seq);
+        return PyBytes_FromStringAndSize("", 0);
+    }
+
+    std::vector<float> buffer(n * 289);
+    for (Py_ssize_t i = 0; i < n; ++i) {
+        PyObject* item = PySequence_Fast_GET_ITEM(seq, i);
+        PyObject* cleanup = NULL;
+        const BoardState* bs = extract_board_state(item, &cleanup);
+        if (!bs) {
+            Py_DECREF(seq);
+            PyErr_Format(PyExc_TypeError, "Item %zd is not a FastState or CppState", i);
+            return NULL;
+        }
+        bs->encode(buffer.data() + i * 289);
+        Py_XDECREF(cleanup);
+    }
+    Py_DECREF(seq);
+
+    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(buffer.data()),
+                                     buffer.size() * sizeof(float));
 }
 
 static PyMethodDef ModuleMethods[] = {
     {"benchmark_rollouts", (PyCFunction)py_benchmark_rollouts, METH_VARARGS, "Run C++ bitboard rollouts benchmark (num_games, num_threads, seed)"},
     {"alphabeta", (PyCFunction)py_alphabeta, METH_VARARGS, "Run C++ Alpha-Beta search (state, depth, budget)"},
+    {"evaluate", (PyCFunction)py_evaluate, METH_VARARGS, "Heuristic evaluation score in [-1, 1] matching sttt.bots.value()"},
+    {"encode_batch", (PyCFunction)py_encode_batch, METH_VARARGS, "Vectorized batch neural encoding for states sequence"},
     {NULL, NULL, 0, NULL}
 };
 

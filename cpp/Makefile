@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS ?= -O3 -march=native -Wall -Wextra -std=c++17 -fPIC -pthread -I./include
+CXXFLAGS ?= -O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include
 PYTHON ?= /home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python
 PY_INCLUDE ?= /usr/include/python3.14
 

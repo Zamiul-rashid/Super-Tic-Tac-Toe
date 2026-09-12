@@ -8,3 +8,5 @@ runs/
 profiles/
 .agent/
 .agents
+*.so
+scratch/
