@@ -63,6 +63,10 @@ def train(args):
         model = create_model(arch)
         saved = {}
     model.to(device)
+    if getattr(args, 'fp16', False):
+        model.use_fp16 = True
+        if str(device) == 'cuda':
+            print('Using FP16 Automatic Mixed Precision on CUDA', flush=True)
     if 'numpy_rng_state' in saved:
         rng.bit_generator.state = saved['numpy_rng_state']
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
@@ -141,6 +145,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
 
         model.train()
         losses = []
+        use_fp16 = getattr(args, 'fp16', False) and str(device) == 'cuda'
+        scaler = torch.amp.GradScaler('cuda', enabled=use_fp16) if use_fp16 else None
         for _ in range(args.steps):
             indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
             batch = [replay[int(i)] for i in indices]
@@ -148,13 +154,24 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             if getattr(args, 'augment_symmetry', False):
                 x, pi, mask = augment_batch(x, pi, mask, rng)
             z = torch.tensor([row[3] for row in batch], device=device)
-            logits, value = model(x)
-            logits = logits.masked_fill(~mask, -1e9)
-            loss = -(pi * logits.log_softmax(-1)).sum(-1).mean() + (value - z).square().mean()
+            with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=use_fp16):
+                logits, value = model(x)
+                mask_val = -1e4 if use_fp16 else -1e9
+                logits = logits.masked_fill(~mask, mask_val)
+                log_p = logits.log_softmax(-1)
+                log_p = torch.where(mask, log_p, torch.zeros_like(log_p))
+                loss = -(pi * log_p).sum(-1).mean() + (value - z).square().mean()
             optimizer.zero_grad(set_to_none=True)
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
-            optimizer.step()
+            if scaler:
+                scaler.scale(loss).backward()
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
+                optimizer.step()
             losses.append(loss.item())
         checkpoint = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(),
                       'iteration': iteration, 'replay': list(replay), 'arch': arch,
@@ -467,6 +484,7 @@ def main():
     t.add_argument('--workers', type=positive, default=8)
     t.add_argument('--backend', choices=['auto', 'cpp', 'python'], default='auto',
                    help='Search backend: cpp uses C++ bitboard engine, python uses pure Python (default: auto)')
+    t.add_argument('--fp16', action='store_true', help='Use automatic mixed precision (FP16) on CUDA')
     t.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     t.add_argument('--output', default='runs/default')
     t.add_argument('--resume')
