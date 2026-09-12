@@ -1,5 +1,6 @@
 """Named external-engine configurations for reproducible tournaments."""
 import json
+import sys
 from pathlib import Path
 
 from .bots import ExternalProcessBot
@@ -28,7 +29,7 @@ def _validate(name: str, spec: dict, base: Path) -> dict:
     if isinstance(command, list) and not all(isinstance(part, str) and part for part in command):
         raise ValueError(f"Engine '{name}' command argv must contain non-empty strings")
     protocol = spec.get("protocol", "codingame")
-    if protocol not in ("codingame", "action", "action_index"):
+    if protocol not in ("codingame", "action", "action_index", "state_json"):
         raise ValueError(f"Engine '{name}' has unsupported protocol '{protocol}'")
     timeout = float(spec.get("timeout", 5.0))
     if not 0 < timeout <= 5:
@@ -37,6 +38,9 @@ def _validate(name: str, spec: dict, base: Path) -> dict:
     if cwd and not Path(cwd).is_absolute():
         cwd = str((base / cwd).resolve())
     result = dict(spec, protocol=protocol, timeout=timeout, cwd=cwd)
+    import shlex
+    parts = shlex.split(command) if isinstance(command, str) else command
+    result['command'] = [part.replace('{python}', sys.executable) for part in parts]
     result["name"] = name
     return result
 
@@ -46,8 +50,12 @@ def create_configured_engine(name: str, registry: dict[str, dict]) -> ExternalPr
     spec = registry.get(name)
     if spec is None:
         return None
+    import shlex
+    command = shlex.split(spec['command']) if isinstance(spec['command'], str) else spec['command']
+    command = [part.replace('{simulations}', str(spec.get('simulations', 128)))
+               .replace('{seed}', str(spec.get('seed', 0))) for part in command]
     return ExternalProcessBot(
-        command=spec["command"], timeout=spec["timeout"], protocol=spec["protocol"],
+        command=command, timeout=spec["timeout"], protocol=spec["protocol"],
         fallback=spec.get("fallback", "raise"),
         auto_restart=bool(spec.get("auto_restart", True)),
         restart_on_reset=bool(spec.get("restart_on_reset", True)),

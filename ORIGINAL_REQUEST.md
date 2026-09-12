@@ -48,3 +48,41 @@ A dedicated automated test suite that verifies the Bayesian opponent modeling mo
 ### Codebase Non-Regression
 - [ ] All 26 existing unit tests continue to pass with 0 failures on Conda `sttt`.
 - [ ] All code strictly lives on the `testing` branch without disturbing active training in tmux.
+
+## Follow-up — 2026-09-11T18:30:28Z
+
+This is a single self-contained feature; keep it small and focused. Use at most 5 agents total.
+
+Integrate Google DeepMind's `open_spiel` Ultimate Tic-Tac-Toe engine as a benchmark opponent in the `sttt` framework on branch `testing`. Build the `OpenSpielBot` adapter, add unit tests, and verify by running an automated test tournament between the neural agent and OpenSpiel.
+
+Working directory: /home/entropy/Code/Super-Tic-Tac-Toe
+Integrity mode: development
+
+## Requirements
+
+### R1. OpenSpiel Engine Adapter (`sttt/bots.py`)
+- Install / verify `open_spiel` in the Conda environment (`/home/entropy/miniconda3/envs/sttt`).
+- Implement `OpenSpielBot` in `sttt/bots.py` conforming to the uniform `Bot` interface (`name`, `choose`, `advance`, `reset`, `close`).
+- Implement bidirectional state/action translation between `sttt.State` and OpenSpiel's `ultimate_tic_tac_toe` environment.
+- Support configurable OpenSpiel bot algorithms (e.g. `mcts`, `random`) with simulation budgets.
+- Register `openspiel-mcts` in the `create_bot` polymorphic factory.
+
+### R2. Verification & Test Tournament Execution
+- Add unit tests in `tests/test_openspiel.py` verifying state mapping, legal action consistency, move generation, and reset/advance semantics.
+- Execute an automated test tournament (minimum 20 paired games) between `OpenSpielBot` and the neural agent / tactical bot using `python -m sttt.ai tournament`.
+- Verify that tournament ratings (Bayesian Elo and Glicko-2) and summary reports export cleanly.
+
+## Acceptance Criteria
+
+### Functional & Behavioral Verification
+- [ ] `OpenSpielBot` loads `pyspiel.load_game("ultimate_tic_tac_toe")` and correctly chooses legal moves in any legal board state.
+- [ ] Action index translation between `sttt` (0..80) and `open_spiel` is verified exact with zero illegal moves across full games.
+- [ ] `create_bot("openspiel-mcts")` successfully instantiates the bot.
+
+### Tournament Verification
+- [ ] An automated 20-game paired tournament runs to completion without errors or hangs.
+- [ ] Matchup produces valid Elo/Glicko-2 ratings and saves output to `runs/tournaments/`.
+
+### Non-Regression
+- [ ] All existing 206 unit tests on branch `testing` continue to pass without regression.
+- [ ] Active background training session in tmux remains undisturbed.

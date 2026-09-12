@@ -9,8 +9,9 @@
     },
     "utttai": {
       "source": "https://github.com/arnowaczynski/utttai",
-      "command": ["engines/bin/utttai-wrapper"],
-      "protocol": "action_index",
+      "command": ["{python}", "-m", "sttt.utttai_wrapper", "--simulations", "{simulations}", "--seed", "{seed}"],
+      "cwd": "..",
+      "protocol": "state_json",
       "timeout": 5.0,
       "fallback": "raise"
     }

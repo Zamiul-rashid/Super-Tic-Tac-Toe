@@ -37,11 +37,23 @@ def play_game(evaluator, simulations, seed, config, leaf_batch, match=None):
     state, trajectory = State(), []
     match = match or MatchSpec()
     opponent = make_opponent(match)
+    try:
+        return _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent)
+    finally:
+        if opponent is not None:
+            opponent.close()
+
+
+def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent):
+    state, trajectory = State(), []
     opponent_rng = np.random.default_rng(np.random.SeedSequence([int(seed), 731]))
     for _ in range(match.opening_moves):
         if state.result is not None:
             break
-        state = state.play(int(opponent_rng.choice(state.legal_actions())))
+        action = int(opponent_rng.choice(state.legal_actions()))
+        state = state.play(action)
+        if opponent is not None:
+            opponent.advance(action)
     ply = match.opening_moves
     totals = dict(completed_simulations=0, neural_positions=0, max_depth=0,
                   hard_pruned_choices=0, soft_rechecks=0, retained_visits=0)
@@ -49,7 +61,7 @@ def play_game(evaluator, simulations, seed, config, leaf_batch, match=None):
         if opponent is not None and state.turn != match.learner_side:
             if opponent_rng.random() < match.epsilon:
                 action = int(opponent_rng.choice(state.legal_actions()))
-                opponent.reset()
+                opponent.advance(action)
             else:
                 action = opponent.choose(state, opponent_rng)
             tree.advance(action)
@@ -65,10 +77,10 @@ def play_game(evaluator, simulations, seed, config, leaf_batch, match=None):
         p = pi.astype(float); p /= p.sum()
         action = int(rng.choice(81, p=p)) if ply < 15 else int(pi.argmax())
         tree.advance(action)
+        if opponent is not None:
+            opponent.advance(action)
         state = state.play(action)
         ply += 1
-    if opponent is not None:
-        opponent.close()
     totals['match'] = asdict(match)
     totals['plies'] = ply
     return trajectory, state.result, totals

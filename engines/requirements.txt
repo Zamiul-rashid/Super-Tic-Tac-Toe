@@ -1,0 +1,3 @@
+onnxruntime==1.30.0
+open_spiel==2.0.2
+tqdm==4.70.1

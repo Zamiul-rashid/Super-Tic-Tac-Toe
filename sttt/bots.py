@@ -1,5 +1,6 @@
 """Uniform Bot subsystem, baseline search bots, external engine adapter, and factory."""
 import abc
+import json
 import math
 import os
 from pathlib import Path
@@ -120,138 +121,42 @@ def _find_action_sequence_to_state(
     return _find_action_sequence(State(), target, max_depth=max_depth, node_budget=node_budget)
 
 
-def sttt_to_openspiel_state(state: State, game=None, actions: list[int] | None = None):
-    """Construct an OpenSpiel ultimate_tic_tac_toe state equivalent to sttt.State."""
+def sttt_to_openspiel_state(state: State, game=None, actions=None):
+    """Replay local moves into official OpenSpiel's board/cell decisions."""
+    from .engine_runtime import activate_runtime
+    activate_runtime()
     import pyspiel
-
     if game is None:
-        game = pyspiel.load_game("ultimate_tic_tac_toe")
-    os_state = game.new_initial_state()
-
-    valid_actions = actions if (actions and _verify_action_sequence(state, actions)) else None
-
-    # Direct attribute manipulation for engines providing _board and _subgames
-    if hasattr(os_state, "_board") and hasattr(os_state, "_subgames"):
-        board = ["."] * 81
-        for sttt_act in range(81):
-            val = state.cells[sttt_act]
-            if val != 0:
-                os_act = sttt_to_openspiel_action(sttt_act)
-                board[os_act] = "x" if val == 1 else "o"
-        os_state._board = board
-
-        subgames = ["."] * 9
-        for b in range(9):
-            b_val = state.boards[b]
-            if b_val == 1:
-                subgames[b] = "x"
-            elif b_val == -1:
-                subgames[b] = "o"
-            elif b_val == 2:
-                subgames[b] = "="
-        os_state._subgames = subgames
-        forced = state.forced if (0 <= state.forced < 9 and state.boards[state.forced] == 0) else -1
-        os_state._forced_subgame = forced
-
-        if state.result is not None:
-            os_state._is_terminal = True
-            os_state._current_player = pyspiel.PlayerId.TERMINAL
-            if state.result == 1:
-                os_state._returns = [1.0, -1.0]
-            elif state.result == -1:
-                os_state._returns = [-1.0, 1.0]
-            else:
-                os_state._returns = [0.0, 0.0]
-        else:
-            os_state._is_terminal = False
-            os_state._current_player = 0 if state.turn == 1 else 1
-            os_state._returns = [0.0, 0.0]
-
-        if valid_actions:
-            os_state._history = [sttt_to_openspiel_action(a) for a in valid_actions]
-        elif state != State():
-            seq = _find_action_sequence_to_state(state, max_depth=8, node_budget=500)
-            if seq is not None:
-                os_state._history = [sttt_to_openspiel_action(a) for a in seq]
-        return os_state
-
-    if state == State():
-        return os_state
-
-    # Fallback for engines without direct attribute access:
-    if valid_actions:
-        for sttt_act in valid_actions:
-            os_state.apply_action(sttt_to_openspiel_action(sttt_act))
-        return os_state
-
-    seq = _find_action_sequence_to_state(state)
-    if seq is not None:
-        for sttt_act in seq:
-            os_state.apply_action(sttt_to_openspiel_action(sttt_act))
-        return os_state
-
-    raise ValueError(
-        f"Cannot reconstruct OpenSpiel state for {state}: "
-        f"engine does not expose internal board attributes and action sequence could not be found."
-    )
+        game = pyspiel.load_game('ultimate_tic_tac_toe')
+    if actions is None:
+        actions = _find_action_sequence_to_state(state, max_depth=8, node_budget=4000)
+    if actions is None or not _verify_action_sequence(state, actions):
+        raise ValueError('Provide a complete legal action history for this position')
+    result = game.new_initial_state()
+    local = State()
+    for action in actions:
+        board, cell = divmod(action, 9)
+        if local.forced < 0:
+            result.apply_action(board)
+        result.apply_action(cell)
+        local = local.play(action)
+    return result
 
 
 def openspiel_to_sttt_state(os_state) -> State:
-    """Convert an OpenSpiel ultimate_tic_tac_toe state to an equivalent sttt.State."""
-    if hasattr(os_state, "_board") and hasattr(os_state, "_subgames"):
-        cells = [0] * 81
-        for os_act in range(81):
-            c = os_state._board[os_act]
-            if c == "x":
-                cells[openspiel_to_sttt_action(os_act)] = 1
-            elif c == "o":
-                cells[openspiel_to_sttt_action(os_act)] = -1
-
-        boards = [0] * 9
-        for b in range(9):
-            s = os_state._subgames[b]
-            if s == "x":
-                boards[b] = 1
-            elif s == "o":
-                boards[b] = -1
-            elif s == "=":
-                boards[b] = 2
-
-        if os_state.is_terminal():
-            rets = os_state.returns()
-            if rets[0] > 0:
-                result = 1
-            elif rets[1] > 0:
-                result = -1
-            else:
-                result = 0
-            turn = 1 if cells.count(1) == cells.count(-1) else -1
-            raw_forced = getattr(os_state, "_forced_subgame", -1)
-        else:
-            result = None
-            turn = 1 if os_state.current_player() == 0 else -1
-            raw_forced = getattr(os_state, "_forced_subgame", -1)
-
-        forced = raw_forced if (0 <= raw_forced < 9 and boards[raw_forced] == 0) else -1
-
-        return State(
-            cells=tuple(cells),
-            boards=tuple(boards),
-            turn=turn,
-            forced=forced,
-            result=result,
-        )
-
-    if hasattr(os_state, "history") and callable(os_state.history):
-        s = State()
-        for os_act in os_state.history():
-            sttt_act = openspiel_to_sttt_action(os_act)
-            s = s.play(sttt_act)
-        return s
-
-    raise ValueError(
-        "Cannot convert OpenSpiel state to sttt.State: missing board attributes and history() method"
-    )
+    """Convert official history, coalescing board selection and cell moves."""
+    local = State()
+    board = None
+    for decision in os_state.history():
+        if local.forced < 0 and board is None:
+            board = decision
+            continue
+        action = (local.forced if local.forced >= 0 else board) * 9 + decision
+        local = local.play(action)
+        board = None
+    if board is not None:
+        raise ValueError('OpenSpiel is between board and cell selection')
+    return local
 
 
 def _lines_value(cells, player, weights):
@@ -391,6 +296,55 @@ class TacticalBot(AlphaBetaBot):
     """Two-ply replies: immediate wins, global-loss avoidance and local threat blocking."""
     def __init__(self, name=None):
         super().__init__(depth=2, node_budget=10000, name=name or "tactical")
+
+
+class ThreatBlockBot(Bot):
+    """Adversarial threat bot prioritizing wins and denying immediate replies.
+
+    This is deliberately different from the value-driven AlphaBeta bot: it
+    first screens every move for an opponent's immediate global win, then
+    ranks the surviving moves by immediate counter-threats and the normal
+    heuristic. Random ties make it useful as a family of blocking variants.
+    """
+
+    def __init__(self, node_budget=12000, name="threat-block"):
+        self.node_budget = int(node_budget)
+        self._name = name
+
+    def _immediate_wins(self, state, player):
+        return [action for action in state.legal_actions()
+                if state.play(action).result == player]
+
+    def choose(self, state, rng):
+        legal = state.legal_actions()
+        if not legal or state.result is not None:
+            raise ValueError("Cannot choose a move in a terminal state")
+
+        wins = self._immediate_wins(state, state.turn)
+        if wins:
+            return int(rng.choice(wins))
+
+        children = [(action, state.play(action)) for action in legal]
+        safe = []
+        for action, child in children:
+            if not self._immediate_wins(child, -state.turn):
+                safe.append((action, child))
+        candidates = safe or children
+
+        scored = []
+        for action, child in candidates:
+            own_threats = sum(
+                [child.boards[i] for i in line].count(state.turn) == 2
+                and [child.boards[i] for i in line].count(0) == 1
+                for line in LINES)
+            opponent_threats = len(self._immediate_wins(child, -state.turn))
+            local_win = child.boards[action // 9] == state.turn
+            score = -value(child) + 0.5 * own_threats - 0.75 * opponent_threats
+            score += 0.2 if local_win else 0.
+            scored.append((score, action))
+        best = max(score for score, _ in scored)
+        ties = [action for score, action in scored if math.isclose(score, best, abs_tol=1e-12)]
+        return int(rng.choice(ties))
 
 
 class StyleBot(Bot):
@@ -572,7 +526,11 @@ class ExternalProcessBot(Bot):
         try:
             opp_action = self._determine_opp_action(state)
 
-            if self.protocol == "codingame":
+            if self.protocol == 'state_json':
+                payload = json.dumps(dict(cells=state.cells, boards=state.boards,
+                                          turn=state.turn, forced=state.forced,
+                                          result=state.result)) + '\n'
+            elif self.protocol == "codingame":
                 opp_r, opp_c = (-1, -1) if opp_action == -1 else action_to_coord(opp_action)
                 payload = f"{opp_r} {opp_c}\n{len(legal)}\n"
                 for a in legal:
@@ -760,143 +718,88 @@ class CheckpointBot(Bot):
 
 
 class OpenSpielBot(Bot):
-    """Adapter wrapping Google DeepMind's OpenSpiel Ultimate Tic-Tac-Toe engine."""
+    """Official OpenSpiel MCTS; budgets are per board/cell decision."""
 
-    def __init__(
-        self,
-        algorithm: str = "mcts",
-        simulations: int = 100,
-        uct_c: float = 1.414,
-        name: str | None = None,
-        seed: int | None = None,
-        **kwargs,
-    ):
+    def __init__(self, algorithm="mcts", simulations=100, uct_c=1.414,
+                 name=None, seed=None, **kwargs):
+        from .engine_runtime import activate_runtime
+        activate_runtime()
         import pyspiel
+        if Path(pyspiel.__file__).suffix == '.py':
+            raise RuntimeError('Official OpenSpiel extension required')
+        if algorithm not in ('mcts', 'random', 'uniform_random'):
+            raise ValueError(f'Unsupported OpenSpiel algorithm: {algorithm}')
+        self.algorithm, self.simulations = algorithm, max(2, int(simulations))
+        self.seed, self.uct_c = seed, uct_c
+        self._name = name or f'openspiel-{algorithm}-{self.simulations}'
+        self.game = pyspiel.load_game('ultimate_tic_tac_toe')
+        self.reset()
 
-        self.algorithm = algorithm.lower().strip()
-        self.simulations = max(1, int(simulations))
-        self.uct_c = float(uct_c)
-        self.seed = seed
-        self._custom_name = name
-
-        self.game = pyspiel.load_game("ultimate_tic_tac_toe")
-        self.os_state = self.game.new_initial_state()
-        self.history: list[int] = []
-        self._init_bot()
-
-    def _init_bot(self) -> None:
+    def reset(self):
         from open_spiel.python.algorithms import mcts
-        from open_spiel.python.bots import uniform_random
-
-        if self.algorithm == "mcts":
-            evaluator = mcts.RandomRolloutEvaluator(n_rollouts=1, random_state=self.seed)
-            self._bot = mcts.MCTSBot(
-                game=self.game,
-                uct_c=self.uct_c,
-                max_simulations=self.simulations,
-                evaluator=evaluator,
-                solve=True,
-                random_state=self.seed,
-            )
-        elif self.algorithm in ("random", "uniform_random"):
-            self._bot = uniform_random.UniformRandomBot(player_id=0, rng=self.seed)
-        else:
-            raise ValueError(f"Unsupported OpenSpiel algorithm: '{self.algorithm}'")
-
-    @property
-    def name(self) -> str:
-        if self._custom_name is not None:
-            return self._custom_name
-        if self.algorithm == "mcts":
-            return f"openspiel-mcts-{self.simulations}"
-        return f"openspiel-{self.algorithm}"
-
-    def reset(self) -> None:
-        """Reset internal OpenSpiel state between games."""
         self.os_state = self.game.new_initial_state()
+        self.local_state = State()
         self.history = []
-        self._init_bot()
+        random_state = np.random.RandomState(self.seed)
+        self._bot = mcts.MCTSBot(
+            self.game, self.uct_c, self.simulations,
+            mcts.RandomRolloutEvaluator(1, random_state=random_state),
+            solve=True, random_state=random_state)
 
-    def advance(self, action: int) -> None:
-        """Advance internal OpenSpiel state with the given sttt action."""
-        if not (0 <= action < 81):
+    def advance(self, action):
+        action = int(action)
+        child = self.local_state.play(action)
+        board, cell = divmod(action, 9)
+        if self.local_state.forced < 0:
+            self.os_state.apply_action(board)
+        self.os_state.apply_action(cell)
+        self.history.append(action)
+        self.local_state = child
+        if self.os_state.is_terminal() != (child.result is not None):
+            raise ValueError('OpenSpiel/local termination mismatch')
+        if child.result is not None and self.os_state.returns()[0] != child.result:
+            raise ValueError('OpenSpiel/local result mismatch')
+
+    def _sync_state(self, state):
+        if state == self.local_state:
             return
-        os_act = sttt_to_openspiel_action(action)
-        if not self.os_state.is_terminal():
-            legal = self.os_state.legal_actions()
-            if os_act in legal:
-                self.os_state.apply_action(os_act)
-                self.history.append(action)
+        sequence = _find_action_sequence(self.local_state, state, max_depth=8, node_budget=4000)
+        if sequence is None:
+            sequence = _find_action_sequence_to_state(state, max_depth=8, node_budget=4000)
+            if sequence is None:
+                raise ValueError('OpenSpiel needs advance() calls or a replayable opening')
+            self.reset()
+        for action in sequence:
+            self.advance(action)
 
-    def _sync_state(self, state: State) -> None:
-        """Ensure internal OpenSpiel state matches the given sttt.State."""
-        curr_sttt = openspiel_to_sttt_state(self.os_state)
-        if curr_sttt == state:
-            return
-
-        if state == State():
-            self.os_state = self.game.new_initial_state()
-            self.history = []
-            return
-
-        # Fast path 1: Check if state is a direct continuation (1 to 4 plies ahead)
-        seq = _find_action_sequence(curr_sttt, state, max_depth=4, node_budget=500)
-        if seq is not None:
-            for sttt_act in seq:
-                os_act = sttt_to_openspiel_action(sttt_act)
-                if not self.os_state.is_terminal() and os_act in self.os_state.legal_actions():
-                    self.os_state.apply_action(os_act)
-                    self.history.append(sttt_act)
-            if openspiel_to_sttt_state(self.os_state) == state:
-                return
-
-        # Fast path 2: Reconstruct from State() using bounded action search (up to 8 plies)
-        seq_from_start = _find_action_sequence_to_state(state, max_depth=8, node_budget=2000)
-        if seq_from_start is not None:
-            self.os_state = self.game.new_initial_state()
-            self.history = []
-            for sttt_act in seq_from_start:
-                os_act = sttt_to_openspiel_action(sttt_act)
-                self.os_state.apply_action(os_act)
-                self.history.append(sttt_act)
-            return
-
-        # Fallback: construct state directly without passing unverified/stale history
-        valid_actions = self.history if _verify_action_sequence(state, self.history) else None
-        self.os_state = sttt_to_openspiel_state(state, self.game, actions=valid_actions)
-        self.history = list(valid_actions) if valid_actions is not None else []
-
-    def choose(self, state: State, rng: np.random.Generator | None = None) -> int:
-        """Select a legal action (0..80) for the current state."""
+    def choose(self, state, rng=None):
         if state.result is not None:
-            raise ValueError(f"Bot '{self.name}' cannot choose from terminal state")
-
-        if rng is None:
-            rng = np.random.default_rng()
-
+            raise ValueError('Cannot choose from a terminal state')
+        rng = rng if rng is not None else np.random.default_rng(self.seed)
         self._sync_state(state)
+        if self.seed is None:
+            random_state = np.random.RandomState(int(rng.integers(2**31 - 1)))
+            self._bot.random_state = random_state
+            self._bot.evaluator.random_state = random_state
+        work = self.os_state.clone()
 
-        legal_os = self.os_state.legal_actions()
-        if not legal_os:
-            raise ValueError(f"No legal actions available in OpenSpiel state for '{self.name}'")
+        def decision():
+            if self.algorithm != 'mcts':
+                return int(rng.choice(work.legal_actions()))
+            return int(self._bot.step(work))
 
-        if self.algorithm in ("random", "uniform_random"):
-            idx = int(rng.integers(0, len(legal_os)))
-            os_act = legal_os[idx]
-        else:
-            if self.seed is None and rng is not None:
-                self._bot.random_state = rng
-                if hasattr(self._bot, "evaluator"):
-                    self._bot.evaluator.random_state = rng
-            os_act = self._bot.step(self.os_state)
+        board = state.forced
+        if board < 0:
+            board = decision()
+            work.apply_action(board)
+        cell = decision()
+        action = 9 * board + cell
+        if action not in state.legal_actions():
+            raise ValueError('OpenSpiel returned an illegal move')
+        self.advance(action)
+        return action
 
-        self.os_state.apply_action(os_act)
-        sttt_act = openspiel_to_sttt_action(os_act)
-        self.history.append(sttt_act)
-        return sttt_act
-
-    def close(self) -> None:
-        """Release resources."""
+    def close(self):
         self._bot = None
         self.os_state = None
 
@@ -907,6 +810,7 @@ def create_bot(spec: str | Bot, **kwargs) -> Bot:
     Supported specifications:
       - Existing Bot instance: returned as-is.
       - 'tactical': TacticalBot(**kwargs)
+      - 'threat' or 'threat-block': ThreatBlockBot(**kwargs)
       - 'alphabeta': AlphaBetaBot(depth=kwargs.get('depth', 3), node_budget=kwargs.get('node_budget', 3000), ...)
       - 'alphabeta:<depth>': AlphaBetaBot with specified depth
       - 'openspiel-mcts': OpenSpielBot(algorithm='mcts', simulations=kwargs.get('simulations', 100), ...)
@@ -929,6 +833,10 @@ def create_bot(spec: str | Bot, **kwargs) -> Bot:
     s = spec.strip()
     if s == "tactical":
         return TacticalBot(name=kwargs.get("name"))
+
+    if s in ("threat", "threat-block"):
+        return ThreatBlockBot(node_budget=kwargs.get("node_budget", 12000),
+                              name=kwargs.get("name", "threat-block"))
 
     if s == "alphabeta":
         depth = kwargs.get("depth", 3)

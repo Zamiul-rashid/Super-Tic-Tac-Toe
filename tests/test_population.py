@@ -7,7 +7,9 @@ from sttt.env import State
 from sttt.learning import Network, encode
 from sttt.search import SearchConfig
 from sttt.selfplay import SelfPlayPool, play_game
-from sttt.population import MatchSpec, sample_match, SYMMETRIES, augment_batch
+from sttt.population import (MatchSpec, POPULATION_WEIGHTS, augment_batch,
+                              population_quota_counts, sample_match, sample_matches,
+                              SYMMETRIES)
 
 
 class PopulationTests(unittest.TestCase):
@@ -22,10 +24,34 @@ class PopulationTests(unittest.TestCase):
             self.assertNotIn('history', {s.kind for s in specs})
             Path(directory, 'model-0001.pt').touch()
             specs = [sample_match(i, directory) for i in range(1000)]
-            self.assertEqual({s.kind for s in specs}, {'self', 'history', 'alphabeta', 'tactical', 'style'})
+            self.assertEqual({s.kind for s in specs},
+                             {'self', 'history', 'alphabeta', 'tactical', 'threat',
+                              'openspiel', 'utttai', 'style'})
             self.assertEqual({s.learner_side for s in specs}, {-1, 1})
-            self.assertEqual({s.depth for s in specs}, {1, 2, 3, 4})
+            self.assertEqual({s.depth for s in specs}, {1, 2, 3, 4, 5})
             self.assertTrue(all(s.checkpoint.endswith('model-0001.pt') for s in specs if s.kind == 'history'))
+
+    def test_iteration_schedule_has_meaningful_quotas(self):
+        with tempfile.TemporaryDirectory() as directory:
+            Path(directory, 'model-0001.pt').touch()
+            Path(directory, 'best.pt').touch()
+            config = {'utttai': {'command': ['wrapper', '--simulations', '{simulations}'],
+                                 'protocol': 'action_index', 'timeout': 5.}}
+            matches = sample_matches(range(16), directory, config)
+            counts = {kind: sum(match.kind == kind for match in matches)
+                      for kind in POPULATION_WEIGHTS}
+            self.assertEqual(counts, population_quota_counts(16))
+            totals = dict.fromkeys(POPULATION_WEIGHTS, 0)
+            for offset in range(0, 400, 16):
+                for kind, count in population_quota_counts(16, offset).items():
+                    totals[kind] += count
+            self.assertEqual(totals, {kind: round(400 * weight)
+                                     for kind, weight in POPULATION_WEIGHTS.items()})
+            self.assertTrue(all(match.opening_moves == 0 for match in matches if match.kind == 'utttai'))
+            self.assertTrue(all(any('{simulations}' in part for part in match.engine_command)
+                                for match in matches if match.kind == 'utttai'))
+            self.assertTrue(all(match.simulations in {64, 128, 256}
+                                for match in matches if match.kind == 'utttai'))
 
     def test_external_turns_never_become_policy_targets(self):
         model = Network().eval()

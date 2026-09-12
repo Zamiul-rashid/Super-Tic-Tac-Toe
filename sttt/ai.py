@@ -1,6 +1,6 @@
 """Run with python -m sttt.ai train|play|evaluate|tournament."""
 import argparse
-from collections import deque
+from collections import Counter, deque
 from dataclasses import asdict
 import json
 from pathlib import Path
@@ -12,7 +12,7 @@ from .learning import ResNet, create_model, encode, load_model
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
-from .population import sample_match, augment_batch
+from .population import sample_matches, augment_batch
 from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
@@ -57,23 +57,53 @@ def train(args):
     replay = deque(saved.get('replay', []), maxlen=args.buffer)
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
+    engine_registry = load_engine_registry(args.engine_config) if getattr(args, 'engine_config', None) else {}
+    if getattr(args, 'population', False):
+        from .engine_runtime import activate_runtime
+        activate_runtime()
+        if not engine_registry.get('utttai') and not engine_registry.get('utttai-low'):
+            raise ValueError("Population league requires --engine-config with an 'utttai' or 'utttai-low' entry")
+        if not any('{simulations}' in part for part in _utttai_command_parts(engine_registry)):
+            raise ValueError("The configured uttt.ai command must include the {simulations} placeholder")
+        try:
+            import pyspiel  # noqa: F401
+        except ImportError as exc:
+            raise RuntimeError('Population league requires the pyspiel OpenSpiel package') from exc
+        if Path(pyspiel.__file__).suffix == '.py':
+            raise RuntimeError('Official compiled OpenSpiel is required; install engines/requirements.txt')
+        # Exercise the real wrapper before launching search workers.
+        from .population import make_opponent, sample_match
+        probe = make_opponent(sample_match(args.seed, engine_registry=engine_registry, kind='utttai'))
+        try:
+            probe.choose(State(), np.random.default_rng(args.seed))
+        finally:
+            probe.close()
     print(f'{device}: {sum(p.numel() for p in model.parameters()):,} parameters ({arch}); workers={args.workers}; replay stays in RAM', flush=True)
     with SelfPlayPool(min(args.workers, args.games), args.inference_batch, args.inference_wait_ms) as pool:
-        _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool)
+        _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool, engine_registry)
 
 
-def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool):
+def _utttai_command_parts(engine_registry):
+    config = (engine_registry or {}).get('utttai') or (engine_registry or {}).get('utttai-low') or {}
+    command = config.get('command', ())
+    return command.split() if isinstance(command, str) else tuple(command)
+
+
+def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool, engine_registry=None):
     start_iteration = saved.get('iteration', 0)
+    population_games = saved.get('population_games', 0)
     for iteration in range(start_iteration + 1, start_iteration + args.iterations + 1):
         started = time.monotonic()
         seeds = rng.integers(0, 10**9, size=args.games)
         matches = None
         if getattr(args, 'population', False):
             history = getattr(args, 'population_checkpoints', None) or str(output)
-            matches = [sample_match(seed, history) for seed in seeds]
+            matches = sample_matches(seeds, history, engine_registry, offset=population_games)
         results, inference_stats = pool.run(model, seeds, args.simulations, search_config(args), args.leaf_batch,
                                            matches=matches)
         selfplay_seconds = time.monotonic() - started
+        if matches is not None:
+            population_games += len(matches)
         for game_idx, (trajectory, outcome, stats) in enumerate(results):
             for state, pi in trajectory:
                 mask = np.zeros(81, dtype=bool)
@@ -103,7 +133,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         checkpoint = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(),
                       'iteration': iteration, 'replay': list(replay), 'arch': arch,
                       'training_config': vars(args), 'search_config': asdict(search_config(args)),
-                      'numpy_rng_state': rng.bit_generator.state}
+                      'numpy_rng_state': rng.bit_generator.state,
+                      'population_games': population_games}
         temporary = output / 'latest.tmp'
         torch.save(checkpoint, temporary)
         temporary.replace(output / 'latest.pt')
@@ -118,6 +149,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                   'games': args.games, 'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
                   'search_config': asdict(search_config(args)), **inference_stats,
                   'population_matches': [r[2]['match'] for r in results],
+                  'population_match_counts': dict(Counter(r[2]['match']['kind'] for r in results)),
                   'completed_simulations': sum(r[2]['completed_simulations'] for r in results),
                   'max_search_depth': max(r[2]['max_depth'] for r in results),
                   'soft_rechecks': sum(r[2]['soft_rechecks'] for r in results),
@@ -410,9 +442,11 @@ def main():
     t.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     t.add_argument('--output', default='runs/default')
     t.add_argument('--resume')
-    t.add_argument('--population', action='store_true', help='Randomized self-play, history and bot mixture')
+    t.add_argument('--population', action='store_true', help='Quota-controlled league of self-play and strong opponents')
     t.add_argument('--augment-symmetry', action='store_true', help='Random rotations/reflections of training positions')
-    t.add_argument('--population-checkpoints', help='Directory of frozen model-*.pt opponents; defaults to output')
+    t.add_argument('--population-checkpoints', help='Directory of frozen model-*.pt and best.pt opponents; defaults to output')
+    t.add_argument('--engine-config', default=str(Path(__file__).resolve().parent.parent / 'engines/registry.json'),
+                   help='JSON registry (defaults to bundled uttt.ai wrapper)')
     t.add_argument('--inference-batch', type=positive, default=128,
                    help='Maximum positions evaluated together by the inference owner')
     t.add_argument('--inference-wait-ms', type=float, default=2.,

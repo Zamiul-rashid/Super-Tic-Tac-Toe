@@ -14,6 +14,7 @@ from sttt.bots import (
     Bot,
     AlphaBetaBot,
     TacticalBot,
+    ThreatBlockBot,
     StyleBot,
     ExternalProcessBot,
     CheckpointBot,
@@ -79,6 +80,10 @@ class BotTests(unittest.TestCase):
         ab_default = AlphaBetaBot(depth=3)
         self.assertEqual(ab_default.name, "alphabeta-d3")
 
+        threat = ThreatBlockBot(node_budget=500)
+        self.assertIsInstance(threat, Bot)
+        self.assertIn(threat.choose(State(), self.rng), State().legal_actions())
+
         state = State()
         action_t = tactical.choose(state, self.rng)
         self.assertIn(action_t, state.legal_actions())
@@ -96,6 +101,8 @@ class BotTests(unittest.TestCase):
             tactical.choose(s, self.rng)
         with self.assertRaises(ValueError):
             ab.choose(s, self.rng)
+        with self.assertRaises(ValueError):
+            threat.choose(s, self.rng)
 
     def test_style_bot_all_policies(self):
         styles = ('random', 'center', 'corners', 'local-win', 'global-win')
@@ -371,6 +378,9 @@ class BotTests(unittest.TestCase):
         # Tactical
         bot = create_bot("tactical")
         self.assertIsInstance(bot, TacticalBot)
+
+        bot_threat = create_bot("threat")
+        self.assertIsInstance(bot_threat, ThreatBlockBot)
 
         # AlphaBeta
         bot_ab = create_bot("alphabeta", depth=4)
