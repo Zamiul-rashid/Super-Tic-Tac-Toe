@@ -110,6 +110,7 @@ def _utttai_command_parts(engine_registry):
 def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool, engine_registry=None):
     start_iteration = saved.get('iteration', 0)
     population_games = saved.get('population_games', 0)
+    for iteration in range(start_iteration + 1, start_iteration + args.iterations + 1):
     max_iter = getattr(args, 'max_iterations', None)
     end_iteration = min(start_iteration + args.iterations, max_iter) if max_iter else (start_iteration + args.iterations)
     for iteration in range(start_iteration + 1, end_iteration + 1):
