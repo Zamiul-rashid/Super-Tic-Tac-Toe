@@ -702,6 +702,20 @@ class CheckpointBot(Bot):
         if not legal:
             raise ValueError("Cannot choose a move in a terminal state")
 
+        try:
+            from .cpp_env import CppTreeSearch, is_cpp_available
+            _HAS_CPP = is_cpp_available()
+        except ImportError:
+            _HAS_CPP = False
+
+        if _HAS_CPP:
+            if self.tree is None:
+                self.tree = CppTreeSearch(self.model, rng=rng, config=self.config)
+            pi = self.tree.run(state, self.simulations, batch_size=self.leaf_batch)
+            action = int(pi.argmax())
+            self.tree.advance(action)
+            return action
+
         if self.tree is None or self.tree.root is None or self.tree.root.state != state:
             matched = False
             if self.tree is not None and self.tree.root is not None:
