@@ -99,5 +99,34 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(float(p.sum()), 1.0, places=5)
         self.assertTrue(-1.0 <= v <= 1.0)
 
+    def test_checkpoint_pruning_window(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = Path(tmpdir)
+            (out / "best.pt").touch()
+            (out / "latest.pt").touch()
+            for it in (50, 100, 200, 500, 550):
+                (out / f"model-{it:04d}.pt").touch()
+
+            # Prune at iteration 550 with window 500 (cutoff 50: model-0050.pt deleted)
+            cutoff = 550 - 500
+            for old_model in out.glob("model-*.pt"):
+                try:
+                    old_it = int(old_model.stem.split("-")[1])
+                    if old_it <= cutoff:
+                        old_model.unlink(missing_ok=True)
+                except (ValueError, IndexError):
+                    pass
+
+            remaining = {f.name for f in out.iterdir()}
+            self.assertIn("best.pt", remaining)
+            self.assertIn("latest.pt", remaining)
+            self.assertNotIn("model-0050.pt", remaining)
+            self.assertIn("model-0100.pt", remaining)
+            self.assertIn("model-0550.pt", remaining)
+
+
 if __name__ == '__main__':
     unittest.main()
+

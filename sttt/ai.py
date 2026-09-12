@@ -187,6 +187,16 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             snapshot = output / f'model-{iteration:04d}.pt'
             torch.save({'model': model.state_dict(), 'iteration': iteration, 'arch': arch}, snapshot.with_suffix('.tmp'))
             snapshot.with_suffix('.tmp').replace(snapshot)
+            max_age = getattr(args, 'keep_checkpoint_window', 500)
+            if max_age and max_age > 0:
+                cutoff = iteration - max_age
+                for old_model in output.glob('model-*.pt'):
+                    try:
+                        old_iter = int(old_model.stem.split('-')[1])
+                        if old_iter <= cutoff:
+                            old_model.unlink(missing_ok=True)
+                    except (ValueError, IndexError):
+                        pass
         report = {'iteration': iteration, 'positions': len(replay), 'loss': float(np.mean(losses)),
                   'seconds': round(time.monotonic() - started, 2), 'selfplay_seconds': selfplay_seconds,
                   'games': args.games, 'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
@@ -498,6 +508,8 @@ def main():
     t.add_argument('--inference-wait-ms', type=float, default=2.,
                    help='Maximum wait for other workers to fill an inference batch')
     t.add_argument('--save-every', type=int, default=100, help='Save snapshot model checkpoint every N iterations; 0 disables')
+    t.add_argument('--keep-checkpoint-window', type=int, default=500,
+                   help='Prune model-*.pt snapshots older than N iterations; 0 disables')
     t.add_argument('--eval-every', type=int, default=0, help='Evaluate every N iterations; 0 disables')
     t.add_argument('--eval-games', type=positive, default=20)
     t.add_argument('--eval-simulations', type=positive, default=512)

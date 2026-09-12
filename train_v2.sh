@@ -17,7 +17,13 @@ echo "Population: 25% utttai (2320 Elo), 25% Alpha-Beta (d3-d8), 30% Self-Play"
 echo "Buffer: 200,000 | Batch: 512 | Simulations: 512 | Workers: 8"
 echo "=========================================================================="
 
+RESUME_ARG=""
+if [[ -f runs/run_v2/latest.pt ]]; then
+  RESUME_ARG="--resume runs/run_v2/latest.pt"
+fi
+
 /home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -u -m sttt.ai train \
+  $RESUME_ARG \
   --output runs/run_v2 \
   --device cuda \
   --backend cpp \
@@ -33,6 +39,7 @@ echo "==========================================================================
   --inference-batch 512 \
   --inference-wait-ms 2 \
   --save-every 50 \
+  --keep-checkpoint-window 500 \
   --eval-every 100 \
   --eval-games 20 \
   --eval-simulations 512 \
