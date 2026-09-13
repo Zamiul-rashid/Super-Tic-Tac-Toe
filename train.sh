@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Continue training from an existing FULL checkpoint with a cosine learning-rate
-# schedule, FP16 AMP on CUDA and the native search backend.
+# Canonical training launcher. Resumes a FULL checkpoint with the cosine
+# learning-rate schedule, FP16 AMP on CUDA and the native search backend.
+# train_v2.sh and the run_v2/run_v3 naming are deprecated; this is the one
+# production command. The readiness pilot gate runs this same script.
 #
-#   scripts/launch_continuation.sh <checkpoint> <new-output-dir> [population-config.json]
+#   train.sh <checkpoint> <output-dir> [population-config.json]
 #
 # Every setting below is explicit. The launcher freezes an immutable copy of the
 # source checkpoint into the output directory and resumes from THAT copy, so a
@@ -18,7 +20,7 @@
 #
 # Environment overrides:
 #   STTT_PY     interpreter (default: python on PATH)
-#   WORKERS     self-play worker processes (default 4; raise on a desktop CPU)
+#   WORKERS     self-play worker processes (default 10)
 #   ITERATIONS  additional iterations to run (default 5000)
 #   LR_HORIZON  cosine horizon in completed iterations (default = ITERATIONS)
 set -euo pipefail
@@ -31,10 +33,10 @@ SRC_CKPT=$1
 OUTPUT=$2
 POP_CONFIG=${3:-configs/population/baseline.json}
 
-REPO=$(cd "$(dirname "$0")/.." && pwd)
+REPO=$(cd "$(dirname "$0")" && pwd)
 cd "$REPO"
 PY=${STTT_PY:-python}
-WORKERS=${WORKERS:-4}
+WORKERS=${WORKERS:-10}
 ITERATIONS=${ITERATIONS:-5000}
 LR_HORIZON=${LR_HORIZON:-$ITERATIONS}
 
@@ -59,7 +61,7 @@ PYEOF
 )
 
 echo "=========================================================================="
-echo " CONTINUATION: cosine LR, FP16 AMP, CUDA, native search"
+echo " TRAINING: cosine LR, FP16 AMP, CUDA, native search"
 echo "   start checkpoint : $FROZEN"
 echo "   output           : $OUTPUT"
 echo "   population config: $POP_CONFIG"

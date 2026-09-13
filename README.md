@@ -19,6 +19,24 @@ python -m pip install -e . --no-deps
 python -m unittest discover -s tests -v
 ```
 
+### Training (canonical launcher)
+
+`./train.sh <checkpoint> <output-dir> [population-config.json]` is the one
+production command: it freezes an immutable copy of the start checkpoint,
+resumes it on CUDA with FP16 AMP, the native search backend and the cosine
+learning-rate schedule, uses the population curriculum from
+`configs/population/*.json` (default `baseline.json`, 10 workers), prints its
+effective configuration and refuses an output directory that already holds a
+run. `train_v2.sh` and the `run_v2`/`run_v3` naming are deprecated; existing
+`runs/run_v2` and `runs/big_run` are historical inputs, never outputs.
+
+Before a long run, certify the environment with the staged readiness runner
+(`scripts/check_training_ready.py`, stages build/native/cpu/mixed/failure on
+CPU, gpu/memory/pilot on CUDA). The pilot stage runs `train.sh` itself for
+20 measured iterations and writes the ETA; that ETA, not a fixed speed-up
+claim, is the runtime estimate. `TRAINING_READINESS_PLAN.md` is the canonical
+checklist and result ledger.
+
 ### High-Performance C++ Bitboard Engine
 
 Build the native C++ extension for hardware-accelerated bitboard rules, MCTS search, and batch encoding:

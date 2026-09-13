@@ -1,25 +1,32 @@
 # Population league
 
-The next league uses a balanced 100-game cycle:
+The curriculum is versioned configuration: `configs/population/baseline.json`
+is the source of truth for quotas and budgets, and every checkpoint and metrics
+row records the config's name and sha256. The table below is `baseline.json`;
+if it disagrees with the file, the file wins. `candidate-utttai35.json` raises
+uttt.ai to 35 and lowers AlphaBeta to 15 with everything else identical.
 
-| Opponent | Games per 100 | Budget |
+| Family | Games per 100 | Budget (baseline.json) |
 | --- | ---: | --- |
-| Self-play | 35 | Learner --simulations |
-| Older checkpoints | 15 | 128/256/512 simulations |
+| Self-play | 30 | Learner --simulations |
+| uttt.ai stage-2 ONNX + official NMCTS | 25 | 64/128/256 per move; move noise epsilon 0–0.02 |
+| AlphaBeta | 25 | Depth 3–8; 100k/250k/500k nodes |
+| Older checkpoints | 10 | 128/256/512 simulations |
 | best.pt | 5 | 128/256/512 simulations |
-| AlphaBeta | 8 | Depth 3–5; 6k/12k/24k nodes |
-| Tactical variants | 4 | 6k/10k/16k nodes, randomized moves |
-| Threat/blocking | 3 | Immediate-win/loss screening and threat ranking |
-| Official OpenSpiel MCTS | 15 | 128/256/512/1024 per decision |
-| uttt.ai stage-2 ONNX + official NMCTS | 10 | 64/128/256 per move |
-| Behavioral styles | 5 | Randomized policy and move noise |
+| Tactical variants | 2 | Depth 2; 6k/10k/16k nodes; epsilon 0–0.12 |
+| Official OpenSpiel MCTS | 1 | 128/256/512/1024 per decision |
+| Threat/blocking | 1 | Depth 2; 6k/12k/24k nodes |
+| Behavioral styles | 1 | Randomized policy and move noise |
 
-The aggregate mix is 35% self, 20% history/best, 15% tactical/AlphaBeta/threat,
-15% OpenSpiel, 10% uttt.ai and 5% styles. Counts span iteration boundaries:
-a 16-game iteration approximates the mix, and every 100 scheduled games has
-the exact proportions. The schedule cursor is saved as `population_games`
-in latest.pt and restored on resume. Game order, seat, openings and variants
-are seeded. A family's quota is not an independent random draw.
+Quotas are exact per 100 scheduled games and span iteration boundaries: a
+16-game iteration approximates the mix. The schedule cursor is saved as
+`population_games` in latest.pt and restored on resume; changing the config
+(a new sha256) starts a new phase and resets the cursor, and the checkpoint
+keeps the phase history. Game order, seat, openings and variants are seeded.
+A family's quota is not an independent random draw. Metrics record both the
+requested family (`population_requested_counts`) and the family actually
+played (`population_match_counts`), so a substitution (for example a history
+slot played as self-play because no snapshot exists yet) is visible.
 
 Historical opponents come from frozen model-*.pt files. Following checkpoint
 cleanup, the history quota uses best.pt until new snapshots are available.

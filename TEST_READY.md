@@ -1,9 +1,16 @@
 # Super-Tic-Tac-Toe: E2E Test Suite Readiness Certification (`TEST_READY.md`)
 
+> **Historical (2026-09-14 note).** Test counts and results in this document are
+> from the `testing` branch at the time of writing (122 tests). The suite is now
+> 533 tests; run it with `"$STTT_PY" -m unittest discover -s tests` where
+> `STTT_PY=/home/mt/miniconda3/envs/sttt/bin/python` (see
+> `TRAINING_READINESS_PLAN.md` §6). `test_f20_git_branch_isolation` passes only
+> on `main`, `testing` and `cpp` by construction.
+
 **Date**: 2026-09-10T19:33:00Z  
 **Branch**: `testing`  
 **Author**: E2E Test Writer (`teamwork_preview_test_writer_e2e`)  
-**Harness**: Python `unittest` (`/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest`)  
+**Harness**: Python `unittest` (`"$STTT_PY" -m unittest`)  
 **Status**: **CERTIFIED READY**
 
 ---
@@ -23,7 +30,7 @@ All 20 features (F1–F20) cataloged in `PROJECT.md` are rigorously covered with
 
 ## 2. Test Execution Verification
 
-- **Command**: `/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest discover -v tests`
+- **Command**: `"$STTT_PY" -m unittest discover -v tests`
 - **Total Test Cases**: **122 tests**
 - **Active Tests Executed & Passed**: **78 passed, 0 failures, 0 errors**
 - **Milestone-Gated Tests (Queued for M2/M4)**: **44 skipped via progressive capability detection**
@@ -77,19 +84,19 @@ Once Milestone M2 and M4 workers commit their respective modules, no modificatio
 
 To run the complete verified test suite:
 ```bash
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest discover -v tests
+"$STTT_PY" -m unittest discover -v tests
 ```
 
 To run only the E2E tournament suite:
 ```bash
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests/test_e2e_tournament.py
+"$STTT_PY" -m unittest -v tests/test_e2e_tournament.py
 ```
 
 To run individual tiers:
 ```bash
 # Tier 1 Bot & External Process tests
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier1BotInterface tests.test_e2e_tournament.TestTier1ExternalProcessBot
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier1BotInterface tests.test_e2e_tournament.TestTier1ExternalProcessBot
 
 # Tier 2 Boundary tests
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier2ExternalProcessEdgeCases tests.test_e2e_tournament.TestTier2CrashAndCorruptOutput
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier2ExternalProcessEdgeCases tests.test_e2e_tournament.TestTier2CrashAndCorruptOutput
 ```

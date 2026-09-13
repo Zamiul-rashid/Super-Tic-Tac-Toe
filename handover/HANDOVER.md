@@ -1,5 +1,19 @@
 # Super Tic-Tac-Toe: Project Handover & Engineering Documentation
 
+> **Status, 2026-09-14 (M11 reconciliation).** Everything below this note is
+> historical: it describes the `cpp` and `testing` branches as of September 12.
+> The canonical checklist and result ledger is `TRAINING_READINESS_PLAN.md`;
+> the canonical launcher is `./train.sh` (`train_v2.sh` is deprecated). Claims
+> below that are superseded by measurement: the `encode_batch` 8.6M states/s
+> figure was taken on one cached state and is not zero-copy in the pipeline
+> (5.54M states/s on varied positions, see `BENCHMARK_REPORT.md`); the
+> "~15x–20x self-play speed-up, hours rather than days" forecast is withdrawn
+> (measured end-to-end pipeline speed-up is 1.71x; runtime comes from the
+> readiness pilot ETA); the 258-test count and the 87.5% / 1812.9 Elo
+> tournament result are the numbers at commit `bc63578`, not current
+> measurements. The interpreter path is `/home/mt/miniconda3/envs/sttt/bin/python`
+> on this machine (see the plan §6).
+
 **Date:** September 12, 2026
 **Active Development Branches:**
 

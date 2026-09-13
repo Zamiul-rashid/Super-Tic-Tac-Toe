@@ -1,9 +1,16 @@
 # Super-Tic-Tac-Toe: Test Infrastructure Specification
 
+> **Historical (2026-09-14 note).** Test counts and results in this document are
+> from the `testing` branch at the time of writing (122 tests). The suite is now
+> 533 tests; run it with `"$STTT_PY" -m unittest discover -s tests` where
+> `STTT_PY=/home/mt/miniconda3/envs/sttt/bin/python` (see
+> `TRAINING_READINESS_PLAN.md` §6). `test_f20_git_branch_isolation` passes only
+> on `main`, `testing` and `cpp` by construction.
+
 **Document Version**: 1.0.0  
 **Author**: E2E Test Writer  
 **Target Branch**: `testing`  
-**Test Harness**: Python `unittest` (`/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest`)  
+**Test Harness**: Python `unittest` (`"$STTT_PY" -m unittest`)  
 **Scope**: Full Test Suite Architecture, Feature Inventory Mapping, and Quality Assurance Gateways
 
 ---
@@ -145,31 +152,31 @@ The E2E test suite in `tests/test_e2e_tournament.py` is organized into a 4-tier 
 
 ### 5.1 Run Full Test Suite
 ```bash
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest discover -v tests
+"$STTT_PY" -m unittest discover -v tests
 ```
 
 ### 5.2 Run E2E Tournament Suite Only
 ```bash
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests/test_e2e_tournament.py
+"$STTT_PY" -m unittest -v tests/test_e2e_tournament.py
 ```
 
 ### 5.3 Run by Specific Tier
 ```bash
 # Run Tier 1 Feature Coverage
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier1BotInterface
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier1ExternalProcessBot
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier1TournamentPairing
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier1BayesianElo
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier1Glicko2
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier1BotInterface
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier1ExternalProcessBot
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier1TournamentPairing
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier1BayesianElo
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier1Glicko2
 
 # Run Tier 2 Boundary & Corner Cases
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier2ExternalProcessEdgeCases
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier2PairingBoundaries
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier2RatingBoundaries
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier2ExternalProcessEdgeCases
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier2PairingBoundaries
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier2RatingBoundaries
 
 # Run Tier 3 Cross-Feature Combinations
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier3CrossFeatureCombinations
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier3CrossFeatureCombinations
 
 # Run Tier 4 Real-World Application Scenarios
-/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python -m unittest -v tests.test_e2e_tournament.TestTier4RealWorldScenarios
+"$STTT_PY" -m unittest -v tests.test_e2e_tournament.TestTier4RealWorldScenarios
 ```
