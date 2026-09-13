@@ -1,6 +1,8 @@
 """Seeded, quota-controlled opponent diversity for population training."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+import hashlib
+import json
 import shlex
 import numpy as np
 
@@ -40,12 +42,126 @@ POPULATION_WEIGHTS = {
 }
 
 
-def population_quota_counts(games: int, offset: int = 0) -> dict[str, int]:
+FAMILIES = tuple(POPULATION_WEIGHTS)
+
+# M6: the per-family budget and noise ranges sample_match used to hold as
+# literals. These defaults reproduce the previous sampler exactly; a JSON
+# population config may override any of them per family.
+DEFAULT_FAMILY_SETTINGS = {
+    'self': {},
+    'alphabeta': {'depth': [3, 4, 5, 6, 7, 8], 'nodes': [100000, 250000, 500000],
+                  'epsilon': [0., .02], 'simulations': [128, 256, 512]},
+    'tactical': {'depth': [2], 'nodes': [6000, 10000, 16000], 'epsilon': [0., .12],
+                 'simulations': [128, 256, 512]},
+    'threat': {'depth': [2], 'nodes': [6000, 12000, 24000], 'epsilon': [0., .08],
+               'simulations': [128, 256, 512]},
+    'history': {'depth': [3], 'nodes': [0], 'epsilon': [0., .03], 'simulations': [128, 256, 512]},
+    'best': {'depth': [3], 'nodes': [0], 'epsilon': [0., .03], 'simulations': [128, 256, 512]},
+    'openspiel': {'depth': [3], 'nodes': [0], 'epsilon': [0., .03],
+                  'simulations': [128, 256, 512, 1024]},
+    # Kept materially cheaper than the learner's 512 simulations.
+    'utttai': {'depth': [3], 'nodes': [0], 'epsilon': [0., .02], 'simulations': [64, 128, 256]},
+    'style': {'depth': [1], 'nodes': [0], 'epsilon': [0., .12], 'simulations': [128, 256, 512]},
+}
+_BUDGET_KEYS = ('depth', 'nodes', 'simulations')
+POPULATION_CONFIG_VERSION = 1
+
+
+@dataclass
+class PopulationConfig:
+    """Versioned curriculum: integer quotas summing to 100 plus per-family ranges."""
+    quotas: dict
+    families: dict = field(default_factory=dict)
+    name: str = 'baseline'
+    version: int = POPULATION_CONFIG_VERSION
+
+    def __post_init__(self):
+        self.quotas = {k: v for k, v in self.quotas.items()}
+        merged = {}
+        for family in FAMILIES:
+            merged[family] = {**DEFAULT_FAMILY_SETTINGS[family], **(self.families.get(family) or {})}
+        unknown = set(self.families) - set(FAMILIES)
+        if unknown:
+            raise ValueError(f'Unknown population families in settings: {sorted(unknown)}')
+        self.families = merged
+        self.validate()
+
+    def validate(self):
+        if self.version != POPULATION_CONFIG_VERSION:
+            raise ValueError(f'Unsupported population config version {self.version!r}; '
+                             f'expected {POPULATION_CONFIG_VERSION}')
+        unknown = set(self.quotas) - set(FAMILIES)
+        if unknown:
+            raise ValueError(f'Unknown population families: {sorted(unknown)}')
+        for family, quota in self.quotas.items():
+            if isinstance(quota, bool) or not isinstance(quota, int):
+                raise ValueError(f'Quota for {family!r} must be an integer, got {quota!r}')
+            if quota < 0:
+                raise ValueError(f'Quota for {family!r} is negative: {quota}')
+        total = sum(self.quotas.values())
+        if total != 100:
+            raise ValueError(f'Population quotas must sum to 100, got {total}')
+        for family, settings in self.families.items():
+            for key in _BUDGET_KEYS:
+                values = settings.get(key)
+                if values is None:
+                    continue
+                if not isinstance(values, list) or not values:
+                    raise ValueError(f'{family}.{key} must be a non-empty list, got {values!r}')
+                floor = 0 if key == 'nodes' else 1
+                for value in values:
+                    if isinstance(value, bool) or not isinstance(value, int) or value < floor:
+                        raise ValueError(f'{family}.{key} contains an invalid budget {value!r} '
+                                         f'(integers >= {floor} required)')
+            epsilon = settings.get('epsilon')
+            if epsilon is not None:
+                ok = (isinstance(epsilon, list) and len(epsilon) == 2
+                      and all(isinstance(e, (int, float)) and not isinstance(e, bool) for e in epsilon)
+                      and 0. <= epsilon[0] <= epsilon[1] <= 1.)
+                if not ok:
+                    raise ValueError(f'{family}.epsilon must be [low, high] within [0, 1], got {epsilon!r}')
+
+    def weights(self) -> dict:
+        return {family: self.quotas.get(family, 0) / 100. for family in FAMILIES}
+
+    def to_dict(self) -> dict:
+        return {'version': self.version, 'name': self.name,
+                'quotas': {family: int(self.quotas.get(family, 0)) for family in FAMILIES},
+                'families': {family: dict(self.families[family]) for family in FAMILIES}}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'PopulationConfig':
+        if not isinstance(data, dict) or 'quotas' not in data:
+            raise ValueError("Population config must be an object with a 'quotas' field")
+        return cls(quotas=data['quotas'], families=data.get('families') or {},
+                   name=str(data.get('name', 'unnamed')),
+                   version=data.get('version', POPULATION_CONFIG_VERSION))
+
+    @property
+    def sha256(self) -> str:
+        canonical = json.dumps(self.to_dict(), sort_keys=True, separators=(',', ':'))
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def default_population_config() -> PopulationConfig:
+    """The legacy hardcoded mix, as configuration. Backward-compatible default."""
+    return PopulationConfig(quotas={k: round(100 * v) for k, v in POPULATION_WEIGHTS.items()},
+                            name='baseline')
+
+
+def load_population_config(path) -> PopulationConfig:
+    with Path(path).open(encoding='utf-8') as handle:
+        data = json.load(handle)
+    return PopulationConfig.from_dict(data)
+
+
+def population_quota_counts(games: int, offset: int = 0, config: PopulationConfig | None = None) -> dict[str, int]:
     """Allocate a slice of a balanced 100-game cycle; offset survives resume."""
     games = int(games)
     if games < 1:
         raise ValueError('At least one population game is required')
-    names = list(POPULATION_WEIGHTS)
+    quotas = (config or default_population_config()).quotas
+    names = list(FAMILIES)
     # Smooth weighted round-robin gives exact percentages every 100 games,
     # including across small iterations. Reserving one of nine variants per
     # 16 games would overweight tactical bots and reduce self-play to 25%.
@@ -53,7 +169,7 @@ def population_quota_counts(games: int, offset: int = 0) -> dict[str, int]:
     cycle = []
     for _ in range(100):
         for name in names:
-            credits[name] += round(100 * POPULATION_WEIGHTS[name])
+            credits[name] += quotas.get(name, 0)
         chosen = max(names, key=lambda name: credits[name])
         credits[chosen] -= 100
         cycle.append(chosen)
@@ -98,6 +214,10 @@ class MatchSpec:
     engine_cwd: str = ''
     engine_fallback: str = 'raise'
     engine_name: str = ''
+    # M6: the family the quota asked for. Differs from `kind` only for the
+    # documented history/best -> self fallback, which used to be invisible in
+    # the actual counts.
+    requested_kind: str = ''
 
 
 def _engine_fields(engine_registry, seed, simulations):
@@ -117,17 +237,20 @@ def _engine_fields(engine_registry, seed, simulations):
                 engine_name=str(config.get('name', 'utttai')))
 
 
-def sample_match(seed, checkpoint_dir=None, engine_registry=None, kind=None):
+def sample_match(seed, checkpoint_dir=None, engine_registry=None, kind=None, config=None):
     """Sample one deterministic match specification.
 
-    Missing history falls back to self-play. Each game gets independent random
-    strength, seat, opening length, and move-noise settings. Never use latest.pt.
-    ``kind`` is used by :func:`sample_matches` to enforce exact quotas.
+    Missing history falls back to self-play and is recorded as such in
+    ``requested_kind``. Each game gets independent random strength, seat,
+    opening length, and move-noise settings drawn from ``config``. Never use
+    latest.pt. ``kind`` is used by :func:`sample_matches` to enforce exact quotas.
     """
+    config = config or default_population_config()
     rng = np.random.default_rng(np.random.SeedSequence([int(seed), 9127]))
     if kind is None:
-        names = list(POPULATION_WEIGHTS)
-        kind = str(rng.choice(names, p=list(POPULATION_WEIGHTS.values())))
+        names = list(FAMILIES)
+        kind = str(rng.choice(names, p=list(config.weights().values())))
+    requested_kind = kind
     checkpoint = ''
     if kind == 'history':
         paths = sorted(Path(checkpoint_dir).glob('model-*.pt')) if checkpoint_dir else []
@@ -150,39 +273,19 @@ def sample_match(seed, checkpoint_dir=None, engine_registry=None, kind=None):
         else:
             kind = 'self'
 
-    if kind == 'alphabeta':
-        depth = int(rng.choice([3, 4, 5, 6, 7, 8]))
-        nodes = int(rng.choice([100000, 250000, 500000]))
-        epsilon = float(rng.uniform(0., .02))
-    elif kind == 'tactical':
-        depth, nodes = 2, int(rng.choice([6000, 10000, 16000]))
-        epsilon = float(rng.uniform(0., .12))
-    elif kind == 'threat':
-        depth, nodes = 2, int(rng.choice([6000, 12000, 24000]))
-        epsilon = float(rng.uniform(0., .08))
-    elif kind == 'history' or kind == 'best':
-        depth, nodes = 3, 0
-        epsilon = float(rng.uniform(0., .03))
-    elif kind == 'openspiel':
-        depth, nodes = 3, 0
-        epsilon = float(rng.uniform(0., .03))
-    elif kind == 'utttai':
-        depth, nodes = 3, 0
-        epsilon = float(rng.uniform(0., .02))
-    elif kind == 'style':
-        depth, nodes = 1, 0
-        epsilon = float(rng.uniform(0., .12))
-    else:
+    settings = config.families[kind]
+    if kind == 'self':
         depth, nodes, epsilon = 3, 0, 0.
+    else:
+        depth = int(rng.choice(settings['depth']))
+        nodes = int(rng.choice(settings['nodes']))
+        low, high = settings['epsilon']
+        epsilon = float(rng.uniform(low, high))
 
-    simulations = int(rng.choice([128, 256, 512]))
+    simulations = int(rng.choice(settings.get('simulations', [128, 256, 512])))
     engine_fields = {'bot_seed': int(rng.integers(0, 2**31 - 1))}
-    if kind == 'openspiel':
-        simulations = int(rng.choice([128, 256, 512, 1024]))
-    elif kind == 'utttai':
-        # Keep the external reference materially cheaper than the learner's
-        # 512 simulations. Its command receives this through {simulations}.
-        simulations = int(rng.choice([64, 128, 256]))
+    if kind == 'utttai':
+        # Its command receives the budget through {simulations}.
         engine_fields = _engine_fields(engine_registry, int(rng.integers(0, 2**31 - 1)), simulations)
 
     # Legacy incremental engines cannot accept openings or injected moves.
@@ -195,20 +298,54 @@ def sample_match(seed, checkpoint_dir=None, engine_registry=None, kind=None):
                      depth=depth, nodes=nodes, epsilon=epsilon,
                      style=str(rng.choice(['random', 'center', 'corners', 'local-win', 'global-win'])),
                      checkpoint=checkpoint, simulations=simulations,
-                     opening_moves=opening_moves, **engine_fields)
+                     opening_moves=opening_moves, requested_kind=requested_kind,
+                     **engine_fields)
 
 
-def sample_matches(seeds, checkpoint_dir=None, engine_registry=None, offset=0):
+def sample_matches(seeds, checkpoint_dir=None, engine_registry=None, offset=0, config=None):
     """Build one randomized, quota-controlled league schedule for an iteration."""
     seeds = [int(seed) for seed in seeds]
     if not seeds:
         raise ValueError('At least one population game is required')
-    counts = population_quota_counts(len(seeds), offset)
+    config = config or default_population_config()
+    counts = population_quota_counts(len(seeds), offset, config=config)
     kinds = [kind for kind, count in counts.items() for _ in range(count)]
     slot_rng = np.random.default_rng(np.random.SeedSequence([seeds[0], len(seeds), 41873]))
     slot_rng.shuffle(kinds)
-    return [sample_match(seed, checkpoint_dir, engine_registry, kind=kind)
+    return [sample_match(seed, checkpoint_dir, engine_registry, kind=kind, config=config)
             for seed, kind in zip(seeds, kinds)]
+
+
+def family_report(results):
+    """Per-family coverage for one iteration: games, learner positions, wall
+    time, score rate, requested-vs-actual family and the opponent budgets used.
+
+    Keyed by the family that actually played. A ``history`` request that fell
+    back to ``self`` shows up under ``self`` with ``requested_as: {history: n}``.
+    No engine here reports its internal search effort, so the budgets recorded
+    are the ones the opponent was constructed with.
+    """
+    report = {}
+    for trajectory, outcome, stats in results:
+        match = stats['match']
+        kind = match['kind']
+        entry = report.setdefault(kind, {'games': 0, 'positions': 0, 'seconds': 0., 'score': 0.,
+                                         'requested_as': {}, 'budgets': {k: {} for k in _BUDGET_KEYS}})
+        entry['games'] += 1
+        entry['positions'] += len(trajectory)
+        entry['seconds'] += float(stats.get('seconds', 0.))
+        learner_outcome = outcome * match['learner_side']
+        entry['score'] += 1. if learner_outcome > 0 else (.5 if learner_outcome == 0 else 0.)
+        requested = match.get('requested_kind') or kind
+        entry['requested_as'][requested] = entry['requested_as'].get(requested, 0) + 1
+        for key in _BUDGET_KEYS:
+            bucket = entry['budgets'][key]
+            value = str(match.get(key))
+            bucket[value] = bucket.get(value, 0) + 1
+    for entry in report.values():
+        entry['score_rate'] = entry.pop('score') / entry['games']
+        entry['seconds'] = round(entry['seconds'], 3)
+    return report
 
 
 def make_opponent(spec):

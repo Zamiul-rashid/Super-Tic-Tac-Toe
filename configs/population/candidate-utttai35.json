@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "name": "candidate-utttai35",
+  "quotas": {
+    "self": 30,
+    "utttai": 35,
+    "alphabeta": 15,
+    "history": 10,
+    "best": 5,
+    "tactical": 2,
+    "openspiel": 1,
+    "threat": 1,
+    "style": 1
+  },
+  "families": {
+    "self": {},
+    "utttai": {
+      "depth": [
+        3
+      ],
+      "nodes": [
+        0
+      ],
+      "epsilon": [
+        0.0,
+        0.02
+      ],
+      "simulations": [
+        64,
+        128,
+        256
+      ]
+    },
+    "alphabeta": {
+      "depth": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "nodes": [
+        100000,
+        250000,
+        500000
+      ],
+      "epsilon": [
+        0.0,
+        0.02
+      ],
+      "simulations": [
+        128,
+        256,
+        512
+      ]
+    },
+    "history": {
+      "depth": [
+        3
+      ],
+      "nodes": [
+        0
+      ],
+      "epsilon": [
+        0.0,
+        0.03
+      ],
+      "simulations": [
+        128,
+        256,
+        512
+      ]
+    },
+    "best": {
+      "depth": [
+        3
+      ],
+      "nodes": [
+        0
+      ],
+      "epsilon": [
+        0.0,
+        0.03
+      ],
+      "simulations": [
+        128,
+        256,
+        512
+      ]
+    },
+    "tactical": {
+      "depth": [
+        2
+      ],
+      "nodes": [
+        6000,
+        10000,
+        16000
+      ],
+      "epsilon": [
+        0.0,
+        0.12
+      ],
+      "simulations": [
+        128,
+        256,
+        512
+      ]
+    },
+    "openspiel": {
+      "depth": [
+        3
+      ],
+      "nodes": [
+        0
+      ],
+      "epsilon": [
+        0.0,
+        0.03
+      ],
+      "simulations": [
+        128,
+        256,
+        512,
+        1024
+      ]
+    },
+    "threat": {
+      "depth": [
+        2
+      ],
+      "nodes": [
+        6000,
+        12000,
+        24000
+      ],
+      "epsilon": [
+        0.0,
+        0.08
+      ],
+      "simulations": [
+        128,
+        256,
+        512
+      ]
+    },
+    "style": {
+      "depth": [
+        1
+      ],
+      "nodes": [
+        0
+      ],
+      "epsilon": [
+        0.0,
+        0.12
+      ],
+      "simulations": [
+        128,
+        256,
+        512
+      ]
+    }
+  }
+}

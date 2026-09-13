@@ -66,6 +66,8 @@ def play_game(evaluator, simulations, seed, config, leaf_batch, match=None, use_
 
 
 def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cpp=False):
+    import time
+    started = time.monotonic()
     state = CppFastState() if (use_cpp and CppFastState is not None) else State()
     trajectory = []
     opponent_rng = np.random.default_rng(np.random.SeedSequence([int(seed), 731]))
@@ -105,6 +107,7 @@ def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cp
         ply += 1
     totals['match'] = asdict(match)
     totals['plies'] = ply
+    totals['seconds'] = time.monotonic() - started   # M6: wall time by family
     return trajectory, state.result, totals
 
 

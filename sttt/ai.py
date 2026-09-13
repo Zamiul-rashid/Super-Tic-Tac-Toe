@@ -14,7 +14,8 @@ from .learning import ResNet, create_model, encode, load_model
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
-from .population import sample_matches, augment_batch
+from .population import (sample_matches, augment_batch, family_report,
+                         default_population_config, load_population_config, PopulationConfig)
 from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
@@ -146,6 +147,17 @@ def train(args):
     apply_lr(optimizer, schedule.current_lr)
     print(schedule.describe(), flush=True)
     replay = deque(saved.get('replay', []), maxlen=args.buffer)
+    # M6: parallel per-sample origin (iteration, family) so sampled-position
+    # fractions and age are measurable without touching the target tuple.
+    # Legacy checkpoints carry none; their samples are tagged as such.
+    legacy_meta = [(int(saved.get('iteration', 0)), 'legacy')] * len(replay)
+    replay_meta = deque(saved.get('replay_meta') or legacy_meta, maxlen=args.buffer)
+    if len(replay_meta) != len(replay):
+        raise ValueError(f'checkpoint replay ({len(replay)}) and replay_meta ({len(replay_meta)}) disagree')
+    population_config, population_games, population_phases = resolve_population_config(args, saved)
+    print(f'population config: {population_config.name} sha256={population_config.sha256[:12]} '
+          f'cursor={population_games}' + (f' phases={len(population_phases)}' if population_phases else ''),
+          flush=True)
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     ownership = RunOwnership(output).acquire()
@@ -165,7 +177,8 @@ def train(args):
             raise RuntimeError('Official compiled OpenSpiel is required; install engines/requirements.txt')
         # Exercise the real wrapper before launching search workers.
         from .population import make_opponent, sample_match
-        probe = make_opponent(sample_match(args.seed, engine_registry=engine_registry, kind='utttai'))
+        probe = make_opponent(sample_match(args.seed, engine_registry=engine_registry, kind='utttai',
+                                           config=population_config))
         try:
             probe.choose(State(), np.random.default_rng(args.seed))
         finally:
@@ -174,9 +187,42 @@ def train(args):
     try:
         with SelfPlayPool(min(args.workers, args.games), args.inference_batch, args.inference_wait_ms) as pool:
             _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
-                        engine_registry, scaler=scaler, use_fp16=use_fp16, schedule=schedule)
+                        engine_registry, scaler=scaler, use_fp16=use_fp16, schedule=schedule,
+                        population=(population_config, population_games, population_phases),
+                        replay_meta=replay_meta)
     finally:
         ownership.release()
+
+
+def resolve_population_config(args, saved):
+    """M6: which curriculum this run trains under, and where its quota cursor is.
+
+    Rule: an omitted --population-config inherits the saved configuration; an
+    explicit one that differs from the saved one is a recorded phase change and
+    restarts the 100-game cursor, because the old cursor indexes a cycle built
+    from the old quotas. Legacy checkpoints carry no config and inherit the
+    default while keeping their cursor.
+
+    Returns (config, population_games_cursor, phases).
+    """
+    explicit = getattr(args, 'population_config', None)
+    saved_dict = saved.get('population_config')
+    saved_config = PopulationConfig.from_dict(saved_dict) if saved_dict else None
+    cursor = int(saved.get('population_games', 0))
+    phases = list(saved.get('population_phases', []))
+    if explicit:
+        config = load_population_config(explicit)
+    elif saved_config is not None:
+        config = saved_config
+    else:
+        config = default_population_config()
+    if saved_config is not None and config.sha256 != saved_config.sha256:
+        phases.append({'iteration': int(saved.get('iteration', 0)),
+                       'from_name': saved_config.name, 'from_sha256': saved_config.sha256,
+                       'to_name': config.name, 'to_sha256': config.sha256,
+                       'source': str(explicit)})
+        cursor = 0
+    return config, cursor, phases
 
 
 def _utttai_command_parts(engine_registry):
@@ -186,9 +232,14 @@ def _utttai_command_parts(engine_registry):
 
 
 def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
-                engine_registry=None, scaler=None, use_fp16=False, schedule=None):
+                engine_registry=None, scaler=None, use_fp16=False, schedule=None,
+                population=None, replay_meta=None):
     start_iteration = saved.get('iteration', 0)
-    population_games = saved.get('population_games', 0)
+    if population is None:
+        population = resolve_population_config(args, saved)
+    population_config, population_games, population_phases = population
+    if replay_meta is None:
+        replay_meta = deque([(start_iteration, 'legacy')] * len(replay), maxlen=replay.maxlen)
     max_iter = getattr(args, 'max_iterations', None)
     end_iteration = min(start_iteration + args.iterations, max_iter) if max_iter else (start_iteration + args.iterations)
     for iteration in range(start_iteration + 1, end_iteration + 1):
@@ -197,7 +248,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         matches = None
         if getattr(args, 'population', False):
             history = getattr(args, 'population_checkpoints', None) or str(output)
-            matches = sample_matches(seeds, history, engine_registry, offset=population_games)
+            matches = sample_matches(seeds, history, engine_registry, offset=population_games,
+                                     config=population_config)
         use_cpp = getattr(args, '_use_cpp', False)
         results, inference_stats = pool.run(
             model, seeds, args.simulations, search_config(args), args.leaf_batch,
@@ -207,6 +259,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         if matches is not None:
             population_games += len(matches)
         for game_idx, (trajectory, outcome, stats) in enumerate(results):
+            origin = (iteration, stats['match']['kind'])
             if trajectory and use_cpp and _HAS_CPP and cpp_encode_batch is not None:
                 traj_states = [s for s, _ in trajectory]
                 encoded_batch = cpp_encode_batch(traj_states)
@@ -215,12 +268,14 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                     mask[state.legal_actions()] = True
                     replay.append((torch.from_numpy(encoded_batch[i].copy()), torch.from_numpy(pi),
                                    torch.from_numpy(mask), float(outcome * state.turn)))
+                    replay_meta.append(origin)
             else:
                 for state, pi in trajectory:
                     mask = np.zeros(81, dtype=bool)
                     mask[state.legal_actions()] = True
                     replay.append((torch.from_numpy(encode(state)), torch.from_numpy(pi),
                                    torch.from_numpy(mask), float(outcome * state.turn)))
+                    replay_meta.append(origin)
             print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} training positions, '
                   f'opponent={stats["match"]["kind"]}', flush=True)
 
@@ -231,9 +286,16 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         policy_losses, value_losses, grad_norms = [], [], []
         optimizer_updates = 0
         skipped_updates = 0
+        sampled_kinds, sampled_ages = Counter(), []
         for _ in range(args.steps):
             indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
             batch = [replay[int(i)] for i in indices]
+            # M6: what the optimizer actually saw this iteration, by family and
+            # age. Game quota is not replay quota; this is the replay side.
+            for i in indices:
+                origin_iteration, origin_kind = replay_meta[int(i)]
+                sampled_kinds[origin_kind] += 1
+                sampled_ages.append(iteration - origin_iteration)
             x, pi, mask = [torch.stack([row[k] for row in batch]).to(device) for k in range(3)]
             if getattr(args, 'augment_symmetry', False):
                 x, pi, mask = augment_batch(x, pi, mask, rng)
@@ -314,6 +376,12 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                       'lr_schedule': schedule.state_dict() if schedule is not None else None,
                       'backend_info': getattr(args, '_backend_info', None),
                       'population_games': population_games,
+                      # M6: the curriculum this checkpoint was trained under, so a
+                      # budget/mix change is reproducible from the checkpoint alone.
+                      'population_config': population_config.to_dict(),
+                      'population_config_sha256': population_config.sha256,
+                      'population_phases': population_phases,
+                      'replay_meta': list(replay_meta),
                       'metrics': {'loss': float(np.mean(losses)),
                                   'policy_loss': float(np.mean(policy_losses)),
                                   'value_loss': float(np.mean(value_losses)),
@@ -347,6 +415,16 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                   'search_config': asdict(search_config(args)), **inference_stats,
                   'population_matches': [r[2]['match'] for r in results],
                   'population_match_counts': dict(Counter(r[2]['match']['kind'] for r in results)),
+                  'population_requested_counts': dict(Counter(
+                      r[2]['match'].get('requested_kind') or r[2]['match']['kind'] for r in results)),
+                  'population_config_sha256': population_config.sha256,
+                  'population_config_name': population_config.name,
+                  'population_games_cursor': population_games,
+                  'population_by_family': family_report(results),
+                  'replay_sample_kind_fractions': {k: v / max(1, sum(sampled_kinds.values()))
+                                                   for k, v in sampled_kinds.items()},
+                  'replay_sample_age': ({'min': int(min(sampled_ages)), 'mean': float(np.mean(sampled_ages)),
+                                         'max': int(max(sampled_ages))} if sampled_ages else None),
                   'completed_simulations': sum(r[2]['completed_simulations'] for r in results),
                   'max_search_depth': max(r[2]['max_depth'] for r in results),
                   'soft_rechecks': sum(r[2]['soft_rechecks'] for r in results),
@@ -655,6 +733,10 @@ def main():
     t.add_argument('--population', action='store_true', help='Quota-controlled league of self-play and strong opponents')
     t.add_argument('--augment-symmetry', action='store_true', help='Random rotations/reflections of training positions')
     t.add_argument('--population-checkpoints', help='Directory of frozen model-*.pt and best.pt opponents; defaults to output')
+    t.add_argument('--population-config', default=None,
+                   help='Versioned JSON curriculum (quotas summing to 100 + per-family budgets). '
+                        'Omitted on resume inherits the saved one; a different file is a recorded phase change. '
+                        'Presets: configs/population/*.json')
     t.add_argument('--engine-config', default=str(Path(__file__).resolve().parent.parent / 'engines/registry.json'),
                    help='JSON registry (defaults to bundled uttt.ai wrapper)')
     t.add_argument('--inference-batch', type=positive, default=128,
