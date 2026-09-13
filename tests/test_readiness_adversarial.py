@@ -13,6 +13,7 @@ Verifies:
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import os
 import subprocess
@@ -419,3 +420,44 @@ class TestProtectedRunsImmutability(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestGpuAndPilotGatesCannotPassVacuously(unittest.TestCase):
+    """M9: the gpu and pilot stages must not report success without doing the work."""
+
+    def _run(self, *extra):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_dir = Path(tmpdir) / "runs" / "readiness" / "gate"
+            cmd = [sys.executable, str(_REPO_ROOT / "scripts" / "check_training_ready.py"),
+                   "--backend", "cpp", "--device", "cuda", "--output-dir", str(out_dir), *extra]
+            res = subprocess.run(cmd, cwd=_REPO_ROOT, capture_output=True, text=True)
+            stage = extra[extra.index("--stage") + 1]
+            with open(out_dir / stage / "manifest.json") as f:
+                manifest = json.load(f)
+            with open(out_dir / "summary_manifest.json") as f:
+                summary = json.load(f)
+            return res, manifest, summary
+
+    def test_pilot_without_checkpoint_is_pending_not_passed(self):
+        res, manifest, summary = self._run("--stage", "pilot")
+        self.assertEqual(manifest["status"], "pending")
+        self.assertIn("--pilot-checkpoint", manifest["reason"])
+        self.assertEqual(summary["overall_status"], "pending")
+        self.assertNotEqual(res.returncode, 0, "a pending gate must not exit 0")
+
+    def test_pilot_with_missing_checkpoint_fails(self):
+        res, manifest, summary = self._run("--stage", "pilot", "--pilot-checkpoint", "/nonexistent/full.pt")
+        self.assertEqual(manifest["status"], "failed")
+        self.assertIn("not found", manifest["error"])
+        self.assertEqual(res.returncode, 1)
+
+    def test_gpu_stage_manifest_records_real_checks_when_it_passes(self):
+        """A passed gpu manifest must carry the fp32 and fp16 evidence, never a bare 'passed'."""
+        import scripts.check_training_ready as ctr
+        src = inspect.getsource(ctr.ReadinessRunner.run_stage_gpu)
+        for required in ("--fp16", "_growth_tracker", "optimizer_updates", "policy_loss",
+                         "peak_gpu_mb", "--resume", "PolicyValueNet"):
+            if required == "PolicyValueNet":
+                self.assertNotIn(required, src, "phantom import must be gone")
+            else:
+                self.assertIn(required, src)

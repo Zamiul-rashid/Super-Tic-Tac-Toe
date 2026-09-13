@@ -125,7 +125,19 @@ class ReadinessRunner:
         stage: str = "all",
         output_dir: Path | None = None,
         manifest_only: bool = False,
+        pilot_checkpoint: str | None = None,
+        pilot_iterations: int = 20,
+        pilot_warmup: int = 2,
+        pilot_workers: int = 10,
+        pilot_population_config: str = "configs/population/baseline.json",
+        pilot_eta_iterations: int = 5000,
     ):
+        self.pilot_checkpoint = pilot_checkpoint
+        self.pilot_iterations = pilot_iterations
+        self.pilot_warmup = pilot_warmup
+        self.pilot_workers = pilot_workers
+        self.pilot_population_config = pilot_population_config
+        self.pilot_eta_iterations = pilot_eta_iterations
         self.backend = backend
         self.device = device
         self.requested_stage = stage
@@ -1031,62 +1043,124 @@ class ReadinessRunner:
         return result
 
     def run_stage_gpu(self) -> dict[str, Any]:
-        """Stage 6: GPU Correctness Gate."""
+        """Stage 6: GPU Correctness Gate.
+
+        FP32 and FP16 training on an explicit CUDA device, a real optimizer
+        update, finite masked policy loss, GradScaler persistence across a CUDA
+        checkpoint/resume, and no CPU fallback. A CPU run cannot satisfy it.
+        """
         print("\n==========================================")
         print("STAGE 6: GPU CORRECTNESS GATE")
         print("==========================================")
         t0 = time.time()
         stage_dir = self.output_dir / "gpu"
         stage_dir.mkdir(parents=True, exist_ok=True)
+        checks: dict[str, Any] = {}
+
+        def finish(status, **extra):
+            result = {"stage": "gpu", "status": status,
+                      "duration_sec": time.time() - t0, "checks": checks, **extra}
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
 
         if self.device != "cuda":
-            stage_result = {
-                "stage": "gpu",
-                "status": "skipped",
-                "duration_sec": time.time() - t0,
-                "reason": "CPU device specified; GPU gate requires --device cuda.",
-            }
-            (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-            return stage_result
+            return finish("skipped", reason="CPU device specified; GPU gate requires --device cuda.")
 
+        import math
         import torch
 
         if not torch.cuda.is_available():
-            stage_result = {
-                "stage": "gpu",
-                "status": "failed",
-                "duration_sec": time.time() - t0,
-                "error": "CUDA device specified but torch.cuda.is_available() is False.",
-            }
-            (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-            return stage_result
+            return finish("failed", error="CUDA device specified but torch.cuda.is_available() is False.")
+        checks["device_name"] = torch.cuda.get_device_name(0)
+
+        common = ["--backend", self.backend, "--device", "cuda", "--games", "4",
+                  "--workers", "2", "--simulations", "32", "--leaf-batch", "4",
+                  "--inference-batch", "8", "--steps", "4", "--batch", "16",
+                  "--buffer", "1000", "--eval-every", "0"]
+
+        def train(output, iterations, *extra, resume=None):
+            cmd = [sys.executable, "-m", "sttt.ai", "train"]
+            cmd += ["--resume", str(resume)] if resume else ["--arch", "resnet"]
+            cmd += ["--output", str(output), "--iterations", str(iterations), *common, *extra]
+            print(f"[gpu] {' '.join(cmd)}")
+            res = subprocess.run(cmd, cwd=self.repo_root, capture_output=True, text=True)
+            if res.returncode != 0:
+                raise RuntimeError(f"training exited {res.returncode}:\n{res.stderr}\n{res.stdout}")
+            ckpt = torch.load(output / "latest.pt", map_location="cpu", weights_only=False)
+            rows = [json.loads(line) for line in
+                    (output / "metrics.jsonl").read_text().splitlines() if line.strip()]
+            return ckpt, rows
+
+        def assert_finite_on_cuda(label, ckpt, rows):
+            metrics = ckpt["metrics"]
+            for key in ("loss", "policy_loss", "value_loss"):
+                if not math.isfinite(metrics[key]):
+                    raise RuntimeError(f"{label}: nonfinite {key}={metrics[key]}")
+            if metrics["optimizer_updates"] < 1:
+                raise RuntimeError(f"{label}: no optimizer update happened")
+            # peak_gpu_mb is only recorded when the learner ran on CUDA.
+            if not all(row.get("peak_gpu_mb", 0) > 0 for row in rows):
+                raise RuntimeError(f"{label}: an iteration ran without CUDA memory use (CPU fallback?)")
 
         try:
-            from sttt.model import PolicyValueNet
+            # FP32: forward/train on CUDA without a scaler.
+            ckpt32, rows32 = train(stage_dir / "fp32", 1)
+            assert_finite_on_cuda("fp32", ckpt32, rows32)
+            if ckpt32.get("precision") != "fp32" or ckpt32.get("scaler") is not None:
+                raise RuntimeError(f"fp32 run recorded precision={ckpt32.get('precision')} scaler={ckpt32.get('scaler') is not None}")
+            checks["fp32"] = {"loss": ckpt32["metrics"]["loss"], "policy_loss": ckpt32["metrics"]["policy_loss"],
+                              "optimizer_updates": ckpt32["metrics"]["optimizer_updates"],
+                              "peak_gpu_mb": max(r["peak_gpu_mb"] for r in rows32)}
 
-            model = PolicyValueNet().cuda()
-            x = torch.randn(8, 289, device="cuda")
-            p, v = model(x)
-            assert p.shape == (8, 81)
-            assert v.shape == (8, 1)
+            # FP16: two iterations, then a CUDA resume for one more.
+            fp16_dir = stage_dir / "fp16"
+            ckpt_a, rows_a = train(fp16_dir, 2, "--fp16")
+            assert_finite_on_cuda("fp16", ckpt_a, rows_a)
+            if ckpt_a.get("precision") != "fp16" or not ckpt_a.get("scaler"):
+                raise RuntimeError("fp16 run did not persist a GradScaler state")
+            scale_a = ckpt_a["scaler"]["scale"]
+            tracker_a = ckpt_a["scaler"]["_growth_tracker"]
 
-            stage_result = {
-                "stage": "gpu",
-                "status": "passed",
-                "duration_sec": time.time() - t0,
-                "device_name": torch.cuda.get_device_name(0),
-                "peak_memory_bytes": torch.cuda.max_memory_allocated(),
-            }
-        except Exception as e:
-            stage_result = {
-                "stage": "gpu",
-                "status": "failed",
-                "duration_sec": time.time() - t0,
-                "error": str(e),
-            }
+            ckpt_b, rows_b = train(fp16_dir, 1, "--fp16", resume=fp16_dir / "latest.pt")
+            assert_finite_on_cuda("fp16-resume", ckpt_b, rows_b)
+            if ckpt_b["iteration"] != 3:
+                raise RuntimeError(f"expected iteration 3 after 2 + 1, got {ckpt_b['iteration']}")
+            if ckpt_b.get("precision") != "fp16" or not ckpt_b.get("scaler"):
+                raise RuntimeError("resumed fp16 run lost the GradScaler state")
+            scale_b = ckpt_b["scaler"]["scale"]
+            tracker_b = ckpt_b["scaler"]["_growth_tracker"]
+            updates_b = ckpt_b["metrics"]["optimizer_updates"]
+            skipped_b = ckpt_b["metrics"]["skipped_updates"]
+            # A fresh GradScaler also starts at scale 65536, so equal scales prove
+            # nothing. The growth tracker counts consecutive unskipped steps and
+            # only continues from the saved value if the state was restored.
+            if skipped_b == 0 and tracker_b != tracker_a + updates_b:
+                raise RuntimeError(f"scaler state was not restored on resume: growth tracker "
+                                   f"{tracker_a} + {updates_b} updates != {tracker_b}")
+            if skipped_b and not scale_b < scale_a:
+                raise RuntimeError("an update was skipped but the scale did not back off")
+            for field in ("optimizer", "replay", "lr_schedule"):
+                if ckpt_b.get(field) is None:
+                    raise RuntimeError(f"resumed checkpoint lost '{field}'")
+            # metrics.jsonl is appended on resume, so rows_b already holds all three.
+            checks["fp16"] = {"losses": [r["loss"] for r in rows_b],
+                              "scale_before_resume": scale_a, "scale_after_resume": scale_b,
+                              "growth_tracker_before": tracker_a, "growth_tracker_after": tracker_b,
+                              "resume_optimizer_updates": updates_b, "resume_skipped_updates": skipped_b,
+                              "peak_gpu_mb": max(r["peak_gpu_mb"] for r in rows_b)}
 
-        (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-        return stage_result
+            leftover = subprocess.run(["pgrep", "-f", f"--output {stage_dir}"],
+                                      capture_output=True, text=True)
+            checks["leftover_workers"] = leftover.stdout.split()
+            if leftover.stdout.strip():
+                raise RuntimeError(f"workers outlived the training run: {checks['leftover_workers']}")
+        except Exception as exc:
+            return finish("failed", error=str(exc))
+
+        print(f"[gpu] {checks['device_name']}: fp32 loss={checks['fp32']['loss']:.3f} "
+              f"fp16 losses={[round(v, 3) for v in checks['fp16']['losses']]} "
+              f"scaler tracker {tracker_a}->{tracker_b} scale={scale_b:.0f}")
+        return finish("passed")
 
     @staticmethod
     def _rss_kb(pid: int) -> int | None:
@@ -1244,34 +1318,102 @@ class ReadinessRunner:
         return result
 
     def run_stage_pilot(self) -> dict[str, Any]:
-        """Stage 8: Representative Pilot Gate."""
+        """Stage 8: Representative Pilot Gate.
+
+        Runs the canonical launcher (train.sh) with the exact production
+        configuration, resumed from a frozen copy of a full checkpoint, for
+        warm-up + measured iterations on the target GPU. Computes the ETA from
+        the measured iterations, requires GPU memory headroom and no CPU
+        fallback, and preserves the checkpoints. Fewer than 20 measured
+        iterations leaves the gate pending: the wiring is proven, the ETA is not.
+        """
         print("\n==========================================")
         print("STAGE 8: REPRESENTATIVE PILOT GATE")
         print("==========================================")
         t0 = time.time()
         stage_dir = self.output_dir / "pilot"
         stage_dir.mkdir(parents=True, exist_ok=True)
+        result: dict[str, Any] = {"stage": "pilot"}
 
-        # Quick pilot benchmark
-        if ce.is_cpp_available():
-            rate, elapsed = ce.benchmark_rollouts(2000, 2, 42)
-            stage_result = {
-                "stage": "pilot",
-                "status": "passed",
-                "duration_sec": time.time() - t0,
-                "rollouts_per_sec": rate,
-                "benchmark_duration_sec": elapsed,
-            }
-        else:
-            stage_result = {
-                "stage": "pilot",
-                "status": "passed",
-                "duration_sec": time.time() - t0,
-                "note": "Pure Python baseline (C++ unavailable).",
-            }
+        def finish(status, **extra):
+            result.update(status=status, duration_sec=time.time() - t0, **extra)
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
 
-        (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-        return stage_result
+        if self.device != "cuda":
+            return finish("skipped", reason="CPU device specified; the pilot gate requires --device cuda.")
+        if not self.pilot_checkpoint:
+            return finish("pending", reason="requires --pilot-checkpoint <full checkpoint> to resume from")
+        if not Path(self.pilot_checkpoint).is_file():
+            return finish("failed", error=f"pilot checkpoint not found: {self.pilot_checkpoint}")
+
+        import statistics
+        import torch
+        if not torch.cuda.is_available():
+            return finish("failed", error="CUDA device specified but torch.cuda.is_available() is False.")
+        free_before, total_bytes = torch.cuda.mem_get_info()
+        total_mb = total_bytes / 1024**2
+
+        sys.path.insert(0, str(self.repo_root / "scripts"))
+        from run_pipeline_benchmark import compute_eta, evaluation_overhead
+        from sttt.evaluation import sha256_file
+
+        run_dir = stage_dir / "run"
+        iterations = self.pilot_warmup + self.pilot_iterations
+        env = {**os.environ, "STTT_PY": sys.executable, "WORKERS": str(self.pilot_workers),
+               "ITERATIONS": str(iterations), "LR_HORIZON": str(self.pilot_eta_iterations)}
+        cmd = ["bash", str(self.repo_root / "train.sh"), str(Path(self.pilot_checkpoint).resolve()),
+               str(run_dir), str(Path(self.pilot_population_config).resolve())]
+        result["command"] = cmd
+        result["environment"] = {k: env[k] for k in ("STTT_PY", "WORKERS", "ITERATIONS", "LR_HORIZON")}
+        print(f"[pilot] {' '.join(cmd)}  (WORKERS={self.pilot_workers} ITERATIONS={iterations})")
+        res = subprocess.run(cmd, cwd=self.repo_root, env=env, capture_output=True, text=True)
+        if res.returncode != 0:
+            return finish("failed", error=f"train.sh exited {res.returncode}:\n{res.stderr[-4000:]}\n{res.stdout[-4000:]}")
+
+        frozen = sorted((run_dir / "start-checkpoint").glob("*.pt"))
+        result["start_checkpoint"] = {"source": str(self.pilot_checkpoint),
+                                      "frozen": str(frozen[0]) if frozen else None,
+                                      "sha256": sha256_file(frozen[0]) if frozen else None}
+        rows = [json.loads(line) for line in
+                (run_dir / "metrics.jsonl").read_text().splitlines() if line.strip()]
+        rows = [r for r in rows if "loss" in r]
+        if len(rows) < iterations:
+            return finish("failed", error=f"expected {iterations} training iterations, found {len(rows)}")
+        measured = rows[self.pilot_warmup:]
+        if not all(r.get("peak_gpu_mb", 0) > 0 for r in rows):
+            return finish("failed", error="an iteration ran without CUDA memory use (CPU fallback)")
+        peak_reserved = max(r.get("reserved_gpu_mb", 0) for r in rows)
+        headroom_mb = total_mb - peak_reserved
+        result["gpu"] = {"device_name": torch.cuda.get_device_name(0), "total_mb": round(total_mb, 1),
+                         "free_mb_before_pilot": round(free_before / 1024**2, 1),
+                         "peak_reserved_mb": peak_reserved,
+                         "peak_allocated_mb": max(r.get("peak_gpu_mb", 0) for r in rows),
+                         "headroom_mb": round(headroom_mb, 1)}
+        if peak_reserved > 0.9 * total_mb:
+            return finish("failed", error=f"peak reserved {peak_reserved} MiB leaves no headroom on {total_mb:.0f} MiB")
+
+        seconds = [r["seconds"] for r in measured]
+        arm = {"backend": self.backend, "measured_iterations": len(measured),
+               "iteration_seconds": {"mean": statistics.mean(seconds), "median": statistics.median(seconds),
+                                     "min": min(seconds), "max": max(seconds),
+                                     "stdev": statistics.pstdev(seconds) if len(seconds) > 1 else 0.0}}
+        result["measured"] = {"warmup_iterations": self.pilot_warmup, "measured_iterations": len(measured),
+                              "per_iteration_seconds": seconds, "stage_seconds": [r.get("stage_seconds") for r in measured],
+                              "iteration_seconds": arm["iteration_seconds"]}
+        result["eta"] = compute_eta(arm, self.pilot_eta_iterations, eval_every=100,
+                                    eval_overhead_seconds=evaluation_overhead(run_dir))
+        result["checkpoints"] = sorted(str(p) for p in run_dir.glob("*.pt"))
+        if not (run_dir / "latest.pt").is_file():
+            return finish("failed", error="latest.pt was not preserved")
+        print(f"[pilot] {len(measured)} measured iterations: mean {arm['iteration_seconds']['mean']:.1f}s "
+              f"(min {min(seconds):.1f}, max {max(seconds):.1f}); ETA for {self.pilot_eta_iterations}: "
+              f"{result['eta']['hours_mean']:.1f} h [{result['eta']['hours_low']:.1f}, {result['eta']['hours_high']:.1f}]; "
+              f"peak reserved {peak_reserved} MiB of {total_mb:.0f} MiB")
+        if len(measured) < 20:
+            return finish("pending", reason=f"only {len(measured)} measured iterations; the representative "
+                                            f"pilot needs at least 20 (rerun with --pilot-iterations 20)")
+        return finish("passed")
 
     def run(self) -> int:
         """Execute requested verification stages and write summary manifest."""
@@ -1291,6 +1433,7 @@ class ReadinessRunner:
         )
 
         all_passed = True
+        any_pending = False
         for stage_name in stages_to_run:
             handler = getattr(self, f"run_stage_{stage_name}", None)
             if not handler:
@@ -1308,13 +1451,16 @@ class ReadinessRunner:
                     break
             elif status == "skipped":
                 print(f"--> Stage '{stage_name}' SKIPPED: {result.get('reason', '')}")
+            elif status == "pending":
+                any_pending = True
+                print(f"--> Stage '{stage_name}' PENDING: {result.get('reason', '')}")
             else:
                 print(f"--> Stage '{stage_name}' PASSED ({result.get('duration_sec', 0.0):.2f}s)")
 
         summary = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "duration_sec": time.time() - overall_t0,
-            "overall_status": "passed" if all_passed else "failed",
+            "overall_status": ("failed" if not all_passed else "pending" if any_pending else "passed"),
             "requested_stage": self.requested_stage,
             "backend": self.backend,
             "device": self.device,
@@ -1325,7 +1471,7 @@ class ReadinessRunner:
         summary_file.write_text(json.dumps(summary, indent=2))
         print(f"\nSummary manifest written to {summary_file}")
 
-        return 0 if all_passed else 1
+        return 0 if all_passed and not any_pending else 1
 
 
 def main() -> int:
@@ -1360,6 +1506,16 @@ def main() -> int:
         help="Print and save machine-readable capability manifest without executing stages",
     )
 
+    parser.add_argument("--pilot-checkpoint", default=None,
+                        help="full checkpoint the pilot gate resumes from (frozen copy is made)")
+    parser.add_argument("--pilot-iterations", type=int, default=20,
+                        help="measured pilot iterations after warm-up (gate needs >= 20)")
+    parser.add_argument("--pilot-warmup", type=int, default=2)
+    parser.add_argument("--pilot-workers", type=int, default=10)
+    parser.add_argument("--pilot-population-config", default="configs/population/baseline.json")
+    parser.add_argument("--pilot-eta-iterations", type=int, default=5000,
+                        help="production iteration count the ETA is projected for")
+
     args = parser.parse_args()
     runner = ReadinessRunner(
         backend=args.backend,
@@ -1367,6 +1523,12 @@ def main() -> int:
         stage=args.stage,
         output_dir=args.output_dir,
         manifest_only=args.manifest_only,
+        pilot_checkpoint=args.pilot_checkpoint,
+        pilot_iterations=args.pilot_iterations,
+        pilot_warmup=args.pilot_warmup,
+        pilot_workers=args.pilot_workers,
+        pilot_population_config=args.pilot_population_config,
+        pilot_eta_iterations=args.pilot_eta_iterations,
     )
     return runner.run()
 
