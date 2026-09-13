@@ -7,12 +7,74 @@
 #include <thread>
 #include <vector>
 #include <string>
+#include <cmath>
 
 using namespace sttt;
 
 // Forward declaration from python_module.cpp
 extern PyTypeObject PyFastStateType;
 extern const BoardState* extract_board_state(PyObject* obj, PyObject** cleanup);
+
+// --- M1: validation of every float crossing the Python boundary --------------
+// PyFloat_AsDouble reports failure as -1.0 with an exception set, so an
+// unchecked call silently turns a non-numeric entry into a real prior. Priors
+// must also be finite and non-negative: expand() normalizes the vector, so one
+// NaN or negative entry corrupts the whole distribution rather than one move.
+static bool parse_policy_81(PyObject* pol_seq, float* out, const char* who) {
+    for (int k = 0; k < 81; ++k) {
+        PyObject* item = PySequence_Fast_GET_ITEM(pol_seq, k);
+        double v = PyFloat_AsDouble(item);
+        if (v == -1.0 && PyErr_Occurred()) {
+            PyErr_Clear();
+            PyErr_Format(PyExc_ValueError,
+                         "%s returned a non-numeric policy entry at index %d",
+                         who, k);
+            return false;
+        }
+        if (!std::isfinite(v) || v < 0.0) {
+            PyErr_Format(PyExc_ValueError,
+                         "%s returned an invalid policy entry at index %d: "
+                         "priors must be finite and non-negative", who, k);
+            return false;
+        }
+        out[k] = static_cast<float>(v);
+    }
+    return true;
+}
+
+// A nonfinite c_puct makes every child's PUCT score NaN, so selection degenerates
+// to "first child" with no error anywhere. Reject it at the boundary instead.
+static bool config_float(PyObject* obj, const char* name, float* out) {
+    double v = PyFloat_AsDouble(obj);
+    if (v == -1.0 && PyErr_Occurred()) {
+        PyErr_Clear();
+        PyErr_Format(PyExc_ValueError, "config.%s must be a number", name);
+        return false;
+    }
+    if (!std::isfinite(v)) {
+        PyErr_Format(PyExc_ValueError, "config.%s must be finite", name);
+        return false;
+    }
+    *out = static_cast<float>(v);
+    return true;
+}
+
+// revisit_interval == 0 would make the revisit modulus divide by zero; negative
+// min_visits disables soft pruning in a way no caller can express deliberately.
+static bool config_int(PyObject* obj, const char* name, int32_t* out, long lo) {
+    long v = PyLong_AsLong(obj);
+    if (v == -1 && PyErr_Occurred()) {
+        PyErr_Clear();
+        PyErr_Format(PyExc_ValueError, "config.%s must be an integer", name);
+        return false;
+    }
+    if (v < lo) {
+        PyErr_Format(PyExc_ValueError, "config.%s must be >= %ld", name, lo);
+        return false;
+    }
+    *out = static_cast<int32_t>(v);
+    return true;
+}
 
 typedef struct {
     PyObject_HEAD
@@ -244,15 +306,35 @@ static int PyFastTreeSearch_init(PyFastTreeSearch* self, PyObject* args, PyObjec
         val = PyObject_GetAttrString(config, "reuse");
         if (val) { cfg.reuse = PyObject_IsTrue(val); Py_DECREF(val); } else PyErr_Clear();
         val = PyObject_GetAttrString(config, "c_puct");
-        if (val) { cfg.c_puct = (float)PyFloat_AsDouble(val); Py_DECREF(val); } else PyErr_Clear();
+        if (val) {
+            bool ok = config_float(val, "c_puct", &cfg.c_puct);
+            Py_DECREF(val);
+            if (!ok) return -1;
+        } else PyErr_Clear();
         val = PyObject_GetAttrString(config, "soft_margin");
-        if (val) { cfg.soft_margin = (float)PyFloat_AsDouble(val); Py_DECREF(val); } else PyErr_Clear();
+        if (val) {
+            bool ok = config_float(val, "soft_margin", &cfg.soft_margin);
+            Py_DECREF(val);
+            if (!ok) return -1;
+        } else PyErr_Clear();
         val = PyObject_GetAttrString(config, "soft_strength");
-        if (val) { cfg.soft_strength = (float)PyFloat_AsDouble(val); Py_DECREF(val); } else PyErr_Clear();
+        if (val) {
+            bool ok = config_float(val, "soft_strength", &cfg.soft_strength);
+            Py_DECREF(val);
+            if (!ok) return -1;
+        } else PyErr_Clear();
         val = PyObject_GetAttrString(config, "min_visits");
-        if (val) { cfg.min_visits = (int32_t)PyLong_AsLong(val); Py_DECREF(val); } else PyErr_Clear();
+        if (val) {
+            bool ok = config_int(val, "min_visits", &cfg.min_visits, 0);
+            Py_DECREF(val);
+            if (!ok) return -1;
+        } else PyErr_Clear();
         val = PyObject_GetAttrString(config, "revisit_interval");
-        if (val) { cfg.revisit_interval = (int32_t)PyLong_AsLong(val); Py_DECREF(val); } else PyErr_Clear();
+        if (val) {
+            bool ok = config_int(val, "revisit_interval", &cfg.revisit_interval, 1);
+            Py_DECREF(val);
+            if (!ok) return -1;
+        } else PyErr_Clear();
     }
 
     // Minimax losses need not be losses against a fallible opponent model
@@ -450,9 +532,11 @@ static PyObject* PyFastTreeSearch_run(PyFastTreeSearch* self, PyObject* args, Py
                 PyErr_SetString(PyExc_ValueError, "Evaluator returned an invalid policy");
                 return NULL;
             }
-            for (int i = 0; i < 81; ++i) {
-                PyObject* item = PySequence_Fast_GET_ITEM(seq, i);
-                policy_buf[i] = static_cast<float>(PyFloat_AsDouble(item));
+            if (!parse_policy_81(seq, policy_buf, "Evaluator")) {
+                Py_DECREF(seq);
+                Py_DECREF(eval_res);
+                Py_XDECREF(cleanup);
+                return NULL;
             }
             Py_DECREF(seq);
             Py_DECREF(eval_res);
@@ -658,8 +742,13 @@ static PyObject* PyFastTreeSearch_run(PyFastTreeSearch* self, PyObject* args, Py
                         return NULL;
                     }
 
-                    for (int k = 0; k < 81; ++k) {
-                        parsed[i].policy[k] = static_cast<float>(PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pol_seq, k)));
+                    if (!parse_policy_81(pol_seq, parsed[i].policy, "Evaluator")) {
+                        Py_DECREF(pol_seq);
+                        Py_DECREF(seq);
+                        Py_DECREF(outputs);
+                        for (auto& path : pending) engine->release(path);
+                        Py_XDECREF(cleanup);
+                        return NULL;
                     }
                     Py_DECREF(pol_seq);
                     parsed[i].val = val;
