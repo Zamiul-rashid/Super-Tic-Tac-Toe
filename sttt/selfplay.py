@@ -8,6 +8,7 @@ from multiprocessing.connection import wait
 import time
 import traceback
 from dataclasses import asdict
+import os
 import numpy as np
 from .env import State
 from .search import TreeSearch
@@ -41,7 +42,17 @@ class RemoteEvaluator:
 
 def play_game(evaluator, simulations, seed, config, leaf_batch, match=None, use_cpp=False):
     rng = np.random.default_rng(seed)
-    if use_cpp and _HAS_CPP and CppTreeSearch is not None:
+    # M2: `use_cpp` is a REQUIREMENT here, not a preference. Each spawned worker
+    # re-evaluates its own _HAS_CPP, so a worker whose extension failed to load
+    # used to fall through to the Python TreeSearch while the owner went on
+    # believing the whole iteration ran natively. Fail loudly instead; the pool
+    # handshake below is meant to catch this before any game is dispatched.
+    if use_cpp:
+        if not (_HAS_CPP and CppTreeSearch is not None):
+            raise RuntimeError(
+                'C++ backend required for self-play but sttt_cpp is unavailable '
+                'in this worker process. Run "make -C cpp"; refusing to silently '
+                'fall back to the Python search.')
         tree = CppTreeSearch(evaluator, rng, config)
     else:
         tree = TreeSearch(evaluator, rng, config)
@@ -107,6 +118,21 @@ def _worker(connection):
             message = connection.recv()
             if message[0] == 'stop':
                 break
+            if message[0] == 'handshake':
+                # Report what THIS process can actually do, before it is asked
+                # to play anything.
+                try:
+                    from .cpp_env import get_cpp_provenance
+                    provenance = get_cpp_provenance()
+                except ImportError:
+                    provenance = {'available': False, 'build_id': None, 'version': None}
+                connection.send(('capabilities', {
+                    'cpp_available': bool(_HAS_CPP and CppTreeSearch is not None),
+                    'cpp_build_id': provenance.get('build_id'),
+                    'cpp_version': provenance.get('version'),
+                    'pid': os.getpid(),
+                }))
+                continue
             _, index, simulations, seed, config, leaf_batch, match, use_cpp = message
             trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch, match, use_cpp=use_cpp)
             connection.send(('game', index, trajectory, outcome, stats))
@@ -127,6 +153,7 @@ class SelfPlayPool:
             raise ValueError('Invalid inference pool configuration')
         self.batch_size, self.wait_ms, self.timeout = batch_size, wait_ms, timeout
         self.connections, self.processes = [], []
+        self.worker_capabilities = None
         ctx = mp.get_context('spawn')
         try:
             for _ in range(workers):
@@ -139,6 +166,41 @@ class SelfPlayPool:
         except BaseException:
             self.close()
             raise
+
+    def verify_backend(self, use_cpp, timeout=30):
+        """Handshake every worker before games are dispatched.
+
+        Returns the per-worker capability reports. A strict native run aborts
+        here rather than discovering a degraded worker mid-iteration -- by which
+        point part of the data would already be Python-search output labelled as
+        native.
+        """
+        reports = []
+        for connection in self.connections:
+            connection.send(('handshake',))
+        for connection in self.connections:
+            if not connection.poll(timeout):
+                raise TimeoutError('Self-play worker did not answer the backend handshake')
+            message = connection.recv()
+            if message[0] == 'error':
+                raise RuntimeError('Self-play worker failed during handshake:\n' + message[1])
+            if message[0] != 'capabilities':
+                raise RuntimeError(f'Unexpected handshake reply: {message[0]!r}')
+            reports.append(message[1])
+
+        if use_cpp:
+            degraded = [r for r in reports if not r['cpp_available']]
+            if degraded:
+                raise RuntimeError(
+                    f'{len(degraded)} of {len(reports)} self-play workers lack the '
+                    f'native search (pids {[r["pid"] for r in degraded]}). Refusing '
+                    f'to start: those workers would run the Python search while the '
+                    f'run reported "cpp".')
+            builds = {r['cpp_build_id'] for r in reports}
+            if len(builds) > 1:
+                raise RuntimeError(f'Self-play workers loaded different native builds: {builds}')
+        self.worker_capabilities = reports
+        return reports
 
     def __enter__(self):
         return self
@@ -167,6 +229,9 @@ class SelfPlayPool:
         if matches is not None and len(matches) != len(seeds):
             raise ValueError('One match specification is required per seed')
         model.eval()
+        # Verified once per pool; workers are long-lived across iterations.
+        if getattr(self, 'worker_capabilities', None) is None:
+            self.verify_backend(use_cpp)
         results, active = {}, set()
         next_game = 0
         metrics = dict(inference_batches=0, inference_positions=0, max_inference_batch=0,

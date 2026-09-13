@@ -198,3 +198,36 @@ class TestCheckpointBotResolvesUpFront(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestWorkerHandshake(unittest.TestCase):
+    """Spawned workers must prove their backend before any game is dispatched."""
+
+    def test_pool_handshake_reports_capabilities(self):
+        from sttt.selfplay import SelfPlayPool
+        with SelfPlayPool(workers=2, batch_size=4) as pool:
+            reports = pool.verify_backend(use_cpp=False)
+        self.assertEqual(len(reports), 2)
+        for report in reports:
+            self.assertIn("cpp_available", report)
+            self.assertIn("cpp_build_id", report)
+            self.assertIsInstance(report["pid"], int)
+
+    def test_strict_native_run_verifies_every_worker(self):
+        from sttt.selfplay import SelfPlayPool
+        from sttt.cpp_env import is_cpp_available
+        if not is_cpp_available():
+            self.skipTest("native search not built")
+        with SelfPlayPool(workers=2, batch_size=4) as pool:
+            reports = pool.verify_backend(use_cpp=True)
+        self.assertTrue(all(r["cpp_available"] for r in reports))
+        builds = {r["cpp_build_id"] for r in reports}
+        self.assertEqual(len(builds), 1, "workers must share one native build")
+
+    def test_play_game_refuses_to_degrade(self):
+        """use_cpp is a requirement: a worker without native must raise."""
+        from sttt import selfplay
+        with mock.patch.object(selfplay, "_HAS_CPP", False):
+            with self.assertRaises(RuntimeError) as ctx:
+                selfplay.play_game(None, 8, 1, SearchConfig(), 1, use_cpp=True)
+        self.assertIn("refusing to silently fall back", str(ctx.exception).lower())
