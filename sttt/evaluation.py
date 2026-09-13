@@ -201,16 +201,23 @@ def pair_bootstrap_score(results: Sequence[Any], subject: str, iterations: int =
 
 def pair_bootstrap_difference(results_a: Sequence[Any], results_b: Sequence[Any], subject: str,
                               iterations: int = 10000, seed: int = 12345,
-                              confidence: float = 0.95) -> dict[str, Any]:
-    """Paired difference (B minus A) in `subject`'s score rate on a shared corpus.
+                              confidence: float = 0.95,
+                              subject_b: str | None = None) -> dict[str, Any]:
+    """Paired difference (B minus A) in the subject's score rate on a shared corpus.
 
     Both arms must have been played from the *same* openings, which is the
     property `run_thorough_tournament.py` broke by seeding each search budget with
     `100 + simulations`. A mismatch is an error rather than a silently unpaired
     comparison.
+
+    `subject_b` names the subject in arm B when it differs from arm A. A search
+    budget sweep needs this: the arms are one checkpoint under budget-derived
+    names, so the same player appears as `...-s512` in one arm and `...-s2000`
+    in the other.
     """
+    subject_b = subject_b or subject
     ids_a, scores_a = _pair_scores(results_a, subject)
-    ids_b, scores_b = _pair_scores(results_b, subject)
+    ids_b, scores_b = _pair_scores(results_b, subject_b)
     if ids_a != ids_b:
         raise ValueError(f"Arms do not share opening pair ids: {ids_a} vs {ids_b}")
 
@@ -229,6 +236,7 @@ def pair_bootstrap_difference(results_a: Sequence[Any], results_b: Sequence[Any]
     low, high = _percentile_ci(means, confidence)
     return {
         "subject": subject,
+        "subject_b": subject_b,
         "difference": float(deltas.mean()),
         "score_rate_a": float(np.mean(scores_a)),
         "score_rate_b": float(np.mean(scores_b)),

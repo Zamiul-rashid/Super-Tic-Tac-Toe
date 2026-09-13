@@ -214,6 +214,18 @@ class TestPairBootstrap(unittest.TestCase):
             pair_bootstrap_difference(low, high, "S", iterations=10, seed=1)
         self.assertIn("opening", str(ctx.exception).lower())
 
+    def test_budget_difference_handles_a_differently_named_subject_per_arm(self):
+        """A budget sweep is one checkpoint under two budget-derived names."""
+        low, high = [], []
+        for k in range(6):
+            low += make_pair(k, "cand-s512", "AB", -1, 1)     # 0.0
+            high += make_pair(k, "cand-s2000", "AB", 1, -1)   # 1.0
+        stats = pair_bootstrap_difference(low, high, "cand-s512",
+                                          subject_b="cand-s2000", iterations=200, seed=2)
+        self.assertAlmostEqual(stats["difference"], 1.0)
+        self.assertEqual(stats["subject"], "cand-s512")
+        self.assertEqual(stats["subject_b"], "cand-s2000")
+
     def test_budget_difference_point_estimate(self):
         low, high = [], []
         for k in range(8):
