@@ -321,11 +321,41 @@ For each row, replace Pending with the actual result only after recording the co
 | M5 LR policy and resume tests | **Done** | `328f047`. `sttt/training_schedule.py`, horizon in completed iterations, verified continuity across a real save/resume. 24 tests. |
 | M6 curriculum configuration | **Done** | `17d6247`. `PopulationConfig` + `--population-config`; presets `configs/population/{baseline,candidate-utttai35}.json`; explicit `requested_kind`; per-family coverage and replay sample fractions/age in metrics; phase change + cursor rules verified in a real uttt.ai/AlphaBeta run. 26 tests; suite 504. |
 | M7 controlled evaluation | **Done** | `6140465`, `1941ea9`, `b575e3f`, `3ca848d`. `sttt/evaluation.py`; shared openings across budgets; pair-level bootstrap; provenance manifests. 56 tests; suite 481. See notes below. |
-| M8 honest benchmarks | Pending | — |
-| M9 CPU certification | Pending | — |
-| M9 GPU certification and soak | Pending | Requires real CUDA access |
-| M10 bounded strength experiments | Pending | No Elo outcome assumed |
-| M11 docs/launch/rollback | Pending | — |
+| M8 honest benchmarks | **Done** | `625cad0`. Native primitives re-measured with varied positions, consumed checksums, warm-up, median of 5: encoding was overstated ~6× (one cached state); play/movegen hold up. Categories declared; stage timers in `_train_loop`; `scripts/run_pipeline_benchmark.py` (alternating backend order, completed-work denominators, ETA). 29 tests; suite 530. |
+| M9 CPU certification | **Done (on this branch, one known failure)** | `0964a74`. Five of six CPU gates were stubs that could not fail; rewritten. native/cpu/mixed/failure/memory PASS (`runs/readiness/m9-cpu-20260914-011945/`). build FAILS on `test_f20_git_branch_isolation` only (hard-coded branch allowlist; passes on `main`). |
+| M9 GPU certification and soak | **Partial** | `gpu`/`pilot` stages are still stubs. Real CUDA evidence instead: fp16 AMP + cosine resume of run_v2 iteration 2007 for 3 + 1 iterations (`runs/readiness/cosine-burst-*`): finite losses, 10/10 updates, 0 skipped, scaler scale 65536 held and restored across the resume, cosine `completed` 3→4 with no phase reset, peak allocated 60 MiB. No soak, no pilot ETA: the RTX 4090 was at 95–100% with another job. |
+| M10 bounded strength experiments | **Skipped by decision (2026-09-14)** | Replaced by a 90-second screen of the existing run_v2 checkpoints; see "LR decision evidence" below. Cosine chosen. No Elo outcome is claimed. The five-arm screen remains available if the decision is revisited. |
+| M11 docs/launch/rollback | **Partial** | `scripts/launch_continuation.sh`: explicit checkpoint/output/config, freezes an immutable start copy, cosine + fp16 + CUDA + native, all knobs explicit, refuses an occupied output dir. Doc reconciliation (README, POPULATION_TRAINING.md, handovers) not done. |
+
+### LR decision evidence (2026-09-14)
+
+The §3 hypothesis was "flat `1e-3` caused model-1600 to outperform model-2000".
+Tested directly on the ten saved run_v2 checkpoints (1550–2000), each playing the
+**same** 40-game opening corpus against `cpp-alphabeta:6` at 256 simulations, CPU:
+
+| ckpt | score | 95% pair CI | ckpt | score | 95% pair CI |
+| --- | --- | --- | --- | --- | --- |
+| 1550 | 52.5% | 40–65 | 1800 | 47.5% | 36–59 |
+| **1600** | **57.5%** | 49–66 | 1850 | 40.0% | 28–53 |
+| 1650 | 42.5% | 33–53 | 1900 | 33.8% | 25–43 |
+| 1700 | 47.5% | 36–59 | 1950 | 52.5% | 40–65 |
+| 1750 | 48.8% | 34–63 | **2000** | **53.8%** | 38–69 |
+
+- **"1600 beats 2000" is not supported**: 57.5% vs 53.8% with heavily
+  overlapping intervals; late (1850–2000) minus early (1550–1700) is −5.0 points,
+  inside noise.
+- **What the data does show is oscillation.** Adjacent checkpoints 50 iterations
+  apart swing 57→42 and 34→53, and training-loss stdev over 100-iteration windows
+  rose from 0.005 (1400–1600) to 0.019 (1900–2000) while the mean kept falling
+  (1.805 → 1.625). That is the signature of a step size too large for the basin
+  reached — which checkpoint was saved was a lottery.
+- **Decision:** lower the LR late. The data cannot separate constant `3e-4` from
+  cosine; cosine subsumes the lower late LR and anneals to a floor, so it is the
+  default for a fixed-length continuation. **No Elo forecast is attached.**
+- **Limits:** 40 games per checkpoint gives ±12-point intervals; this is a screen
+  that is sufficient to choose a setting, not a proof of its effect. The
+  `run_v2/latest.pt` (2007) replay is 471 MB and is serialized every iteration:
+  `checkpoint_write` was 8.7–10.1 s of a 40–55 s iteration in the burst.
 
 ### M6 evidence (2026-09-14)
 
