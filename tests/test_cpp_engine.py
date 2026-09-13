@@ -2,7 +2,7 @@
 import unittest
 import random
 import numpy as np
-from sttt.env import State, LINES
+from sttt.env import State, LINES, state_key
 from sttt.cpp_env import CppState, FastState, is_cpp_available, to_python_state, to_fast_state
 from sttt.learning import encode as py_encode
 
@@ -209,16 +209,43 @@ class TestCppBitboardEngine(unittest.TestCase):
             enc_cpp = np.array(fs.encode(), dtype=np.float32)
             np.testing.assert_array_almost_equal(enc_cpp, enc_py)
 
-    def test_state_hashing_and_dict_keys(self):
+    def test_state_key_dict_keys(self):
+        """FastState is mutable, so dict keys come from state_key(), not hash()."""
         s1 = FastState()
         s2 = FastState()
-        self.assertEqual(hash(s1), hash(s2))
-        d = {s1: "root"}
-        self.assertIn(s2, d)
+        self.assertEqual(state_key(s1), state_key(s2))
+        d = {state_key(s1): "root"}
+        self.assertIn(state_key(s2), d)
         s3 = s1.play(40)
-        self.assertNotIn(s3, d)
-        d[s3] = "child"
+        self.assertNotIn(state_key(s3), d)
+        d[state_key(s3)] = "child"
         self.assertEqual(len(d), 2)
+
+    def test_mutable_states_are_unhashable(self):
+        """play_inplace would move a hashed state to a different bucket."""
+        for state in (FastState(), CppState()):
+            with self.assertRaises(TypeError):
+                hash(state)
+            with self.assertRaises(TypeError):
+                {state: "nope"}
+        # The frozen Python State stays hashable; only the mutable ones changed.
+        self.assertIsInstance(hash(State()), int)
+
+    def test_state_key_tracks_inplace_mutation(self):
+        """The key must follow the mutation -- that is why hashing was unsafe."""
+        s = FastState()
+        before = state_key(s)
+        s.play_inplace(40)
+        self.assertNotEqual(before, state_key(s))
+
+    def test_clone_is_independent(self):
+        """A clone shares no storage: play_inplace on one is invisible to the other."""
+        for original in (FastState(), CppState()):
+            copy = original.clone()
+            self.assertEqual(state_key(original), state_key(copy))
+            copy.play_inplace(40)
+            self.assertNotEqual(state_key(original), state_key(copy))
+            self.assertEqual(state_key(original), state_key(type(original)()))
 
     def test_init_with_cells_only_and_none_boards(self):
         """Verify CppState and FastState handle default and None boards without TypeError."""
@@ -548,18 +575,19 @@ class TestDifferentialParityAndEdgeCases(unittest.TestCase):
         with self.assertRaises(ValueError):
             FastState(boards=[0] * 8 + [5])
 
-    def test_11_hash_consistency_with_python_state(self):
-        """FastState, CppState, and Python State must have equal hashes when states are equal."""
+    def test_11_state_key_consistency_with_python_state(self):
+        """Equal states must produce equal state_key()s across all three backends."""
         py = State()
         fs = FastState()
         cs = CppState()
         self.assertEqual(py, fs)
         self.assertEqual(py, cs)
-        self.assertEqual(hash(py), hash(fs))
-        self.assertEqual(hash(py), hash(cs))
-        self.assertIn(fs, {py})
-        self.assertIn(cs, {py})
-        self.assertIn(py, {fs})
+        self.assertEqual(state_key(py), state_key(fs))
+        self.assertEqual(state_key(py), state_key(cs))
+        # Keys built from one backend are found in a set built from another.
+        self.assertIn(state_key(fs), {state_key(py)})
+        self.assertIn(state_key(cs), {state_key(py)})
+        self.assertIn(state_key(py), {state_key(fs)})
 
         # Play several moves and check hash consistency at each step
         rng = np.random.default_rng(42)
@@ -573,10 +601,10 @@ class TestDifferentialParityAndEdgeCases(unittest.TestCase):
             cs = cs.play(m)
             self.assertEqual(py, fs)
             self.assertEqual(py, cs)
-            self.assertEqual(hash(py), hash(fs))
-            self.assertEqual(hash(py), hash(cs))
-            self.assertIn(fs, {py})
-            self.assertIn(cs, {py})
+            self.assertEqual(state_key(py), state_key(fs))
+            self.assertEqual(state_key(py), state_key(cs))
+            self.assertIn(state_key(fs), {state_key(py)})
+            self.assertIn(state_key(cs), {state_key(py)})
 
 
 if __name__ == "__main__":

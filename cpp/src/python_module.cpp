@@ -273,6 +273,10 @@ static PyObject* PyFastState_reduce(PyFastState* self, PyObject* Py_UNUSED(ignor
     return res;
 }
 
+// Defined below, referenced by the method table above them.
+static PyObject* PyFastState_state_key(PyFastState* s, PyObject* ignored);
+static PyObject* PyFastState_clone(PyFastState* self, PyObject* ignored);
+
 static PyMethodDef PyFastState_methods[] = {
     {"legal_actions", (PyCFunction)PyFastState_legal_actions, METH_NOARGS, "Return list of legal actions (0..80)"},
     {"play", (PyCFunction)PyFastState_play, METH_VARARGS, "Play an action, returning a new FastState"},
@@ -282,6 +286,10 @@ static PyMethodDef PyFastState_methods[] = {
     {"evaluate", (PyCFunction)PyFastState_evaluate, METH_NOARGS, "Heuristic evaluation score in [-1, 1] matching sttt.bots.value()"},
     {"value", (PyCFunction)PyFastState_evaluate, METH_NOARGS, "Alias for evaluate() matching sttt.bots.value()"},
     {"render", (PyCFunction)PyFastState_render, METH_NOARGS, "Render board as ASCII string"},
+    {"state_key", (PyCFunction)PyFastState_state_key, METH_NOARGS,
+     "Immutable canonical (cells, boards, turn, forced, result) tuple for dict/set keys"},
+    {"clone", (PyCFunction)PyFastState_clone, METH_NOARGS,
+     "Return an independent copy that shares no storage with this state"},
     {"__reduce__", (PyCFunction)PyFastState_reduce, METH_NOARGS, "Pickle serialization support"},
     {NULL, NULL, 0, NULL}
 };
@@ -356,10 +364,13 @@ static PyObject* PyFastState_richcompare(PyObject* v, PyObject* w, int op) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-static Py_hash_t PyFastState_hash(PyObject* self) {
-    PyFastState* s = (PyFastState*)self;
-    // Build the same tuple Python State.__hash__ uses:
-    // hash((cells, boards, turn, forced, result))
+// M1: FastState is MUTABLE (play_inplace rewrites it), so it must not be
+// hashable -- a state used as a dict key would silently move to a different
+// bucket the moment it was advanced, and lookups would miss. tp_hash is set to
+// PyObject_HashNotImplemented below. Callers that need a dictionary/set key ask
+// for this immutable canonical tuple instead, which is identical across the
+// Python, FastState and CppState backends so keys stay interchangeable.
+static PyObject* PyFastState_state_key(PyFastState* s, PyObject* /*ignored*/) {
     PyObject* cells = PyFastState_get_cells(s, NULL);
     PyObject* boards = PyFastState_get_boards(s, NULL);
     PyObject* result_obj;
@@ -369,20 +380,26 @@ static Py_hash_t PyFastState_hash(PyObject* self) {
     } else {
         result_obj = PyLong_FromLong(s->state.result);
     }
-    PyObject* key = Py_BuildValue("(OOiiO)",
-        cells, boards, (int)s->state.turn, (int)s->state.forced, result_obj);
-    Py_hash_t h = -1;
-    if (key) {
-        h = PyObject_Hash(key);
-        Py_DECREF(key);
+    PyObject* key = NULL;
+    if (cells && boards && result_obj) {
+        key = Py_BuildValue("(OOiiO)", cells, boards, (int)s->state.turn,
+                            (int)s->state.forced, result_obj);
     }
     Py_XDECREF(cells);
     Py_XDECREF(boards);
     Py_XDECREF(result_obj);
-    if (h == -1 && !PyErr_Occurred()) {
-        h = -2;  // Python convention: -1 is reserved for errors
+    return key;
+}
+
+// An independent copy: the returned state shares no storage with the original,
+// so play_inplace on either one cannot be observed by the other.
+static PyObject* PyFastState_clone(PyFastState* self, PyObject* /*ignored*/) {
+    PyFastState* out = (PyFastState*)PyFastStateType.tp_alloc(&PyFastStateType, 0);
+    if (out == NULL) {
+        return NULL;
     }
-    return h;
+    out->state = self->state;
+    return (PyObject*)out;
 }
 
 static PyObject* PyFastState_repr(PyFastState* self) {
@@ -565,7 +582,8 @@ PyMODINIT_FUNC PyInit_sttt_cpp(void) {
     PyFastStateType.tp_new = PyFastState_new;
     PyFastStateType.tp_init = (initproc)PyFastState_init;
     PyFastStateType.tp_repr = (reprfunc)PyFastState_repr;
-    PyFastStateType.tp_hash = (hashfunc)PyFastState_hash;
+    // Mutable -> deliberately unhashable; use state_key() for dict/set keys.
+    PyFastStateType.tp_hash = PyObject_HashNotImplemented;
     PyFastStateType.tp_richcompare = PyFastState_richcompare;
     PyFastStateType.tp_methods = PyFastState_methods;
     PyFastStateType.tp_getset = PyFastState_getseters;

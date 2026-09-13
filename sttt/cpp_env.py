@@ -189,8 +189,17 @@ class CppState:
             return self._fast == other
         return False
 
-    def __hash__(self) -> int:
-        return hash(self._fast)
+    # Mutable (play_inplace), so deliberately unhashable -- see FastState.
+    # Use state_key() when a dictionary or set key is needed.
+    __hash__ = None
+
+    def state_key(self):
+        """Immutable canonical tuple, equal across all three state backends."""
+        return self._fast.state_key()
+
+    def clone(self) -> "CppState":
+        """An independent copy; play_inplace on either is invisible to the other."""
+        return CppState(_fast=self._fast.clone())
 
     def __repr__(self) -> str:
         return repr(self._fast)

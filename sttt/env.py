@@ -9,6 +9,19 @@ def winner(cells):
             return cells[a]
     return 0
 
+def state_key(state):
+    """Immutable canonical identity for a state from any backend.
+
+    ``State`` is a frozen dataclass and is hashable, but ``FastState`` and
+    ``CppState`` are mutable (``play_inplace``) and deliberately are not. Key
+    dictionaries and sets on this tuple instead; it compares equal across all
+    three backends, so keys built from one are found by another.
+    """
+    result = state.result
+    return (tuple(state.cells), tuple(state.boards), int(state.turn),
+            int(state.forced), None if result is None else int(result))
+
+
 @dataclass(frozen=True)
 class State:
     cells: tuple = (0,) * 81
