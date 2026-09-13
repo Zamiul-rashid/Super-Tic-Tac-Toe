@@ -4,6 +4,7 @@ from collections import Counter, deque
 from dataclasses import asdict
 import json
 from pathlib import Path
+import os
 import time
 import numpy as np
 import torch
@@ -35,6 +36,52 @@ def search_config(args):
     return SearchConfig(soft_pruning=not getattr(args, 'no_soft_pruning', False),
                         proofs=not getattr(args, 'no_proofs', False),
                         reuse=not getattr(args, 'no_reuse', False))
+
+
+class RunOwnership:
+    """Exclusive per-output-directory lock held for the whole run.
+
+    Two trainers pointed at one output directory would interleave writes to
+    latest.pt and to the same snapshot names, each overwriting the other's
+    iterations while both reported progress. The lock is taken before any
+    worker is spawned so the loser exits without having started a pool.
+    """
+
+    def __init__(self, output):
+        self.path = Path(output) / '.run.lock'
+        self._handle = None
+
+    def acquire(self):
+        import fcntl
+        self._handle = open(self.path, 'w')
+        try:
+            fcntl.flock(self._handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            self._handle.close()
+            self._handle = None
+            raise RuntimeError(
+                f'another training process already owns {self.path.parent} '
+                f'(lock: {self.path}). Use a different --output; two writers '
+                f'would overwrite each other\'s checkpoints.')
+        self._handle.write(f'{os.getpid()}\n')
+        self._handle.flush()
+        return self
+
+    def release(self):
+        if self._handle is not None:
+            import fcntl
+            try:
+                fcntl.flock(self._handle.fileno(), fcntl.LOCK_UN)
+            finally:
+                self._handle.close()
+                self._handle = None
+
+    def __enter__(self):
+        return self.acquire()
+
+    def __exit__(self, *exc):
+        self.release()
+        return False
 
 
 def resolve_device(device):
@@ -72,12 +119,27 @@ def train(args):
             print('Using FP16 Automatic Mixed Precision on CUDA', flush=True)
     if 'numpy_rng_state' in saved:
         rng.bit_generator.state = saved['numpy_rng_state']
+    # Torch's stream drives dropout and any torch-side sampling; without
+    # restoring it a resumed run diverged from an uninterrupted one even with
+    # the numpy stream restored. Absent in legacy checkpoints, which simply
+    # keep the process default.
+    if saved.get('torch_rng_state') is not None:
+        torch.set_rng_state(torch.as_tensor(saved['torch_rng_state'], dtype=torch.uint8))
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    # M4: one GradScaler per PROCESS. It used to be constructed inside the
+    # iteration loop, so every iteration threw away the loss scale the previous
+    # one had converged on and restarted the scale-discovery ramp -- silently
+    # skipping optimizer updates at the start of each iteration, forever.
+    use_fp16 = getattr(args, 'fp16', False) and str(device) == 'cuda'
+    scaler = torch.amp.GradScaler('cuda', enabled=use_fp16)
+    if use_fp16 and saved.get('scaler'):
+        scaler.load_state_dict(saved['scaler'])
     if 'optimizer' in saved:
         optimizer.load_state_dict(saved['optimizer'])
     replay = deque(saved.get('replay', []), maxlen=args.buffer)
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
+    ownership = RunOwnership(output).acquire()
     engine_registry = load_engine_registry(args.engine_config) if getattr(args, 'engine_config', None) else {}
     if getattr(args, 'population', False):
         from .engine_runtime import activate_runtime
@@ -100,8 +162,12 @@ def train(args):
         finally:
             probe.close()
     print(f'{device}: {sum(p.numel() for p in model.parameters()):,} parameters ({arch}); workers={args.workers}; replay stays in RAM', flush=True)
-    with SelfPlayPool(min(args.workers, args.games), args.inference_batch, args.inference_wait_ms) as pool:
-        _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool, engine_registry)
+    try:
+        with SelfPlayPool(min(args.workers, args.games), args.inference_batch, args.inference_wait_ms) as pool:
+            _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
+                        engine_registry, scaler=scaler, use_fp16=use_fp16)
+    finally:
+        ownership.release()
 
 
 def _utttai_command_parts(engine_registry):
@@ -110,7 +176,8 @@ def _utttai_command_parts(engine_registry):
     return command.split() if isinstance(command, str) else tuple(command)
 
 
-def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool, engine_registry=None):
+def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
+                engine_registry=None, scaler=None, use_fp16=False):
     start_iteration = saved.get('iteration', 0)
     population_games = saved.get('population_games', 0)
     max_iter = getattr(args, 'max_iterations', None)
@@ -150,8 +217,9 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
 
         model.train()
         losses = []
-        use_fp16 = getattr(args, 'fp16', False) and str(device) == 'cuda'
-        scaler = torch.amp.GradScaler('cuda', enabled=use_fp16) if use_fp16 else None
+        policy_losses, value_losses, grad_norms = [], [], []
+        optimizer_updates = 0
+        skipped_updates = 0
         for _ in range(args.steps):
             indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
             batch = [replay[int(i)] for i in indices]
@@ -166,23 +234,76 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 logits = logits.masked_fill(~mask, mask_val)
                 log_p = logits.log_softmax(-1)
                 log_p = torch.where(mask, log_p, torch.zeros_like(log_p))
-                loss = -(pi * log_p).sum(-1).mean() + (value - z).square().mean()
-            if scaler:
+                policy_loss = -(pi * log_p).sum(-1).mean()
+                value_loss = (value - z).square().mean()
+                loss = policy_loss + value_loss
+
+            # Never commit an iteration built on a nonfinite loss: the optimizer
+            # would poison every parameter and the run would continue reporting
+            # progress.
+            if not torch.isfinite(loss):
+                raise RuntimeError(
+                    f'iteration {iteration}: nonfinite training loss '
+                    f'(policy={policy_loss.item()}, value={value_loss.item()}); '
+                    f'refusing to apply the update')
+
+            if use_fp16:
                 scaler.scale(loss).backward()
                 scaler.unscale_(optimizer)
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
+                # Measured BEFORE clipping, so the number reports the real
+                # gradient magnitude rather than the clip threshold.
+                grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
+                scale_before = scaler.get_scale()
                 scaler.step(optimizer)
                 scaler.update()
+                # step() is a no-op when the unscaled gradients are nonfinite;
+                # AMP signals that by lowering the scale.
+                if scaler.get_scale() < scale_before:
+                    skipped_updates += 1
+                else:
+                    optimizer_updates += 1
             else:
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
+                grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
                 optimizer.step()
+                optimizer_updates += 1
             losses.append(loss.item())
+            policy_losses.append(policy_loss.item())
+            value_losses.append(value_loss.item())
+            grad_norms.append(float(grad_norm))
+        if args.steps and optimizer_updates == 0:
+            raise RuntimeError(
+                f'iteration {iteration}: all {args.steps} optimizer updates were '
+                f'skipped by the AMP scaler; no training occurred. Refusing to '
+                f'save this iteration as progress.')
+
+        lr = optimizer.param_groups[0]['lr']
+        print(f'iteration {iteration}: loss={np.mean(losses):.4f} '
+              f'policy={np.mean(policy_losses):.4f} value={np.mean(value_losses):.4f} '
+              f'lr={lr:.3e} grad_norm={np.mean(grad_norms):.3f} '
+              f'updates={optimizer_updates} skipped={skipped_updates}'
+              + (f' scale={scaler.get_scale():.0f}' if use_fp16 else ''), flush=True)
+
+        # M4: the checkpoint schema now carries everything a full resume needs.
+        # Scaler and torch RNG state were absent, so resuming an fp16 run
+        # restarted loss-scale discovery and drew a different augmentation
+        # stream than an uninterrupted run would have.
         checkpoint = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(),
                       'iteration': iteration, 'replay': list(replay), 'arch': arch,
                       'training_config': vars(args), 'search_config': asdict(search_config(args)),
                       'numpy_rng_state': rng.bit_generator.state,
-                      'population_games': population_games}
+                      'torch_rng_state': torch.get_rng_state(),
+                      'scaler': scaler.state_dict() if use_fp16 else None,
+                      'precision': 'fp16' if use_fp16 else 'fp32',
+                      'backend_info': getattr(args, '_backend_info', None),
+                      'population_games': population_games,
+                      'metrics': {'loss': float(np.mean(losses)),
+                                  'policy_loss': float(np.mean(policy_losses)),
+                                  'value_loss': float(np.mean(value_losses)),
+                                  'lr': float(lr),
+                                  'grad_norm': float(np.mean(grad_norms)),
+                                  'optimizer_updates': optimizer_updates,
+                                  'skipped_updates': skipped_updates}}
         temporary = output / 'latest.tmp'
         torch.save(checkpoint, temporary)
         temporary.replace(output / 'latest.pt')
