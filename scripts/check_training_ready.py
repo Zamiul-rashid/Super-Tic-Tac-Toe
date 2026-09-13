@@ -37,6 +37,15 @@ if str(_REPO_ROOT) not in sys.path:
 
 import sttt.cpp_env as ce
 
+# RECURSION GUARD, set at import. The build gate runs the full test suite, and
+# the suite contains tests that invoke the build gate -- directly and by
+# spawning this file as a CLI. Marking the environment here means every child
+# process of a test run inherits the flag, so the nested gate skips the
+# full-suite check instead of forking another 530-test run.
+_main_spec = getattr(sys.modules.get("__main__"), "__spec__", None)
+if (getattr(_main_spec, "name", "") or "").startswith(("unittest", "pytest")):
+    os.environ["STTT_READINESS_IN_SUITE"] = "1"
+
 
 def get_git_revision() -> str:
     """Return current git revision short hash."""
@@ -344,6 +353,59 @@ class ReadinessRunner:
                 "manifest": manifest,
             }
 
+        # Check 8: Execute the CURRENT FULL SUITE, not only the native modules.
+        # M9 stage 1 requires it. Checks 6 and 7 alone would pass while the rest
+        # of the suite was broken: 6 runs ~40 native tests and 7 only counts
+        # what discovery *found* without running it.
+        #
+        # RECURSION GUARD. The suite itself contains tests that invoke this
+        # stage, so without this flag the gate runs the suite, which runs the
+        # gate, which runs the suite -- an exponential process explosion, not a
+        # slow test run. When the gate is reached from inside a suite run, the
+        # full-suite check records itself as skipped-nested; the outermost run
+        # is the one that actually executes it.
+        main_module = sys.modules.get("__main__")
+        main_name = getattr(getattr(main_module, "__spec__", None), "name", "") or ""
+        under_unittest = main_name.startswith("unittest") or main_name.startswith("pytest")
+        if os.environ.get("STTT_READINESS_IN_SUITE") == "1" or under_unittest:
+            checks["full_suite"] = {"status": "skipped_nested",
+                                    "reason": "invoked from within a test-suite run"}
+            print("[build] Nested invocation: skipping the full-suite check.")
+            elapsed = time.time() - t0
+            stage_result = {"stage": "build", "status": "passed", "duration_sec": elapsed,
+                            "checks": checks, "manifest": manifest}
+            manifest_file = stage_dir / "manifest.json"
+            manifest_file.write_text(json.dumps(stage_result, indent=2))
+            return stage_result
+
+        print(f"[build] Executing the full discovered suite ({total_discovered} tests)...")
+        suite_env = {**os.environ, "STTT_READINESS_IN_SUITE": "1"}
+        suite_res = subprocess.run(
+            [sys.executable, "-m", "unittest", "discover", "-s", "tests"],
+            cwd=self.repo_root, capture_output=True, text=True, env=suite_env,
+        )
+        suite_output = suite_res.stdout + suite_res.stderr
+        failed_names = sorted({
+            line.split(" ")[1] for line in suite_output.splitlines()
+            if line.startswith("FAIL: ") or line.startswith("ERROR: ")
+        })
+        ran_line = [l for l in suite_output.splitlines() if l.startswith("Ran ")]
+        checks["full_suite"] = {
+            "exit_code": suite_res.returncode,
+            "summary": ran_line[-1] if ran_line else None,
+            "failed_tests": failed_names,
+        }
+        if suite_res.returncode != 0:
+            return {
+                "stage": "build",
+                "status": "failed",
+                "duration_sec": time.time() - t0,
+                "error": ("Full test suite failed: "
+                          + ", ".join(failed_names) + "\n" + suite_output[-4000:]),
+                "checks": checks,
+                "manifest": manifest,
+            }
+
         elapsed = time.time() - t0
         stage_result = {
             "stage": "build",
@@ -360,81 +422,116 @@ class ReadinessRunner:
         return stage_result
 
     def run_stage_native(self) -> dict[str, Any]:
-        """Stage 2: Native Integration Gate (SelfPlayPool, MCTS worker reuse, shape verification)."""
+        """Stage 2: two spawned workers, four complete games, twice, with a model
+        update in between; worker identity reused and the native backend actually
+        used.
+
+        The previous implementation was written against `sttt.model.PolicyValueNet`
+        and `pool.play_games()`, neither of which exists, so this gate had never
+        executed successfully.
+        """
         print("\n==========================================")
         print("STAGE 2: NATIVE INTEGRATION GATE")
         print("==========================================")
         t0 = time.time()
         stage_dir = self.output_dir / "native"
         stage_dir.mkdir(parents=True, exist_ok=True)
+        checks: dict[str, Any] = {}
+
+        def fail(message):
+            result = {"stage": "native", "status": "failed",
+                      "duration_sec": time.time() - t0, "error": message, "checks": checks}
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
 
         if self.backend != "cpp":
-            stage_result = {
-                "stage": "native",
-                "status": "skipped",
-                "duration_sec": time.time() - t0,
-                "reason": "Python backend specified; native integration gate applies to --backend cpp.",
-            }
-            (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-            return stage_result
+            result = {"stage": "native", "status": "skipped",
+                      "duration_sec": time.time() - t0,
+                      "reason": "Python backend specified; native integration gate applies to --backend cpp."}
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
 
         if not ce.is_cpp_available():
-            stage_result = {
-                "stage": "native",
-                "status": "failed",
-                "duration_sec": time.time() - t0,
-                "error": "C++ backend unavailable for native integration test.",
-            }
-            (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-            return stage_result
+            return fail("C++ backend unavailable for the native integration gate.")
 
         try:
             import numpy as np
-            import torch
+            from sttt.learning import create_model
+            from sttt.search import SearchConfig
             from sttt.selfplay import SelfPlayPool
-            from sttt.model import PolicyValueNet
 
-            model = PolicyValueNet()
-            model.eval()
+            use_cpp = self.backend == "cpp"
+            config = SearchConfig()
+            for arch in ("mlp", "resnet"):
+                model = create_model(arch).eval()
+                with SelfPlayPool(2, batch_size=8, wait_ms=2.) as pool:
+                    reports = pool.verify_backend(use_cpp)
+                    checks[f"{arch}_worker_reports"] = reports
+                    if len(reports) != 2:
+                        return fail(f"expected 2 worker handshakes, got {len(reports)}")
+                    for report in reports:
+                        if use_cpp and not report.get("cpp_available"):
+                            return fail(f"worker reports no native build: {report}")
+                    pids_before = [p.pid for p in pool.processes]
 
-            # Spawn 2 workers, inference_batch 8
-            pool = SelfPlayPool(model=model, workers=2, inference_batch=8)
-            try:
-                # Run 4 games, 32 simulations, leaf batch 4
-                trajectories = pool.play_games(
-                    num_games=4,
-                    simulations=32,
-                    leaf_batch=4,
-                    backend=self.backend,
-                )
-                assert len(trajectories) == 4, f"Expected 4 trajectories, got {len(trajectories)}"
-                for traj in trajectories:
-                    for s, p, v in traj:
-                        assert p.shape == (81,), f"Policy shape mismatch: {p.shape}"
-                        assert np.isclose(p.sum(), 1.0, atol=1e-3), "Policy not normalized"
-            finally:
-                pool.close()
+                    rounds = []
+                    for round_index in range(2):
+                        if round_index == 1:
+                            # Model update between rounds: weights change, the
+                            # same worker processes must be reused.
+                            with __import__("torch").no_grad():
+                                for parameter in model.parameters():
+                                    parameter.add_(0.01)
+                        seeds = [11 + round_index * 10 + i for i in range(4)]
+                        results, metrics = pool.run(model, seeds, 32, config, 4, use_cpp=use_cpp)
+                        if len(results) != 4:
+                            return fail(f"expected 4 games, got {len(results)}")
+                        for trajectory, outcome, stats in results:
+                            if outcome not in (-1, 0, 1):
+                                return fail(f"illegal game outcome {outcome}")
+                            for state, pi in trajectory:
+                                if pi.shape != (81,):
+                                    return fail(f"policy shape {pi.shape}")
+                                if not np.isclose(pi.sum(), 1.0, atol=1e-3):
+                                    return fail("policy is not normalized")
+                                legal = set(state.legal_actions())
+                                if not set(np.flatnonzero(pi)).issubset(legal):
+                                    return fail("policy puts mass on an illegal action")
+                        rounds.append({"games": len(results),
+                                       "inference_positions": metrics["inference_positions"],
+                                       "mean_inference_batch": metrics["mean_inference_batch"]})
+                    pids_after = [p.pid for p in pool.processes]
+                    if pids_before != pids_after:
+                        return fail(f"workers were not reused: {pids_before} -> {pids_after}")
+                    checks[f"{arch}_rounds"] = rounds
+                    checks[f"{arch}_worker_pids"] = pids_before
 
-            stage_result = {
-                "stage": "native",
-                "status": "passed",
-                "duration_sec": time.time() - t0,
-                "details": {
-                    "games_played": len(trajectories),
-                    "workers": 2,
-                    "simulations": 32,
-                },
-            }
-        except Exception as e:
-            stage_result = {
-                "stage": "native",
-                "status": "failed",
-                "duration_sec": time.time() - t0,
-                "error": str(e),
-            }
+                # Cleanup: no worker may outlive the pool.
+                alive = [p.pid for p in pool.processes if p.is_alive()]
+                if alive:
+                    return fail(f"workers still alive after pool close: {alive}")
 
-        (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-        return stage_result
+            # The plan asks this gate to exercise the Python reference backend as
+            # well, so a native-only regression cannot hide behind it.
+            model = create_model("mlp").eval()
+            with SelfPlayPool(2, batch_size=8, wait_ms=2.) as pool:
+                pool.verify_backend(False)
+                results, _ = pool.run(model, [91, 92, 93, 94], 32, config, 4, use_cpp=False)
+                if len(results) != 4:
+                    return fail(f"python backend produced {len(results)} games, expected 4")
+                for trajectory, outcome, stats in results:
+                    if outcome not in (-1, 0, 1):
+                        return fail(f"python backend illegal outcome {outcome}")
+                checks["python_backend_games"] = len(results)
+
+            result = {"stage": "native", "status": "passed",
+                      "duration_sec": time.time() - t0, "checks": checks}
+        except Exception as exc:                         # noqa: BLE001
+            return fail(f"{type(exc).__name__}: {exc}")
+
+        (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+        print(f"[native] Stage PASSED in {result['duration_sec']:.2f}s")
+        return result
 
     def run_stage_cpu(self) -> dict[str, Any]:
         """Stage 3: CPU Training & Resume Gate."""
@@ -481,6 +578,12 @@ class ReadinessRunner:
             "--eval-every",
             "0",
         ]
+
+        # Snapshot untrained weights so "the model actually moved" is checkable.
+        import torch as _torch
+        from sttt.learning import create_model as _create_model
+        _torch.manual_seed(0)
+        _torch.save(_create_model("mlp").state_dict(), stage_dir / "initial_weights.pt")
 
         print(f"[cpu] Executing training: {' '.join(cmd_init)}")
         res_init = subprocess.run(cmd_init, cwd=self.repo_root, capture_output=True, text=True)
@@ -552,10 +655,71 @@ class ReadinessRunner:
             (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
             return stage_result
 
+        # The commands above only prove training did not crash. The plan requires
+        # asserting what the run actually produced, so a silently degenerate run
+        # (no iteration advance, unchanged weights, lost optimizer state) cannot
+        # pass this gate.
+        import torch
+
+        def cpu_fail(message):
+            result = {"stage": "cpu", "status": "failed",
+                      "duration_sec": time.time() - t0, "error": message,
+                      "checks": checks}
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
+
+        checks: dict[str, Any] = {}
+        after = torch.load(latest_ckpt, map_location="cpu", weights_only=True)
+
+        # Iteration advancement: 2 initial + 1 resumed.
+        checks["iteration"] = int(after.get("iteration", -1))
+        if checks["iteration"] != 3:
+            return cpu_fail(f"expected iteration 3 after 2 + 1, got {checks['iteration']}")
+
+        # Full-resume state must survive.
+        for field in ("optimizer", "replay", "lr_schedule", "numpy_rng_state", "arch"):
+            if after.get(field) is None:
+                return cpu_fail(f"checkpoint lost '{field}' across the resume")
+        checks["replay_positions"] = len(after["replay"])
+        checks["optimizer_param_groups"] = len(after["optimizer"]["param_groups"])
+        checks["lr_schedule"] = after["lr_schedule"]
+        if not after["replay"]:
+            return cpu_fail("replay buffer is empty after training")
+        if not after["optimizer"].get("state"):
+            return cpu_fail("optimizer moments were not preserved across the resume")
+
+        # Finite losses, and the model actually moved.
+        rows = [json.loads(line) for line in
+                (run_output / "metrics.jsonl").read_text().splitlines() if line.strip()]
+        losses = [r["loss"] for r in rows if "loss" in r]
+        checks["losses"] = losses
+        if len(losses) != 3:
+            return cpu_fail(f"expected 3 metric rows, got {len(losses)}")
+        import math
+        if not all(math.isfinite(v) for v in losses):
+            return cpu_fail(f"nonfinite training loss recorded: {losses}")
+
+        first_snapshot = after["model"]
+        baseline = torch.load(stage_dir / "initial_weights.pt", map_location="cpu",
+                              weights_only=True) if (stage_dir / "initial_weights.pt").is_file() else None
+        if baseline is not None:
+            changed = any(not torch.equal(first_snapshot[k], baseline[k]) for k in baseline)
+            checks["model_changed"] = changed
+            if not changed:
+                return cpu_fail("model weights are unchanged after three iterations")
+
+        # No worker may outlive the training process.
+        leftover = subprocess.run(["pgrep", "-f", f"--output {run_output}"],
+                                  capture_output=True, text=True)
+        checks["leftover_workers"] = leftover.stdout.split()
+        if leftover.stdout.strip():
+            return cpu_fail(f"workers outlived the training run: {leftover.stdout.split()}")
+
         stage_result = {
             "stage": "cpu",
             "status": "passed",
             "duration_sec": time.time() - t0,
+            "checks": checks,
             "details": {
                 "checkpoint": str(latest_ckpt),
                 "initial_iterations": 2,
@@ -563,97 +727,308 @@ class ReadinessRunner:
             },
         }
         (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
+        print(f"[cpu] iteration={checks['iteration']} replay={checks['replay_positions']} "
+              f"losses={[round(v, 3) for v in losses]}")
         return stage_result
 
     def run_stage_mixed(self) -> dict[str, Any]:
-        """Stage 4: Mixed-Opponent Gate."""
+        """Stage 4: every opponent family exercised from explicit match specs on
+        both seats with injected openings, then a full 100-game quota cycle.
+
+        The previous implementation called `bot.choose(state)` without an rng and
+        used bot specs that do not exist, so it had never passed.
+        """
         print("\n==========================================")
         print("STAGE 4: MIXED-OPPONENT GATE")
         print("==========================================")
         t0 = time.time()
         stage_dir = self.output_dir / "mixed"
         stage_dir.mkdir(parents=True, exist_ok=True)
+        checks: dict[str, Any] = {}
+
+        def fail(message):
+            result = {"stage": "mixed", "status": "failed",
+                      "duration_sec": time.time() - t0, "error": message, "checks": checks}
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
 
         try:
-            from sttt.bots import create_bot
-            from sttt.env import State
+            import numpy as np
+            import torch
+            from sttt.learning import create_model
+            from sttt.population import (MatchSpec, default_population_config,
+                                         load_population_config, population_quota_counts,
+                                         sample_matches)
+            from sttt.search import SearchConfig
+            from sttt.selfplay import play_game
 
-            bots_to_test = [
-                ("tactical", {}),
-                ("alphabeta", {"depth": 2, "node_budget": 500}),
-                ("style-center", {}),
-                ("style-corners", {}),
-                ("threat-block", {}),
-            ]
+            use_cpp = self.backend == "cpp"
+            model = create_model("mlp").eval()
+            config = SearchConfig()
 
-            tested_bots = []
-            for name, kwargs in bots_to_test:
-                bot = create_bot(name, **kwargs)
-                state = State()
-                act = bot.choose(state)
-                assert act in state.legal_actions(), f"Bot {name} chose illegal move {act}"
-                tested_bots.append(name)
+            # A frozen checkpoint so history/best have something real to load.
+            history_dir = stage_dir / "history"
+            history_dir.mkdir(parents=True, exist_ok=True)
+            for name in ("model-0001.pt", "best.pt"):
+                torch.save({"model": model.state_dict(), "arch": "mlp", "iteration": 1},
+                           history_dir / name)
+            checkpoint = str((history_dir / "model-0001.pt").resolve())
 
-            stage_result = {
-                "stage": "mixed",
-                "status": "passed",
-                "duration_sec": time.time() - t0,
-                "tested_bots": tested_bots,
+            # Test budgets, deliberately tiny. These are NOT the production
+            # preset; the production budgets live in configs/population/.
+            specs = {
+                "self": MatchSpec(kind="self"),
+                "history": MatchSpec(kind="history", checkpoint=checkpoint, simulations=2),
+                "best": MatchSpec(kind="best", checkpoint=checkpoint, simulations=2),
+                "alphabeta": MatchSpec(kind="alphabeta", depth=1, nodes=200),
+                "tactical": MatchSpec(kind="tactical", nodes=200),
+                "threat": MatchSpec(kind="threat", nodes=200),
+                "style": MatchSpec(kind="style", style="center"),
+                "openspiel": MatchSpec(kind="openspiel", simulations=2),
+                "utttai": MatchSpec(kind="utttai", simulations=64),
             }
-        except Exception as e:
-            stage_result = {
-                "stage": "mixed",
-                "status": "failed",
-                "duration_sec": time.time() - t0,
-                "error": str(e),
-            }
+            # Use the real loader: it is what resolves {python} and validates the
+            # entry. Reading the JSON directly leaves the placeholder unexpanded
+            # and the engine fails to spawn.
+            from sttt.engine_registry import load_engine_registry
+            from sttt.engine_runtime import activate_runtime
+            activate_runtime()
+            registry_path = self.repo_root / "engines" / "registry.json"
+            engine_registry = load_engine_registry(registry_path) if registry_path.is_file() else {}
 
-        (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-        return stage_result
+            from sttt.population import _engine_fields
+            exercised = {}
+            for family, spec in specs.items():
+                if family == "utttai":
+                    fields = _engine_fields(engine_registry, 7, spec.simulations)
+                    if not fields.get("engine_command"):
+                        return fail("uttt.ai is not configured; the mixed gate requires it")
+                    spec = MatchSpec(kind="utttai", simulations=spec.simulations, **fields)
+                seats = {}
+                for side in (1, -1):
+                    # Both seats, with injected opening plies.
+                    seated = MatchSpec(**{**spec.__dict__, "learner_side": side,
+                                          "opening_moves": 0 if family == "utttai" and
+                                          spec.engine_protocol != "state_json" else 2})
+                    trajectory, outcome, stats = play_game(model, 2, 1234 + side, config, 2,
+                                                           seated, use_cpp=use_cpp)
+                    if outcome not in (-1, 0, 1):
+                        return fail(f"{family}: illegal outcome {outcome}")
+                    actual = stats["match"]["kind"]
+                    for state, pi in trajectory:
+                        # Only meaningful when an opponent actually plays: in
+                        # self-play the learner holds both seats, so the turn
+                        # alternates by design.
+                        if actual != "self" and state.turn != side:
+                            return fail(f"{family}: an opponent turn became a learner target")
+                        if not np.isclose(pi.sum(), 1.0, atol=1e-3):
+                            return fail(f"{family}: unnormalized policy target")
+                    if actual != family and not (family in ("history", "best") and actual == "self"):
+                        return fail(f"{family} was silently substituted by {actual}")
+                    seats[side] = {"positions": len(trajectory), "outcome": outcome,
+                                   "actual_kind": actual, "plies": stats["plies"]}
+                exercised[family] = seats
+            checks["families"] = exercised
+
+            # Full configured 100-game quota cycle, sliced across uneven
+            # iterations, with the cursor surviving each slice.
+            population_config = load_population_config(
+                self.repo_root / "configs" / "population" / "baseline.json")
+            totals = dict.fromkeys(population_config.quotas, 0)
+            cursor = 0
+            for size in (7, 13, 30, 21, 29):
+                for kind, count in population_quota_counts(size, cursor,
+                                                           config=population_config).items():
+                    totals[kind] += count
+                cursor += size
+            if cursor != 100:
+                return fail(f"quota cycle slices summed to {cursor}, expected 100")
+            if totals != population_config.quotas:
+                return fail(f"100-game cycle produced {totals}, expected {population_config.quotas}")
+            checks["quota_cycle"] = {"slices": [7, 13, 30, 21, 29], "counts": totals,
+                                     "config": population_config.name,
+                                     "config_sha256": population_config.sha256}
+
+            # And the sampler must realise that cycle end to end.
+            sampled = sample_matches(range(100), str(history_dir), engine_registry,
+                                     config=population_config)
+            requested = {k: sum(m.requested_kind == k for m in sampled) for k in population_config.quotas}
+            if requested != population_config.quotas:
+                return fail(f"sampled requests {requested} != quotas {population_config.quotas}")
+            checks["sampled_requests"] = requested
+            checks["test_budgets_note"] = ("Budgets here are tiny test values, distinct from "
+                                           "the production preset in configs/population/.")
+
+            result = {"stage": "mixed", "status": "passed",
+                      "duration_sec": time.time() - t0, "checks": checks}
+        except Exception as exc:                          # noqa: BLE001
+            import traceback
+            return fail(f"{type(exc).__name__}: {exc}\n{traceback.format_exc()[-1500:]}")
+
+        (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+        print(f"[mixed] Stage PASSED in {result['duration_sec']:.2f}s")
+        return result
 
     def run_stage_failure(self) -> dict[str, Any]:
-        """Stage 5: Failure & Robustness Gate."""
+        """Stage 5: each failure mode must fail promptly, close its children and
+        leave the last completed checkpoint loadable.
+
+        The previous implementation checked only that an invalid --backend was
+        rejected; the other five modes the plan names were never tested.
+        """
         print("\n==========================================")
         print("STAGE 5: FAILURE & ROBUSTNESS GATE")
         print("==========================================")
         t0 = time.time()
         stage_dir = self.output_dir / "failure"
         stage_dir.mkdir(parents=True, exist_ok=True)
-
         checks: dict[str, Any] = {}
 
-        # Check: Invalid backend rejects gracefully with nonzero exit code
-        cmd_bad_backend = [
-            sys.executable,
-            "-m",
-            "sttt.ai",
-            "train",
-            "--backend",
-            "invalid_nonexistent_backend",
-            "--iterations",
-            "1",
-        ]
-        res = subprocess.run(cmd_bad_backend, cwd=self.repo_root, capture_output=True, text=True)
-        checks["invalid_backend_rejected"] = res.returncode != 0
-        if res.returncode == 0:
-            stage_result = {
-                "stage": "failure",
-                "status": "failed",
-                "duration_sec": time.time() - t0,
-                "error": "Invalid backend argument was accepted without error.",
-                "checks": checks,
-            }
-            (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-            return stage_result
+        def fail(message):
+            result = {"stage": "failure", "status": "failed",
+                      "duration_sec": time.time() - t0, "error": message, "checks": checks}
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
 
-        stage_result = {
-            "stage": "failure",
-            "status": "passed",
-            "duration_sec": time.time() - t0,
-            "checks": checks,
-        }
-        (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-        return stage_result
+        try:
+            import signal
+            import numpy as np
+            import torch
+            from sttt.ai import RunOwnership
+            from sttt.learning import create_model
+            from sttt.population import MatchSpec
+            from sttt.search import SearchConfig
+            from sttt.selfplay import SelfPlayPool, play_game
+
+            # 1. Invalid backend is rejected before anything is spawned.
+            res = subprocess.run(
+                [sys.executable, "-m", "sttt.ai", "train", "--backend",
+                 "invalid_nonexistent_backend", "--iterations", "1"],
+                cwd=self.repo_root, capture_output=True, text=True, timeout=180)
+            checks["invalid_backend_rejected"] = res.returncode != 0
+            if res.returncode == 0:
+                return fail("invalid backend was accepted")
+
+            # 2. Malformed inference: an evaluator returning a bad policy must
+            # raise, not poison the tree with a corrupt distribution.
+            class Malformed:
+                def evaluate_many(self, states):
+                    return [(np.full(81, np.nan, dtype=np.float32), 0.0) for _ in states]
+
+                def evaluate(self, state):
+                    return self.evaluate_many([state])[0]
+
+            try:
+                play_game(Malformed(), 8, 3, SearchConfig(), 2, MatchSpec(),
+                          use_cpp=self.backend == "cpp")
+                return fail("a NaN policy from the evaluator was accepted")
+            except (ValueError, RuntimeError) as exc:
+                checks["malformed_inference_rejected"] = f"{type(exc).__name__}: {exc}"[:200]
+
+            # 3. Worker exit mid-iteration is detected rather than hanging.
+            model = create_model("mlp").eval()
+            with SelfPlayPool(2, batch_size=8, wait_ms=2.) as pool:
+                pool.verify_backend(self.backend == "cpp")
+                victim = pool.processes[0]
+                victim.kill()
+                victim.join(timeout=10)
+                killed = time.time()
+                try:
+                    pool.run(model, [1, 2, 3, 4], 8, SearchConfig(), 2,
+                             use_cpp=self.backend == "cpp")
+                    return fail("a killed worker did not surface as an error")
+                except (RuntimeError, EOFError, TimeoutError, OSError) as exc:
+                    checks["worker_exit_detected"] = {
+                        "error": f"{type(exc).__name__}: {exc}"[:200],
+                        "seconds_to_detect": round(time.time() - killed, 2)}
+            checks["worker_exit_cleanup"] = [p.pid for p in pool.processes if p.is_alive()]
+            if checks["worker_exit_cleanup"]:
+                return fail(f"workers survived pool close: {checks['worker_exit_cleanup']}")
+
+            # 4. Engine timeout: an external engine that never answers must time
+            # out rather than block the iteration forever.
+            from sttt.bots import ExternalProcessBot
+            from sttt.env import State
+            sleeper = ExternalProcessBot(
+                command=[sys.executable, "-c", "import time; time.sleep(600)"],
+                timeout=3.0, protocol="action_index", fallback="raise", name="sleeper")
+            started = time.time()
+            try:
+                sleeper.choose(State(), np.random.default_rng(0))
+                return fail("an unresponsive engine did not time out")
+            except Exception as exc:                       # noqa: BLE001
+                waited = time.time() - started
+                checks["engine_timeout"] = {"error": f"{type(exc).__name__}: {exc}"[:200],
+                                            "seconds": round(waited, 2)}
+                if waited > 60:
+                    return fail(f"engine timeout took {waited:.0f}s; the contract is unbounded")
+            finally:
+                sleeper.close()
+
+            # 5. Duplicate writer: a second trainer on one output directory is
+            # rejected before it spawns workers.
+            lock_dir = stage_dir / "ownership"
+            lock_dir.mkdir(parents=True, exist_ok=True)
+            first = RunOwnership(lock_dir).acquire()
+            try:
+                try:
+                    RunOwnership(lock_dir).acquire()
+                    return fail("a second writer acquired the same output directory")
+                except RuntimeError as exc:
+                    checks["duplicate_writer_rejected"] = str(exc)[:200]
+            finally:
+                first.release()
+
+            # 6. Ctrl+C during training leaves the last completed checkpoint
+            # loadable and no orphaned workers.
+            interrupt_dir = stage_dir / "interrupt"
+            command = [sys.executable, "-m", "sttt.ai", "train",
+                       "--backend", self.backend, "--device", "cpu", "--arch", "mlp",
+                       "--output", str(interrupt_dir), "--iterations", "50",
+                       "--games", "2", "--workers", "2", "--simulations", "16",
+                       "--leaf-batch", "2", "--inference-batch", "4", "--steps", "2",
+                       "--batch", "8", "--buffer", "200", "--eval-every", "0",
+                       "--save-every", "0", "--keep-checkpoint-window", "0", "--seed", "3"]
+            proc = subprocess.Popen(command, cwd=self.repo_root, stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT, text=True,
+                                    start_new_session=True)
+            checkpoint = interrupt_dir / "latest.pt"
+            deadline = time.time() + 180
+            while time.time() < deadline and not checkpoint.is_file():
+                time.sleep(0.5)
+            if not checkpoint.is_file():
+                proc.kill()
+                return fail("training produced no checkpoint to interrupt")
+            time.sleep(1.0)
+            os.killpg(os.getpgid(proc.pid), signal.SIGINT)
+            try:
+                proc.wait(timeout=120)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                return fail("training did not exit within 120s of SIGINT")
+            interrupted = time.time()
+            # The checkpoint written before the interrupt must still load.
+            restored = torch.load(checkpoint, map_location="cpu", weights_only=True)
+            if "model" not in restored or "iteration" not in restored:
+                return fail("the checkpoint left after an interrupt is not loadable")
+            leftover = subprocess.run(
+                ["pgrep", "-f", f"--output {interrupt_dir}"], capture_output=True, text=True)
+            checks["ctrl_c"] = {"exit_code": proc.returncode,
+                                "iteration_preserved": int(restored["iteration"]),
+                                "seconds_to_exit": round(interrupted - deadline + 180, 2),
+                                "orphans": leftover.stdout.split()}
+            if leftover.stdout.strip():
+                return fail(f"orphaned processes after SIGINT: {leftover.stdout.split()}")
+
+            result = {"stage": "failure", "status": "passed",
+                      "duration_sec": time.time() - t0, "checks": checks}
+        except Exception as exc:                           # noqa: BLE001
+            import traceback
+            return fail(f"{type(exc).__name__}: {exc}\n{traceback.format_exc()[-1500:]}")
+
+        (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+        print(f"[failure] Stage PASSED in {result['duration_sec']:.2f}s")
+        return result
 
     def run_stage_gpu(self) -> dict[str, Any]:
         """Stage 6: GPU Correctness Gate."""
@@ -713,32 +1088,160 @@ class ReadinessRunner:
         (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
         return stage_result
 
+    @staticmethod
+    def _rss_kb(pid: int) -> int | None:
+        """Resident set size from /proc, so no psutil dependency is required."""
+        try:
+            with open(f"/proc/{pid}/statm") as handle:
+                pages = int(handle.read().split()[1])
+            return pages * os.sysconf("SC_PAGE_SIZE") // 1024
+        except (OSError, IndexError, ValueError):
+            return None
+
     def run_stage_memory(self) -> dict[str, Any]:
-        """Stage 7: Memory Stability Gate."""
+        """Stage 7: 100 complete games and >= 20 training iterations after a
+        warm-up, with owner, workers and external engines accounted separately.
+
+        The previous implementation ran 1000 rollouts, recorded RSS before and
+        after, and returned "passed" without ever comparing them: it could not
+        fail. Replay is deliberately sized to saturate during warm-up so that
+        post-warm-up growth is attributable to leaks rather than to the buffer
+        filling.
+        """
         print("\n==========================================")
         print("STAGE 7: MEMORY STABILITY GATE")
         print("==========================================")
         t0 = time.time()
         stage_dir = self.output_dir / "memory"
         stage_dir.mkdir(parents=True, exist_ok=True)
+        checks: dict[str, Any] = {}
 
-        import resource
+        def fail(message):
+            result = {"stage": "memory", "status": "failed",
+                      "duration_sec": time.time() - t0, "error": message, "checks": checks}
+            (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+            return result
 
-        rss_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        # Perform state transitions / rollouts
-        if ce.is_cpp_available():
-            ce.benchmark_rollouts(1000, 1, 42)
-        rss_after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # Growth beyond INVESTIGATE is recorded for investigation; beyond FAIL the
+        # gate fails. Replay is saturated before the baseline is taken, so this
+        # measures leakage, not buffer fill.
+        INVESTIGATE_PCT, FAIL_PCT = 10.0, 25.0
+        GAMES_PER_ITERATION, WARMUP_ITERATIONS, MEASURED_ITERATIONS = 5, 4, 20
 
-        stage_result = {
-            "stage": "memory",
-            "status": "passed",
-            "duration_sec": time.time() - t0,
-            "rss_before_kb": rss_before,
-            "rss_after_kb": rss_after,
-        }
-        (stage_dir / "manifest.json").write_text(json.dumps(stage_result, indent=2))
-        return stage_result
+        try:
+            import gc
+            import numpy as np
+            import torch
+            from sttt.learning import create_model
+            from sttt.search import SearchConfig
+            from sttt.selfplay import SelfPlayPool
+
+            use_cpp = self.backend == "cpp"
+            device = self.device
+            model = create_model("mlp").to(device).eval()
+            config = SearchConfig()
+            owner_pid = os.getpid()
+
+            def sample(label, pool):
+                owner = self._rss_kb(owner_pid)
+                workers = {p.pid: self._rss_kb(p.pid) for p in pool.processes}
+                return {"label": label, "owner_rss_kb": owner,
+                        "worker_rss_kb": workers,
+                        "worker_total_kb": sum(v for v in workers.values() if v),
+                        # Owner and workers are separate processes; their RSS is
+                        # summed here only as an upper bound, because shared
+                        # pages are counted once per process.
+                        "aggregate_rss_kb_upper_bound": (owner or 0) + sum(v for v in workers.values() if v)}
+
+            samples = []
+            with SelfPlayPool(2, batch_size=8, wait_ms=2.) as pool:
+                pool.verify_backend(use_cpp)
+
+                # Warm-up: fill replay and pay one-time allocations.
+                replay = []
+                seed = 0
+                for _ in range(WARMUP_ITERATIONS):
+                    seeds = list(range(seed, seed + GAMES_PER_ITERATION))
+                    seed += GAMES_PER_ITERATION
+                    results, _ = pool.run(model, seeds, 16, config, 2, use_cpp=use_cpp)
+                    for trajectory, outcome, _ in results:
+                        replay.extend(trajectory)
+                    replay = replay[-4000:]          # saturated, fixed-size
+                gc.collect()
+                if device.startswith("cuda"):
+                    torch.cuda.synchronize()
+                    torch.cuda.reset_peak_memory_stats()
+                baseline = sample("post_warmup_baseline", pool)
+                samples.append(baseline)
+
+                games_played = 0
+                arena = []
+                for iteration in range(MEASURED_ITERATIONS):
+                    seeds = list(range(seed, seed + GAMES_PER_ITERATION))
+                    seed += GAMES_PER_ITERATION
+                    results, _ = pool.run(model, seeds, 16, config, 2, use_cpp=use_cpp)
+                    games_played += len(results)
+                    for trajectory, outcome, stats in results:
+                        replay.extend(trajectory)
+                        if "arena_nodes" in stats:
+                            arena.append((stats["arena_nodes"], stats.get("arena_capacity")))
+                    replay = replay[-4000:]
+                    if iteration % 5 == 4:
+                        gc.collect()
+                        samples.append(sample(f"iteration_{iteration + 1}", pool))
+                final = sample("final", pool)
+                samples.append(final)
+                worker_pids = [p.pid for p in pool.processes]
+
+            # Orphans: no worker may outlive the pool.
+            orphans = [pid for pid in worker_pids if Path(f"/proc/{pid}").exists()]
+            checks["orphan_processes"] = orphans
+            checks["games_played"] = games_played
+            checks["measured_iterations"] = MEASURED_ITERATIONS
+            checks["samples"] = samples
+            if arena:
+                live = [a for a, _ in arena]
+                capacity = [c for _, c in arena if c]
+                checks["native_arena"] = {"live_nodes_max": max(live),
+                                          "capacity_max": max(capacity) if capacity else None}
+            if device.startswith("cuda"):
+                checks["cuda"] = {
+                    "peak_allocated_mb": round(torch.cuda.max_memory_allocated() / 1024**2, 1),
+                    "peak_reserved_mb": round(torch.cuda.max_memory_reserved() / 1024**2, 1)}
+
+            if games_played < 100:
+                return fail(f"only {games_played} games completed; the gate requires 100")
+            if orphans:
+                return fail(f"orphaned worker processes survived the pool: {orphans}")
+
+            base_kb = baseline["aggregate_rss_kb_upper_bound"]
+            final_kb = final["aggregate_rss_kb_upper_bound"]
+            growth_pct = ((final_kb - base_kb) / base_kb * 100) if base_kb else 0.0
+            checks["growth"] = {"baseline_kb": base_kb, "final_kb": final_kb,
+                                "growth_pct": round(growth_pct, 2),
+                                "investigate_threshold_pct": INVESTIGATE_PCT,
+                                "fail_threshold_pct": FAIL_PCT,
+                                "note": ("Replay is saturated before the baseline, so this is "
+                                         "not buffer fill. Aggregate RSS double-counts shared "
+                                         "pages and is an upper bound.")}
+            if growth_pct > FAIL_PCT:
+                return fail(f"aggregate RSS grew {growth_pct:.1f}% after warm-up "
+                            f"({base_kb} -> {final_kb} kB), above the {FAIL_PCT}% cap")
+            checks["growth"]["verdict"] = ("investigate" if growth_pct > INVESTIGATE_PCT else "stable")
+
+            result = {"stage": "memory", "status": "passed",
+                      "duration_sec": time.time() - t0, "checks": checks}
+        except MemoryError as exc:
+            return fail(f"MemoryError during the memory gate: {exc}")
+        except Exception as exc:                           # noqa: BLE001
+            import traceback
+            return fail(f"{type(exc).__name__}: {exc}\n{traceback.format_exc()[-1500:]}")
+
+        (stage_dir / "manifest.json").write_text(json.dumps(result, indent=2))
+        print(f"[memory] {games_played} games, {MEASURED_ITERATIONS} iterations, "
+              f"RSS growth {checks['growth']['growth_pct']}% ({checks['growth']['verdict']})")
+        print(f"[memory] Stage PASSED in {result['duration_sec']:.2f}s")
+        return result
 
     def run_stage_pilot(self) -> dict[str, Any]:
         """Stage 8: Representative Pilot Gate."""

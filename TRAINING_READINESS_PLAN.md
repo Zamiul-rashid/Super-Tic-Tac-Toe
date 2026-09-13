@@ -319,13 +319,30 @@ For each row, replace Pending with the actual result only after recording the co
 | M3 encoding/IPC integration | **Done** | `41293d5`. Owned buffers, explicit encode backend, **removed an unreachable fp16 branch that meant `--fp16` never applied to inference**. 14 tests. |
 | M4 AMP/resume/ownership | **Done** | `1e7e503`. GradScaler once per process (was per iteration), full checkpoint schema, nonfinite/all-skipped guards, per-output flock. 12 tests. |
 | M5 LR policy and resume tests | **Done** | `328f047`. `sttt/training_schedule.py`, horizon in completed iterations, verified continuity across a real save/resume. 24 tests. |
-| M6 curriculum configuration | Pending | — |
+| M6 curriculum configuration | **Done** | `17d6247`. `PopulationConfig` + `--population-config`; presets `configs/population/{baseline,candidate-utttai35}.json`; explicit `requested_kind`; per-family coverage and replay sample fractions/age in metrics; phase change + cursor rules verified in a real uttt.ai/AlphaBeta run. 26 tests; suite 504. |
 | M7 controlled evaluation | **Done** | `6140465`, `1941ea9`, `b575e3f`, `3ca848d`. `sttt/evaluation.py`; shared openings across budgets; pair-level bootstrap; provenance manifests. 56 tests; suite 481. See notes below. |
 | M8 honest benchmarks | Pending | — |
 | M9 CPU certification | Pending | — |
 | M9 GPU certification and soak | Pending | Requires real CUDA access |
 | M10 bounded strength experiments | Pending | No Elo outcome assumed |
 | M11 docs/launch/rollback | Pending | — |
+
+### M6 evidence (2026-09-14)
+
+- **`17d6247`.** Quotas and per-family budget/noise ranges were literals in
+  `population.py`; nothing recorded which mix a checkpoint was trained under,
+  and the history/best → self fallback was invisible in the actual counts.
+- **Measured, not mocked** (`runs/readiness/m6-e2e-*/`): real uttt.ai and
+  native AlphaBeta workers, CPU, 8 games × 2 workers. Baseline for 2 iterations
+  → cursor 16, `population_requested_counts` shows `history:1, best:1` where the
+  actual counts show `self`. Resume with `candidate-utttai35` into a new output
+  → `population_phases` records `baseline → candidate-utttai35` at iteration 2,
+  cursor 16→0→8, requested mix utttai 3 / alphabeta 1 in 8 games. Resume
+  **without** the flag → inherits the candidate config, cursor 8→16, no new
+  phase. No orphan engine processes afterwards.
+- **Limitation:** no engine reports its internal search effort, so
+  `population_by_family.budgets` records the budgets each opponent was
+  *constructed* with, not nodes actually searched.
 
 ### M7 evidence (2026-09-13)
 
