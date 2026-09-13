@@ -277,6 +277,9 @@ def pair_bootstrap_difference(results_a: Sequence[Any], results_b: Sequence[Any]
 def native_build_info() -> dict[str, Any]:
     """Identity of the extension actually loaded, or why it is absent."""
     try:
+        # cpp_env owns the sys.path setup for the extension; importing it first
+        # is what makes this work from a bare script as well as from the package.
+        from . import cpp_env  # noqa: F401
         import sttt_cpp
     except ImportError as exc:
         return {"available": False, "reason": str(exc)}

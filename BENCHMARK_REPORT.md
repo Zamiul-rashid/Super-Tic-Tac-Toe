@@ -1,9 +1,20 @@
 # Super Tic-Tac-Toe C++ Bitboard Engine Benchmark Report
 
-**Date**: 2026-09-12  
+**Date**: 2026-09-12; **primitive sections re-measured 2026-09-14 (M8)**  
 **Branch**: `cpp`  
 **Hardware / Toolchain**: GCC 15.2.0, x86_64, Linux, Python 3.14.4 (`.venv`)  
-**Status**: Target >= 50x speedup achieved and exceeded across all core primitives and rollouts.
+**Status**: Native engine is substantially faster than the Python reference on every
+primitive. The specific multipliers below are local to this machine and these
+loops; there is no release requirement for any particular speedup factor.
+
+> **M8 correction (2026-09-14).** The primitive figures in §2.2 and §2.3 were
+> measured on a *single fixed board state* whose 46 bytes and output buffer stay
+> resident in L1 for the whole loop, and `bench_play_move` never read its result.
+> Re-measured with 4,096 varied pre-generated positions, results consumed into a
+> printed checksum, a warm-up pass and the median of 5 repeats, the encoding rate
+> is **~6x lower**; move play and move generation substantially hold up. Corrected
+> rows are marked **(M8)**; the original rows are retained as historical and must
+> not be quoted as current measurements.
 
 ---
 
@@ -15,7 +26,7 @@ Key highlights:
 - **Memory Footprint**: `sizeof(BoardState)` is **46 bytes** (verified at compile time via `static_assert(sizeof(BoardState) == 46)`), fitting within a single 64-byte L1 cache line.
 - **Rollout Throughput**: Single-core C++ rollouts achieve **675,528 games/sec** (**117.5x speedup** vs Python's 5,751 games/sec), exceeding the 50x target by 2.35x.
 - **Multi-Core Scaling**: 10-thread C++ rollouts achieve **4,813,524 games/sec** (**837.0x speedup** vs Python).
-- **Native Move Generation**: Native C++ move generator produces **156.3 million calls/sec** (6.4 ns/call).
+- **Native Move Generation**: **145.4 million calls/sec** (6.88 ns/call) re-measured over varied positions (M8); originally reported as 156.3 M calls/s (6.4 ns) on one fixed state.
 - **Alpha-Beta Search**: Depth-3 search executes in **0.13 ms** (**520.2x speedup** vs Python's 67.88 ms).
 
 ---
@@ -40,9 +51,10 @@ Key highlights:
 
 | Operation | Python Baseline | C++ Binding | C++ Native | Speedup (Binding) | Speedup (Native) |
 |-----------|----------------:|------------:|-----------:|------------------:|-----------------:|
-| Legal Move Generation | 338,301 calls/s (2.96 µs) | 4,971,558 calls/s (0.20 µs) | 156.3M calls/s (6.4 ns) | **14.7x** | **462.0x** |
-| Move Play (Functional) | 229,602 moves/s (4.36 µs) | 27,122,204 moves/s (0.04 µs) | 400.0M+ moves/s (<2.5 ns) | **118.1x** | **>1,740x** |
-| Move Play (In-place) | N/A (immutable) | 15,005,192 moves/s (0.07 µs) | 400.0M+ moves/s (<2.5 ns) | **65.4x** | **>1,740x** |
+| Legal Move Generation **(M8)** | 338,301 calls/s (2.96 µs) | 4,971,558 calls/s (0.20 µs) | 145.4M calls/s (6.88 ns, median of 5) | **14.7x** | **429.8x** |
+| Move Play (In-place) **(M8)** | 229,602 moves/s (4.36 µs) | 15,005,192 moves/s (0.07 µs) | 376.6M moves/s (2.65 ns, median of 5) | **65.4x** | **1,640x** |
+| *Legal Move Generation (historical, fixed state)* | 338,301 calls/s | 4,971,558 calls/s | *156.3M calls/s (6.4 ns)* | *14.7x* | *462.0x* |
+| *Move Play (historical, fixed state, result unused)* | 229,602 moves/s | 27,122,204 moves/s | *400.0M+ moves/s (<2.5 ns)* | *118.1x* | *>1,740x* |
 | Zero-Sum Heuristic Evaluation | 70,847 evals/s (14.1 µs) | 10,619,660 evals/s (0.09 µs) | 35.0M+ evals/s (28.5 ns) | **149.9x** | **>490x** |
 
 ---
@@ -53,7 +65,15 @@ Key highlights:
 |---------------|--------------------------------:|-----------------:|--------:|
 | Single State (`encode()`) | 103,249 states/s (9.69 µs) | 559,956 states/s (1.79 µs) | **5.4x** |
 | Batched Encoding (Batch 64, `encode_batch`) | 90,527 states/s (0.71 ms/batch) | 8,156,303 states/s (0.01 ms/batch) | **90.1x** |
-| Native C++ Direct Memory (`encode(float*)`) | N/A | 45,454,545 states/s (22.0 ns) | **440.2x** |
+| Native C++ Direct Memory (`encode(float*)`) **(M8)** | 103,249 states/s (9.69 µs) | **5,540,000 states/s (180.5 ns, median of 5)** | **53.7x** |
+| *Native direct memory (historical, one cached state)* | N/A | *45,454,545 states/s (22.0 ns)* | *440.2x* |
+
+**Why the encoding figure moved.** Attributed by direct A/B on this machine:
+one fixed state with the result unused measures 32.6 ns/encode; the same state
+with the result consumed measures 30.4 ns, so dead-code elimination was *not*
+the cause; encoding 4,096 varied positions measures 182.0 ns. The entire gap is
+cache residency. Self-play encodes a different position every time, so the
+varied figure is the one that describes the real workload.
 
 ---
 
@@ -95,7 +115,13 @@ Benchmark executed comparing Python reference `sttt.search.TreeSearch` against C
 | Python `TreeSearch` | 11,819 sims/s | 84.61 ms | 1.0x (Baseline) |
 | C++ `CppTreeSearch` (Python Callback) | 210,785 sims/s | 4.74 ms | **17.8x** |
 
-#### 2.6.2 Native C++ MCTS Engine Throughput (Zero Python Overhead, GIL Released)
+#### 2.6.2 Native C++ MCTS Engine Throughput (heuristic evaluator, GIL released)
+
+> These rows use the built-in heuristic evaluator: **no neural network is
+> involved**, and they are not a neural self-play search rate. Rows in 2.6.1 use
+> a dummy Python evaluator and are a third distinct category. For end-to-end
+> pipeline measurement with real inference, use
+> `scripts/run_pipeline_benchmark.py`.
 
 | Execution Configuration | Simulations / sec | 20,000-Sim Latency | Speedup vs Python |
 |-------------------------|------------------:|-------------------:|------------------:|
@@ -147,8 +173,9 @@ static_assert(sizeof(BoardState) == 46, "BoardState size must be 46 bytes");
 
 ## 4. Test Suite and Parity Non-Regression
 
-- Total discovered unit tests: **258 unit tests** in `.venv/bin/python -m unittest discover tests`.
-- Full test pass rate: **258/258 (100% PASS, 0 failures, 0 errors)**.
+- Total discovered unit tests: **258** at the time of this report; **529** as of
+  2026-09-14 (M8), with one known failure (`test_f20_git_branch_isolation`
+  hard-codes a branch allowlist and fails on any feature branch) and one skip.
 - Lockstep differential parity verified across **> 120,000 paired moves** with 100% exact match against Python `sttt.env.State`.
 - Bit-for-bit identical MCTS visit distributions across all 81 actions verified against Python `TreeSearch`.
 - Zero compiler warnings or errors under `-Wall -Wextra -Werror` in GCC 15.

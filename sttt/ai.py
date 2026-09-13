@@ -16,6 +16,7 @@ from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
 from .population import (sample_matches, augment_batch, family_report,
                          default_population_config, load_population_config, PopulationConfig)
+from .benchmarks.harness import StageTimer
 from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
@@ -244,6 +245,9 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
     end_iteration = min(start_iteration + args.iterations, max_iter) if max_iter else (start_iteration + args.iterations)
     for iteration in range(start_iteration + 1, end_iteration + 1):
         started = time.monotonic()
+        # M8: non-overlapping wall-clock stages. Worker time is recorded as an
+        # aggregate, never summed into elapsed runtime.
+        stage_timer = StageTimer()
         seeds = rng.integers(0, 10**9, size=args.games)
         matches = None
         if getattr(args, 'population', False):
@@ -251,13 +255,20 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             matches = sample_matches(seeds, history, engine_registry, offset=population_games,
                                      config=population_config)
         use_cpp = getattr(args, '_use_cpp', False)
-        results, inference_stats = pool.run(
-            model, seeds, args.simulations, search_config(args), args.leaf_batch,
-            matches=matches, use_cpp=use_cpp
-        )
-        selfplay_seconds = time.monotonic() - started
+        with stage_timer.stage('selfplay'):
+            results, inference_stats = pool.run(
+                model, seeds, args.simulations, search_config(args), args.leaf_batch,
+                matches=matches, use_cpp=use_cpp
+            )
+        selfplay_seconds = stage_timer.stages['selfplay']
+        # Owner-side inference happens inside the self-play stage; it is a
+        # component of it, not an extra stage.
+        stage_timer.add_aggregate('owner_inference', inference_stats['inference_seconds'], workers=1)
+        stage_timer.add_aggregate('worker_game_time', sum(r[2].get('seconds', 0.) for r in results),
+                                  workers=min(args.workers, args.games))
         if matches is not None:
             population_games += len(matches)
+        replay_started = time.monotonic()
         for game_idx, (trajectory, outcome, stats) in enumerate(results):
             origin = (iteration, stats['match']['kind'])
             if trajectory and use_cpp and _HAS_CPP and cpp_encode_batch is not None:
@@ -279,7 +290,10 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} training positions, '
                   f'opponent={stats["match"]["kind"]}', flush=True)
 
+        stage_timer.add('replay_preparation', time.monotonic() - replay_started)
+
         model.train()
+        optimization_started = time.monotonic()
         if schedule is not None:
             apply_lr(optimizer, schedule.current_lr)
         losses = []
@@ -344,6 +358,13 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             policy_losses.append(policy_loss.item())
             value_losses.append(value_loss.item())
             grad_norms.append(float(grad_norm))
+        # CUDA kernels are asynchronous: without this the optimization stage
+        # would appear instant and its cost would land in whatever synchronized
+        # next.
+        if device.startswith('cuda'):
+            torch.cuda.synchronize()
+        stage_timer.add('optimization', time.monotonic() - optimization_started)
+
         if args.steps and optimizer_updates == 0:
             raise RuntimeError(
                 f'iteration {iteration}: all {args.steps} optimizer updates were '
@@ -390,6 +411,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                                   'grad_norm': float(np.mean(grad_norms)),
                                   'optimizer_updates': optimizer_updates,
                                   'skipped_updates': skipped_updates}}
+        checkpoint_started = time.monotonic()
         temporary = output / 'latest.tmp'
         torch.save(checkpoint, temporary)
         temporary.replace(output / 'latest.pt')
@@ -409,6 +431,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                             old_model.unlink(missing_ok=True)
                     except (ValueError, IndexError):
                         pass
+        stage_timer.add('checkpoint_write', time.monotonic() - checkpoint_started)
         report = {'iteration': iteration, 'positions': len(replay), 'loss': float(np.mean(losses)),
                   'seconds': round(time.monotonic() - started, 2), 'selfplay_seconds': selfplay_seconds,
                   'games': args.games, 'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
@@ -432,10 +455,28 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                   'retained_visits': sum(r[2]['retained_visits'] for r in results)}
         if device.startswith('cuda'):
             report['peak_gpu_mb'] = round(torch.cuda.max_memory_allocated() / 1024**2, 1)
+            report['reserved_gpu_mb'] = round(torch.cuda.max_memory_reserved() / 1024**2, 1)
+        # M8: throughput denominators are completed work, and the search rate
+        # uses simulations actually completed, not the budget requested.
+        elapsed = time.monotonic() - started
+        learner_positions = sum(len(r[0]) for r in results)
+        report['throughput'] = {
+            'selfplay_games_per_sec': args.games / selfplay_seconds if selfplay_seconds else None,
+            'learner_positions_per_sec': learner_positions / selfplay_seconds if selfplay_seconds else None,
+            'learner_positions': learner_positions,
+            'completed_simulations_per_sec': (report['completed_simulations'] / selfplay_seconds
+                                              if selfplay_seconds else None),
+            'requested_simulations': args.games * args.simulations,
+            'inference_batch_occupancy': (inference_stats['mean_inference_batch']
+                                          / max(1, args.inference_batch)),
+            'iteration_seconds': elapsed,
+        }
+        report['stage_seconds'] = stage_timer.report(elapsed)
         with (output / 'metrics.jsonl').open('a') as file:
             file.write(json.dumps(report) + '\n')
         print(json.dumps(report), flush=True)
         if args.eval_every and iteration % args.eval_every == 0:
+            evaluation_started = time.monotonic()
             evaluation = argparse.Namespace(**vars(args))
             evaluation.checkpoint = str(output / f'model-{iteration:04d}.pt')
             evaluation.output = str(output / 'evaluations')
@@ -445,6 +486,12 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             evaluation.opponent_depth, evaluation.opponent_nodes = 3, 3000
             evaluation.opponent_simulations = 256
             evaluate(evaluation)
+            # Periodic evaluation is real wall time the ETA must include; it
+            # lands after the metrics row, so it is appended to its own file.
+            with (output / 'metrics.jsonl').open('a') as file:
+                file.write(json.dumps({'iteration': iteration,
+                                       'evaluation_overhead_seconds':
+                                           time.monotonic() - evaluation_started}) + '\n')
 
 def play(args):
     model,_ = load_model(args.checkpoint)
