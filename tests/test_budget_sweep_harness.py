@@ -61,16 +61,11 @@ class TestSharedOpeningCorpus(unittest.TestCase):
         return result, seeds_seen
 
     def test_every_budget_uses_the_same_opening_seed(self):
+        """Directly reproduces `seed=100 + sims`, which gave 512 seed 612 and
+        2000 seed 2100."""
         _, seeds = self._sweep()
         self.assertEqual(len(seeds), 3)
-        self.assertEqual(len(set(seeds)), 1, f"budgets used different opening seeds: {seeds}")
-        self.assertEqual(set(seeds), {4242})
-
-    def test_seed_does_not_vary_with_the_simulation_count(self):
-        """Directly reproduces `seed=100 + sims`."""
-        _, seeds = self._sweep(budgets=(512, 2000))
-        self.assertNotIn(612, seeds)
-        self.assertNotIn(2100, seeds)
+        self.assertEqual(set(seeds), {4242}, f"budgets used different opening seeds: {seeds}")
 
     def test_arms_are_played_from_identical_opening_positions(self):
         result, _ = self._sweep()

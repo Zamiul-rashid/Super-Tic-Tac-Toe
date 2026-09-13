@@ -19,7 +19,6 @@ the whole module runs in seconds and never loads a network or plays a 512
 simulation search.
 """
 import csv
-import inspect
 import json
 import pathlib
 import tempfile
@@ -30,7 +29,7 @@ import torch
 
 import scripts.run_v2_vs_bigrun_comparison as comparison
 from sttt.bots import create_bot
-from sttt.tournament import MatchResult, run_matchup, run_tournament
+from sttt.tournament import MatchResult, run_matchup
 
 
 def write_checkpoint(path, iteration):
@@ -56,20 +55,9 @@ class TestCallSignatures(unittest.TestCase):
         with self.assertRaises(TypeError):
             run_matchup("tactical", "threat-block", pairs=10, games=20)
 
-    def test_comparison_calls_run_matchup_with_supported_arguments_only(self):
-        supported = set(inspect.signature(run_matchup).parameters)
-        seen = []
-
-        def record(*args, **kwargs):
-            seen.append(kwargs)
-            return []
-
-        with mock.patch.object(comparison, "run_matchup", side_effect=record):
-            for kwargs in seen:
-                self.assertFalse(set(kwargs) - supported)
-        # Also assert statically that the script's call sites are satisfiable.
-        for name, func in (("run_matchup", run_matchup), ("run_tournament", run_tournament)):
-            self.assertTrue(callable(func), name)
+    # The script's own call sites are covered by the end-to-end run below: an
+    # unsupported keyword raises TypeError there, the same way the original
+    # `pairs=` did. A separate signature-introspection test added no coverage.
 
 
 class TestGameAndPairAccounting(unittest.TestCase):

@@ -85,15 +85,12 @@ class TestCheckpointIdentity(unittest.TestCase):
         torch.save({"model": {"w": torch.ones(2)}, "iteration": 6155, "arch": "mlp"}, b)
         self.assertNotEqual(entrant_name(a, 512), entrant_name(b, 512))
 
-    def test_name_records_the_loaded_iteration_not_the_filename(self):
+    def test_name_records_the_loaded_iteration_and_budget_not_a_label(self):
         ckpt = write_checkpoint(self.dir / "best.pt", iteration=5750)
         self.assertIn("iter5750", entrant_name(ckpt, 512))
         self.assertNotIn("6155", entrant_name(ckpt, 512))
-
-    def test_name_includes_the_search_budget(self):
-        ckpt = write_checkpoint(self.dir / "latest.pt")
-        self.assertNotEqual(entrant_name(ckpt, 512), entrant_name(ckpt, 2000))
         self.assertTrue(entrant_name(ckpt, 2000).endswith("s2000"))
+        self.assertNotEqual(entrant_name(ckpt, 512), entrant_name(ckpt, 2000))
 
     def test_checkpoint_without_iteration_falls_back_to_stem(self):
         ckpt = self.dir / "mystery.pt"
@@ -179,20 +176,27 @@ class TestPairBootstrap(unittest.TestCase):
         self.assertLessEqual(stats["score_rate"], stats["ci_high"])
 
     def test_resampling_is_over_pairs_not_games(self):
-        """A perfectly mirrored pair contributes one sample, not two.
+        """A mirrored pair contributes one sample, not two.
 
-        With every pair identical there is no between-pair variation, so a
-        pair-level bootstrap must return a zero-width interval. A game-level
-        bootstrap would resample the two halves independently and manufacture
-        spread that the paired design deliberately cancels.
+        Every pair here is SPLIT: the subject wins one seat and loses the other,
+        so every pair mean is exactly 0.5 and there is no between-pair variation
+        -- a pair-level bootstrap must return a zero-width interval at 0.5.
+
+        The split fixture is what makes this test able to fail. Per-GAME scores
+        are 1.0 and 0.0, so a bootstrap that resampled games would draw uneven
+        mixes of wins and losses and produce a visibly wide interval, which is
+        precisely the spread the paired design cancels. A fixture where the
+        subject wins both games of every pair cannot distinguish the two
+        implementations, because then the game scores and the pair means are
+        both uniformly 1.0.
         """
         results = []
         for k in range(10):
-            results += make_pair(k, "S", "O", 1, -1)   # S wins both games of every pair
+            results += make_pair(k, "S", "O", 1, 1)   # S wins as X, loses as O
         stats = pair_bootstrap_score(results, "S", iterations=300, seed=3)
-        self.assertAlmostEqual(stats["score_rate"], 1.0)
-        self.assertAlmostEqual(stats["ci_low"], 1.0)
-        self.assertAlmostEqual(stats["ci_high"], 1.0)
+        self.assertAlmostEqual(stats["score_rate"], 0.5)
+        self.assertAlmostEqual(stats["ci_low"], 0.5)
+        self.assertAlmostEqual(stats["ci_high"], 0.5)
 
     def test_deterministic_for_a_fixed_seed(self):
         results = []
