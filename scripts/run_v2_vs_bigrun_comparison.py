@@ -13,12 +13,17 @@ corpus. They are not universal engine ratings, and the Alpha-Beta opponent is a
 depth- and node-limited reference, not a solved-game oracle.
 """
 import argparse
-import csv
 import json
 import sys
 import time
 from contextlib import ExitStack
 from pathlib import Path
+
+# Running as `python scripts/<name>.py` puts scripts/ on sys.path, not the repo
+# root, so `import sttt` failed. check_training_ready.py already does this.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from sttt.bots import create_bot
 from sttt.evaluation import (
@@ -26,6 +31,7 @@ from sttt.evaluation import (
     evaluation_manifest,
     freeze_checkpoint,
     pair_bootstrap_score,
+    write_games_csv,
     write_ratings_csv,
 )
 from sttt.tournament import run_matchup, run_tournament
@@ -50,20 +56,6 @@ def open_bot(stack: ExitStack, spec, **kwargs):
     bot = create_bot(spec, **kwargs)
     stack.callback(_safe_close, bot)
     return bot
-
-
-def write_games_csv(results, path: Path) -> Path:
-    """Per-game rows. A printed summary cannot be re-analysed; these can."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(["game_id", "pair_id", "opening_plies", "opening_moves",
-                         "player_x", "player_o", "winner", "moves"])
-        for r in results:
-            writer.writerow([r.game_id, r.pair_id, r.opening_plies,
-                             " ".join(str(m) for m in r.opening_moves),
-                             r.player_x, r.player_o, r.winner, r.moves])
-    return path
 
 
 def summarize_matchup(results, subject: str, bootstrap_seed: int) -> dict:

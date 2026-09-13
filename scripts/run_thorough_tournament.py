@@ -30,13 +30,21 @@ import time
 from contextlib import ExitStack
 from pathlib import Path
 
+# Running as `python scripts/<name>.py` puts scripts/ on sys.path, not the repo
+# root, so `import sttt` failed. check_training_ready.py already does this.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 from sttt.bots import create_bot
 from sttt.evaluation import (
     entrant_name,
+    game_rows,
     evaluation_manifest,
     freeze_checkpoint,
     pair_bootstrap_difference,
     pair_bootstrap_score,
+    write_games_csv,
     write_ratings_csv,
 )
 from sttt.tournament import run_matchup, run_tournament
@@ -56,26 +64,6 @@ def open_bot(stack: ExitStack, spec, **kwargs):
     bot = create_bot(spec, **kwargs)
     stack.callback(_safe_close, bot)
     return bot
-
-
-def game_rows(results) -> list[dict]:
-    return [{"game_id": r.game_id, "pair_id": r.pair_id, "opening_plies": r.opening_plies,
-             "opening_moves": " ".join(str(m) for m in r.opening_moves),
-             "player_x": r.player_x, "player_o": r.player_o,
-             "winner": r.winner, "moves": r.moves}
-            for r in results]
-
-
-def write_games_csv(results, path: Path) -> Path:
-    rows = game_rows(results)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]) if rows else
-                                ["game_id", "pair_id", "opening_plies", "opening_moves",
-                                 "player_x", "player_o", "winner", "moves"])
-        writer.writeheader()
-        writer.writerows(rows)
-    return path
 
 
 def model_dtype(bot) -> str:

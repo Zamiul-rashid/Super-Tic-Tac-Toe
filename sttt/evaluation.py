@@ -139,6 +139,30 @@ def write_ratings_csv(tourn: Mapping[str, Any], path: str | Path) -> Path:
     return target
 
 
+GAME_COLUMNS = ["game_id", "pair_id", "opening_plies", "opening_moves",
+                "player_x", "player_o", "winner", "moves"]
+
+
+def game_rows(results: Iterable[Any]) -> list[dict[str, Any]]:
+    """One row per game. This is the single result schema every export uses."""
+    return [{"game_id": r.game_id, "pair_id": r.pair_id, "opening_plies": r.opening_plies,
+             "opening_moves": " ".join(str(m) for m in r.opening_moves),
+             "player_x": r.player_x, "player_o": r.player_o,
+             "winner": r.winner, "moves": r.moves}
+            for r in results]
+
+
+def write_games_csv(results: Iterable[Any], path: str | Path) -> Path:
+    """Per-game rows. A printed summary cannot be re-analysed; these can."""
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=GAME_COLUMNS)
+        writer.writeheader()
+        writer.writerows(game_rows(results))
+    return target
+
+
 def game_score(result, subject: str) -> float:
     """Score rate contribution of one game for `subject`: win 1, draw 0.5, loss 0."""
     if subject == result.player_x:
