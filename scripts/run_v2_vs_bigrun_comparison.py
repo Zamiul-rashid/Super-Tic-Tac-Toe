@@ -61,6 +61,7 @@ def run_comparison(run_v2_ckpt: str, output_dir: Path, h2h_games: int = 50, roun
         bot_a=bot_v2,
         bot_b=bot_legacy,
         pairs=h2h_games,
+        games=h2h_games,
         opening_plies=2,
         seed=42,
     )
@@ -128,6 +129,7 @@ def run_comparison(run_v2_ckpt: str, output_dir: Path, h2h_games: int = 50, roun
         bot_a=test_bot_v2,
         bot_b=oracle,
         pairs=10,
+        games=20,
         opening_plies=2,
         seed=42,
     )
