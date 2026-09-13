@@ -14,7 +14,7 @@ import unittest
 import numpy as np
 import torch
 
-from sttt.ai import RunOwnership
+from sttt.ai import RunOwnership, pack_replay, replay_length, unpack_replay
 
 AI_SOURCE = pathlib.Path(__file__).resolve().parents[1] / "sttt" / "ai.py"
 
@@ -137,3 +137,57 @@ class TestRunOwnership(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestReplayPacking(unittest.TestCase):
+    """The checkpoint stores the replay as four stacked tensors; the trainer
+    must get back exactly the rows it saved, and legacy list checkpoints must
+    still load."""
+
+    @staticmethod
+    def _rows(n, seed=0):
+        g = torch.Generator().manual_seed(seed)
+        rows = []
+        for i in range(n):
+            mask = torch.zeros(81, dtype=torch.bool)
+            mask[torch.randperm(81, generator=g)[: 1 + i % 9]] = True
+            rows.append((torch.randn(289, generator=g), torch.rand(81, generator=g),
+                         mask, float((-1) ** i) * (0.5 if i % 3 else 1.0)))
+        return rows
+
+    def test_roundtrip_through_torch_save_is_exact(self):
+        rows = self._rows(37)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "ckpt.pt"
+            torch.save({"replay": pack_replay(rows)}, path)
+            loaded = torch.load(path, map_location="cpu", weights_only=False)["replay"]
+        self.assertEqual(replay_length(loaded), 37)
+        back = unpack_replay(loaded)
+        self.assertEqual(len(back), 37)
+        for (x, pi, mask, z), (x2, pi2, mask2, z2) in zip(rows, back):
+            self.assertTrue(torch.equal(x, x2))
+            self.assertTrue(torch.equal(pi, pi2))
+            self.assertEqual(mask2.dtype, torch.bool)
+            self.assertTrue(torch.equal(mask, mask2))
+            self.assertEqual(z, z2)
+            self.assertIsInstance(z2, float)
+
+    def test_rows_do_not_share_storage_with_the_packed_block(self):
+        packed = pack_replay(self._rows(5))
+        back = unpack_replay(packed)
+        self.assertNotEqual(back[0][0].data_ptr(), packed["x"].data_ptr())
+
+    def test_legacy_list_and_empty_replay_still_load(self):
+        rows = self._rows(4)
+        self.assertEqual(unpack_replay(rows), rows)
+        self.assertEqual(replay_length(rows), 4)
+        self.assertEqual(unpack_replay(None), [])
+        self.assertEqual(unpack_replay(pack_replay([])), [])
+        self.assertEqual(replay_length(pack_replay([])), 0)
+
+    def test_deque_roundtrip_matches_trainer_use(self):
+        from collections import deque
+        replay = deque(self._rows(12), maxlen=10)
+        back = deque(unpack_replay(pack_replay(replay)), maxlen=10)
+        self.assertEqual(len(back), 10)
+        self.assertTrue(torch.equal(back[0][0], replay[0][0]))

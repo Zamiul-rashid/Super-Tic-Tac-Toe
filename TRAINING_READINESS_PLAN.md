@@ -330,7 +330,35 @@ For each row, replace Pending with the actual result only after recording the co
 | M9 CPU certification | **Done (on this branch, one known failure)** | `0964a74`. Five of six CPU gates were stubs that could not fail; rewritten. native/cpu/mixed/failure/memory PASS (`runs/readiness/m9-cpu-20260914-011945/`). build FAILS on `test_f20_git_branch_isolation` only (hard-coded branch allowlist; passes on `main`). |
 | M9 GPU certification and soak | **Done (gate code); pilot pending on the target GPU** | `gpu` stage rewritten (was a stub with a phantom `sttt.model` import): explicit CUDA, FP32 run + FP16 2-iteration run + CUDA resume, finite loss/policy/value, ≥1 optimizer update, `peak_gpu_mb > 0` every iteration (no CPU fallback), GradScaler persistence proven by the growth tracker continuing across the resume (4→8; a fresh scaler would restart at 4), no leftover workers. PASS on the RTX 4090 in 41.8 s (`runs/readiness/m9-gpu-20260914-024448/gpu/`). `pilot` stage rewritten: runs `./train.sh` itself (exact production flags, frozen start checkpoint with sha256) for warm-up + measured iterations, computes ETA with observed band, records total/peak-reserved/headroom and preserved checkpoints; `pending` unless ≥20 measured iterations. Wiring run with 1 + 2 iterations, 10 workers: peak reserved 68 MiB of 24 080 MiB, 37.9 s/iteration on a 4090 shared with another job at 100% (not representative). The 20-iteration pilot must run on the 3050 Ti laptop: `"$STTT_PY" scripts/check_training_ready.py --backend cpp --device cuda --stage pilot --pilot-checkpoint runs/run_v2/latest.pt`. No soak. |
 | M10 bounded strength experiments | **Skipped by decision (2026-09-14)** | Replaced by a 90-second screen of the existing run_v2 checkpoints; see "LR decision evidence" below. Cosine chosen. No Elo outcome is claimed. The five-arm screen remains available if the decision is revisited. |
-| M11 docs/launch/rollback | **Done** | `./train.sh <checkpoint> <output-dir> [population-config]` is the canonical launcher (moved from `scripts/launch_continuation.sh`; default 10 workers): explicit checkpoint/output/config, freezes an immutable start copy, cosine + fp16 + CUDA + native, prints effective config, refuses an occupied output dir; `RunOwnership` refuses a second writer before workers start. `train_v2.sh` is a deprecation stub (it hard-coded another machine's paths, a rolling-latest resume and an Elo label). Reconciled: README (canonical training section; run_v2/big_run historical inputs), `POPULATION_TRAINING.md` (table now equals `configs/population/baseline.json`, which is the source of truth; old 35/20/15/15/10/5 mix removed), `handover/HANDOVER.md` (status note: 8.6M states/s zero-copy figure, 15–20× forecast, 258-test count and 1812.9 Elo result marked historical/superseded), `handover/handover.md` reduced to a pointer (case-colliding duplicate), `TEST_READY.md`/`TEST_INFRA.md` (dead `.venv` interpreter path → `$STTT_PY`, 122-test figures marked historical). ETA source is the pilot manifest, not a fixed speed-up claim. Rollback: stop the run, keep its last checkpoint, resume a pinned checkpoint into a new output dir with `./train.sh`; revert code via the milestone commit. |
+| M11 docs/launch/rollback | **Done** | `./train.sh <checkpoint> <output-dir> [population-config]` is the canonical launcher (moved from `scripts/launch_continuation.sh`; default 16 workers, leaf batch 64, inference batch 1024): explicit checkpoint/output/config, freezes an immutable start copy, cosine + fp16 + CUDA + native, prints effective config, refuses an occupied output dir; `RunOwnership` refuses a second writer before workers start. `train_v2.sh` is a deprecation stub (it hard-coded another machine's paths, a rolling-latest resume and an Elo label). Reconciled: README (canonical training section; run_v2/big_run historical inputs), `POPULATION_TRAINING.md` (table now equals `configs/population/baseline.json`, which is the source of truth; old 35/20/15/15/10/5 mix removed), `handover/HANDOVER.md` (status note: 8.6M states/s zero-copy figure, 15–20× forecast, 258-test count and 1812.9 Elo result marked historical/superseded), `handover/handover.md` reduced to a pointer (case-colliding duplicate), `TEST_READY.md`/`TEST_INFRA.md` (dead `.venv` interpreter path → `$STTT_PY`, 122-test figures marked historical). ETA source is the pilot manifest, not a fixed speed-up claim. Rollback: stop the run, keep its last checkpoint, resume a pinned checkpoint into a new output dir with `./train.sh`; revert code via the milestone commit. |
+
+### Iteration-time evidence (2026-09-14)
+
+The native port removed search from the critical path (≈1 s of C++ compute per
+iteration at 259k completed simulations); the remaining time was pipeline, not
+search. Two changes, both measured on the RTX 4090 while it was shared with
+another job at ~100%:
+
+| | Before | After |
+| --- | ---: | ---: |
+| Checkpoint write (200k-position replay) | 9.5 s, 471 MB | 0.5 s, 314 MB |
+| Self-play wall (16 games) | 20–24 s | 9–11 s |
+| Mean iteration (pilot gate) | 37.9 s | 16.2 s |
+
+1. The replay was pickled as 200k separate 4-tuples of small tensors. It is now
+   stacked into four contiguous tensors (`pack_replay`/`unpack_replay`,
+   `format: packed-v1`). Legacy list checkpoints still load; the in-RAM deque
+   the optimizer samples from is unchanged. Roundtrip verified exact on the real
+   run_v2 replay and in `tests/test_training_state.py`.
+2. Leaf batch 16 → 64 (32 sequential GPU round trips per 512-simulation move → 8)
+   and workers 10 → 16, one per game, so no worker plays two games back to back.
+   Mean inference batch rose 96 → ~450; batches per iteration fell ~2,600 → ~540.
+   Leaf batch 64 collects more leaves per evaluation, which is a search-quality
+   trade, not a free win.
+
+The ETA on the target 3050 Ti laptop must come from the pilot gate there. On an
+uncontended GPU the remaining optimization time (6–7 s here) should fall back
+toward the ~3 s run_v2 measured.
 
 ### LR decision evidence (2026-09-14)
 

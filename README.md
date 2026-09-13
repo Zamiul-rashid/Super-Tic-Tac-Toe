@@ -25,7 +25,7 @@ python -m unittest discover -s tests -v
 production command: it freezes an immutable copy of the start checkpoint,
 resumes it on CUDA with FP16 AMP, the native search backend and the cosine
 learning-rate schedule, uses the population curriculum from
-`configs/population/*.json` (default `baseline.json`, 10 workers), prints its
+`configs/population/*.json` (default `baseline.json`, 16 workers, leaf batch 64), prints its
 effective configuration and refuses an output directory that already holds a
 run. `train_v2.sh` and the `run_v2`/`run_v3` naming are deprecated; existing
 `runs/run_v2` and `runs/big_run` are historical inputs, never outputs.

@@ -12,15 +12,15 @@
 # written to. The training process itself refuses a second writer on the same
 # output directory before spawning any worker (RunOwnership).
 #
-# Verified 2026-09-14 on CUDA with the exact flags below
-# (runs/readiness/cosine-burst-*): FP16 AMP active, GradScaler scale held at
-# 65536 across iterations and across a resume, cosine schedule attached as
-# phase 0 to a legacy checkpoint and continued on resume, peak allocated GPU
-# memory 60 MiB at batch 512 / inference-batch 512 (540 MiB process footprint).
+# Verified 2026-09-14 on CUDA with the exact flags below: FP16 AMP active,
+# GradScaler state held across iterations and restored across a resume, cosine
+# schedule attached as phase 0 to a legacy checkpoint and continued on resume,
+# peak reserved GPU memory 88 MiB. Mean 16.2 s/iteration on a contended 4090
+# (runs/readiness/m9-pilot-fast-*); measure your own with the pilot gate.
 #
 # Environment overrides:
 #   STTT_PY     interpreter (default: python on PATH)
-#   WORKERS     self-play worker processes (default 10)
+#   WORKERS     self-play worker processes (default 16: one per game, so no worker plays two games back to back)
 #   ITERATIONS  additional iterations to run (default 5000)
 #   LR_HORIZON  cosine horizon in completed iterations (default = ITERATIONS)
 set -euo pipefail
@@ -36,7 +36,7 @@ POP_CONFIG=${3:-configs/population/baseline.json}
 REPO=$(cd "$(dirname "$0")" && pwd)
 cd "$REPO"
 PY=${STTT_PY:-python}
-WORKERS=${WORKERS:-10}
+WORKERS=${WORKERS:-16}
 ITERATIONS=${ITERATIONS:-5000}
 LR_HORIZON=${LR_HORIZON:-$ITERATIONS}
 
@@ -82,8 +82,8 @@ echo "==========================================================================
   --iterations "$ITERATIONS" \
   --games 16 \
   --simulations 512 \
-  --leaf-batch 16 \
-  --inference-batch 512 \
+  --leaf-batch 64 \
+  --inference-batch 1024 \
   --inference-wait-ms 2 \
   --steps 100 \
   --batch 512 \

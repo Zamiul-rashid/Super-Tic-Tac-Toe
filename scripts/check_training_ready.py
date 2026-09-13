@@ -128,7 +128,7 @@ class ReadinessRunner:
         pilot_checkpoint: str | None = None,
         pilot_iterations: int = 20,
         pilot_warmup: int = 2,
-        pilot_workers: int = 10,
+        pilot_workers: int = 16,
         pilot_population_config: str = "configs/population/baseline.json",
         pilot_eta_iterations: int = 5000,
     ):
@@ -692,10 +692,11 @@ class ReadinessRunner:
         for field in ("optimizer", "replay", "lr_schedule", "numpy_rng_state", "arch"):
             if after.get(field) is None:
                 return cpu_fail(f"checkpoint lost '{field}' across the resume")
-        checks["replay_positions"] = len(after["replay"])
+        from sttt.ai import replay_length
+        checks["replay_positions"] = replay_length(after["replay"])
         checks["optimizer_param_groups"] = len(after["optimizer"]["param_groups"])
         checks["lr_schedule"] = after["lr_schedule"]
-        if not after["replay"]:
+        if checks["replay_positions"] == 0:
             return cpu_fail("replay buffer is empty after training")
         if not after["optimizer"].get("state"):
             return cpu_fail("optimizer moments were not preserved across the resume")
@@ -1511,7 +1512,7 @@ def main() -> int:
     parser.add_argument("--pilot-iterations", type=int, default=20,
                         help="measured pilot iterations after warm-up (gate needs >= 20)")
     parser.add_argument("--pilot-warmup", type=int, default=2)
-    parser.add_argument("--pilot-workers", type=int, default=10)
+    parser.add_argument("--pilot-workers", type=int, default=16)
     parser.add_argument("--pilot-population-config", default="configs/population/baseline.json")
     parser.add_argument("--pilot-eta-iterations", type=int, default=5000,
                         help="production iteration count the ETA is projected for")

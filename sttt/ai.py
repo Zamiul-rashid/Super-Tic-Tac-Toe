@@ -147,7 +147,7 @@ def train(args):
     schedule = build_schedule(args, saved.get('lr_schedule'), legacy_lr=legacy_lr)
     apply_lr(optimizer, schedule.current_lr)
     print(schedule.describe(), flush=True)
-    replay = deque(saved.get('replay', []), maxlen=args.buffer)
+    replay = deque(unpack_replay(saved.get('replay')), maxlen=args.buffer)
     # M6: parallel per-sample origin (iteration, family) so sampled-position
     # fractions and age are measurable without touching the target tuple.
     # Legacy checkpoints carry none; their samples are tagged as such.
@@ -193,6 +193,48 @@ def train(args):
                         replay_meta=replay_meta)
     finally:
         ownership.release()
+
+
+REPLAY_PACKED_FORMAT = 'packed-v1'
+
+
+def pack_replay(replay):
+    """Stack the replay's (x, pi, mask, z) rows into four tensors for saving.
+
+    Pickling 200k positions as 600k tiny tensors cost ~10 s per checkpoint
+    write, a quarter of every iteration. Four contiguous tensors serialise at
+    copy speed. Only the on-disk form changes; the in-RAM deque of tuples that
+    the optimizer samples from is untouched.
+    """
+    rows = list(replay)
+    if not rows:
+        return {'format': REPLAY_PACKED_FORMAT, 'count': 0}
+    return {'format': REPLAY_PACKED_FORMAT, 'count': len(rows),
+            'x': torch.stack([r[0] for r in rows]),
+            'pi': torch.stack([r[1] for r in rows]),
+            'mask': torch.stack([r[2] for r in rows]),
+            'z': torch.tensor([r[3] for r in rows], dtype=torch.float64)}
+
+
+def unpack_replay(saved):
+    """Return a list of (x, pi, mask, z) rows from a packed or legacy replay."""
+    if saved is None:
+        return []
+    if isinstance(saved, dict) and saved.get('format') == REPLAY_PACKED_FORMAT:
+        if saved['count'] == 0:
+            return []
+        # clone() so a row does not keep the whole packed block alive after
+        # the deque has evicted its neighbours.
+        return [(x.clone(), pi.clone(), mask.clone(), z) for x, pi, mask, z in
+                zip(saved['x'].unbind(0), saved['pi'].unbind(0), saved['mask'].unbind(0),
+                    saved['z'].tolist())]
+    return list(saved)
+
+
+def replay_length(saved):
+    if isinstance(saved, dict) and saved.get('format') == REPLAY_PACKED_FORMAT:
+        return int(saved['count'])
+    return len(saved or [])
 
 
 def resolve_population_config(args, saved):
@@ -388,7 +430,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         # restarted loss-scale discovery and drew a different augmentation
         # stream than an uninterrupted run would have.
         checkpoint = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(),
-                      'iteration': iteration, 'replay': list(replay), 'arch': arch,
+                      'iteration': iteration, 'replay': pack_replay(replay), 'arch': arch,
                       'training_config': vars(args), 'search_config': asdict(search_config(args)),
                       'numpy_rng_state': rng.bit_generator.state,
                       'torch_rng_state': torch.get_rng_state(),
