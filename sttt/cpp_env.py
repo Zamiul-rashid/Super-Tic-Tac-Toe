@@ -96,7 +96,12 @@ def encode_batch(states) -> np.ndarray:
             converted.append(to_fast_state(s))
             need_convert = True
     raw = sttt_cpp.encode_batch(converted if need_convert else states)
-    return np.frombuffer(raw, dtype=np.float32).reshape(len(states), 289)
+    # np.frombuffer over immutable Python bytes yields a READ-ONLY view that does
+    # not own its storage -- not a valid owner for torch.from_numpy, and it
+    # silently outlives nothing. Return an owned, writable copy until the
+    # extension exposes a real owner-backed buffer.
+    view = np.frombuffer(raw, dtype=np.float32).reshape(len(states), 289)
+    return view.copy()
 
 
 def to_python_state(fast_state: FastState) -> State:
