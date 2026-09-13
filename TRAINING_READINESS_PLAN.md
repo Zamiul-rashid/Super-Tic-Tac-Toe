@@ -313,8 +313,8 @@ For each row, replace Pending with the actual result only after recording the co
 
 | Gate | Status | Commit / artifact |
 | --- | --- | --- |
-| M0 fresh build/provenance | Pending | — |
-| M1 native robustness | Pending | — |
+| M0 fresh build/provenance | **Done** (verify-only) | `a837fa2` predates this ledger and already ships `scripts/check_training_ready.py` + build-provenance fixes. Verified 2026-09-13: fresh `make -C cpp` uses the *selected* interpreter's headers; extension imports in a fresh subprocess; discovered test count is **311**, not the assumed 258. |
+| M1 native robustness | **Done** | `0bd9d8a`, `b58ffcd`, `997c42a`, `9dd3387`. 42 new regression tests; suite 356, 1 pre-existing skip. See notes below. |
 | M2 backend/worker contract | Pending | — |
 | M3 encoding/IPC integration | Pending | — |
 | M4 AMP/resume/ownership | Pending | — |
@@ -326,6 +326,44 @@ For each row, replace Pending with the actual result only after recording the co
 | M9 GPU certification and soak | Pending | Requires real CUDA access |
 | M10 bounded strength experiments | Pending | No Elo outcome assumed |
 | M11 docs/launch/rollback | Pending | — |
+
+### M1 evidence (2026-09-13)
+
+Four focused commits on `feat/m1-native-robustness`. Defects found and fixed:
+
+1. **`0bd9d8a` — unchecked `PyFloat_AsDouble` at every float boundary.** Policy
+   priors and `SearchConfig` floats were converted without checking the error
+   return, so NaN/inf/negative/non-numeric entries became real priors;
+   `expand()` normalizes, so one bad entry corrupted the whole distribution. A
+   nonfinite `c_puct` made every PUCT score NaN. **A string policy entry
+   segfaulted the pre-patch build (exit 139).** 16 tests; against the old build
+   they give 11 failures and one SIGSEGV.
+2. **`b58ffcd` — mutable states were hashable.** `FastState`/`CppState` are
+   mutated by `play_inplace`, so a dict key silently relocated. Both are now
+   unhashable; `state_key()` gives an immutable canonical tuple that compares
+   equal across all three backends, and `clone()` gives an independent copy.
+3. **`997c42a` — node views had no lifetime marker.** A view holds an arena
+   index; `reset()`/`init_root()`/re-rooting rebuild the arena, after which the
+   index names a *different* node and the getters returned its statistics.
+   Generation counter added; stale views now raise `RuntimeError`. Also:
+   `advance()` accepted in-range **illegal** actions and re-rooted onto
+   impossible boards; `sttt_benchmark_rollouts` let worker-thread exceptions
+   call `std::terminate`.
+4. **`9dd3387` — no exception handling in `mcts.cpp` at all**, so `std::bad_alloc`
+   would unwind through the CPython C boundary. All entry points now translate
+   to `MemoryError`/`ValueError`/`RuntimeError`. Stats dict insertion failures
+   propagate. **Arena reclamation:** measured one 60-move game at 1024 sims/move
+   — 437,343 nodes (40 MiB) of which **212 reachable, 99.9% garbage**, growing
+   with game length and multiplied per worker. `advance()` now compacts to the
+   live subtree; the same game ends at 212 nodes. `stats` exposes `arena_nodes`
+   and `arena_capacity` for the M9 memory gate.
+
+**Known limitation:** `test_f20_git_branch_isolation` hard-codes a branch
+allowlist (`testing`/`cpp`/`main`) and therefore fails on any feature branch,
+which §4.2 mandates. Not weakened (§4.6); it passes once merged to `main`.
+
+**Environment note:** `engines/runtime/` is gitignored, so a fresh worktree or
+clone must have it copied in or 8 OpenSpiel/uttt.ai tests error spuriously.
 
 ## 8. Research and API references
 
