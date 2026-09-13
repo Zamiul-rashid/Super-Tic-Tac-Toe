@@ -89,23 +89,10 @@ def validate_output_dir(output_dir: Path, repo_root: Path = _REPO_ROOT) -> Path:
     return resolved
 
 
-def freeze_checkpoint(src_path: str | Path, dest_dir: str | Path, max_retries: int = 3) -> tuple[Path, str]:
-    """Safely snapshot a checkpoint file, verifying it was not modified during copy."""
-    src = Path(src_path).resolve()
-    if not src.is_file():
-        raise FileNotFoundError(f"Checkpoint source does not exist: {src}")
-    dest = Path(dest_dir).resolve() / src.name
-    dest.parent.mkdir(parents=True, exist_ok=True)
-
-    for attempt in range(max_retries):
-        h_before = hashlib.sha256(src.read_bytes()).hexdigest()
-        shutil.copy2(src, dest)
-        h_after = hashlib.sha256(src.read_bytes()).hexdigest()
-        h_dest = hashlib.sha256(dest.read_bytes()).hexdigest()
-        if h_before == h_after == h_dest:
-            return dest, h_dest
-        time.sleep(0.5)
-    raise RuntimeError(f"Source checkpoint '{src}' was concurrently modified during copy!")
+# M7: one implementation, shared with the evaluation harness, which freezes the
+# same rolling checkpoints for the same reason. Re-exported here so the readiness
+# stages and their tests keep importing it from this module.
+from sttt.evaluation import freeze_checkpoint  # noqa: E402,F401
 
 
 class ReadinessRunner:
