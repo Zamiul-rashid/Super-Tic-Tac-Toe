@@ -48,13 +48,16 @@ def train(args):
     torch.manual_seed(args.seed)
     rng = np.random.default_rng(args.seed)
     device = resolve_device(args.device)
+    # M2: one explicit resolution, recorded and logged. The old boolean kept no
+    # record of what `auto` chose, so worker handshakes and checkpoints could not
+    # report the backend actually used.
+    from .backends import resolve_backend, describe_backend
     backend = getattr(args, 'backend', 'auto')
-    use_cpp = (backend == 'cpp' or (backend == 'auto' and _HAS_CPP))
-    if backend == 'cpp' and not _HAS_CPP:
-        raise RuntimeError('C++ backend requested (--backend cpp) but sttt_cpp is not available. Run "make -C cpp" first.')
+    backend_info = resolve_backend(backend)
+    args._backend_info = backend_info
+    use_cpp = backend_info['actual'] == 'cpp'
     args._use_cpp = use_cpp
-    if use_cpp:
-        print('Using C++ bitboard engine for self-play search', flush=True)
+    print(describe_backend(backend_info), flush=True)
     if args.resume:
         model, saved = load_model(args.resume)
         arch = 'resnet' if isinstance(model, ResNet) else 'mlp'

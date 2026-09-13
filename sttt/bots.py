@@ -683,6 +683,12 @@ class CheckpointBot(Bot):
         self.leaf_batch = leaf_batch
         self.config = config or SearchConfig()
         self.backend = backend
+        # M2: resolve the backend HERE, not per move inside choose(). A strict
+        # backend="cpp" on a box with no native build used to fall through to
+        # the Python search silently, so every artifact from that run claimed a
+        # backend it never used. resolve_backend raises instead.
+        from .backends import resolve_backend
+        self.backend_info = resolve_backend(backend)
         iteration = self.checkpoint_data.get("iteration")
         self._name = name or (f"ckpt-iter{iteration:04d}" if iteration is not None else self.path.stem)
         self.tree: TreeSearch | None = None
@@ -705,16 +711,9 @@ class CheckpointBot(Bot):
         if not legal:
             raise ValueError("Cannot choose a move in a terminal state")
 
-        _HAS_CPP = False
-        if self.backend in ("auto", "cpp"):
-            try:
-                from .cpp_env import CppTreeSearch, is_cpp_available
-                _HAS_CPP = is_cpp_available()
-            except ImportError:
-                _HAS_CPP = False
-
-        if _HAS_CPP:
+        if self.backend_info["actual"] == "cpp":
             if self.tree is None:
+                from .cpp_env import CppTreeSearch
                 self.tree = CppTreeSearch(self.model, rng=rng, config=self.config)
             pi = self.tree.run(state, self.simulations, batch_size=self.leaf_batch)
             action = int(pi.argmax())
