@@ -195,6 +195,44 @@ def train(args):
         ownership.release()
 
 
+def snapshot_iteration(path):
+    """Iteration number encoded in a model-NNNN.pt name, or None."""
+    try:
+        return int(Path(path).stem.split('-')[1])
+    except (ValueError, IndexError):
+        return None
+
+
+def prune_snapshots(output, iteration, window=500, keep=10):
+    """Delete model-*.pt snapshots outside the retention policy.
+
+    Two independent caps, both applied: drop anything older than `window`
+    iterations, and keep at most the most recent `keep` snapshots. Either is
+    0 to disable that cap. The count cap matters because the age cap only
+    yields a predictable file count while --save-every divides --keep-
+    checkpoint-window; an unaligned --eval-every adds extra snapshots.
+
+    best.pt and latest.pt are never matched, so a pinned best and the resume
+    point always survive. Returns the deleted paths.
+    """
+    output = Path(output)
+    snapshots = []
+    for path in output.glob('model-*.pt'):
+        found = snapshot_iteration(path)
+        if found is not None:
+            snapshots.append((found, path))
+    snapshots.sort()
+    doomed = set()
+    if window and window > 0:
+        cutoff = iteration - window
+        doomed.update(path for found, path in snapshots if found <= cutoff)
+    if keep and keep > 0 and len(snapshots) > keep:
+        doomed.update(path for _, path in snapshots[:-keep])
+    for path in sorted(doomed):
+        path.unlink(missing_ok=True)
+    return sorted(doomed)
+
+
 REPLAY_PACKED_FORMAT = 'packed-v1'
 
 
@@ -463,16 +501,9 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             snapshot = output / f'model-{iteration:04d}.pt'
             torch.save({'model': model.state_dict(), 'iteration': iteration, 'arch': arch}, snapshot.with_suffix('.tmp'))
             snapshot.with_suffix('.tmp').replace(snapshot)
-            max_age = getattr(args, 'keep_checkpoint_window', 500)
-            if max_age and max_age > 0:
-                cutoff = iteration - max_age
-                for old_model in output.glob('model-*.pt'):
-                    try:
-                        old_iter = int(old_model.stem.split('-')[1])
-                        if old_iter <= cutoff:
-                            old_model.unlink(missing_ok=True)
-                    except (ValueError, IndexError):
-                        pass
+            prune_snapshots(output, iteration,
+                            window=getattr(args, 'keep_checkpoint_window', 500),
+                            keep=getattr(args, 'keep_checkpoints', 10))
         stage_timer.add('checkpoint_write', time.monotonic() - checkpoint_started)
         report = {'iteration': iteration, 'positions': len(replay), 'loss': float(np.mean(losses)),
                   'seconds': round(time.monotonic() - started, 2), 'selfplay_seconds': selfplay_seconds,
@@ -835,6 +866,10 @@ def main():
     t.add_argument('--save-every', type=int, default=100, help='Save snapshot model checkpoint every N iterations; 0 disables')
     t.add_argument('--keep-checkpoint-window', type=int, default=500,
                    help='Prune model-*.pt snapshots older than N iterations; 0 disables')
+    t.add_argument('--keep-checkpoints', type=int, default=10,
+                   help='Keep at most the N most recent model-*.pt snapshots; 0 disables. '
+                        'Applied together with --keep-checkpoint-window; best.pt and '
+                        'latest.pt are never pruned')
     t.add_argument('--eval-every', type=int, default=0, help='Evaluate every N iterations; 0 disables')
     t.add_argument('--eval-games', type=positive, default=20)
     t.add_argument('--eval-simulations', type=positive, default=512)

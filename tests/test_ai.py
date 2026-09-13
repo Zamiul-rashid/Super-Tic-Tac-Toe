@@ -100,8 +100,15 @@ class Tests(unittest.TestCase):
         self.assertTrue(-1.0 <= v <= 1.0)
 
     def test_checkpoint_pruning_window(self):
+        """Age cap: snapshots older than the window go, newer ones stay.
+
+        This calls the production pruner. The previous version of this test
+        re-implemented the cutoff loop inside the test body, so it passed no
+        matter what sttt.ai actually did.
+        """
         import tempfile
         from pathlib import Path
+        from sttt.ai import prune_snapshots
         with tempfile.TemporaryDirectory() as tmpdir:
             out = Path(tmpdir)
             (out / "best.pt").touch()
@@ -109,22 +116,67 @@ class Tests(unittest.TestCase):
             for it in (50, 100, 200, 500, 550):
                 (out / f"model-{it:04d}.pt").touch()
 
-            # Prune at iteration 550 with window 500 (cutoff 50: model-0050.pt deleted)
-            cutoff = 550 - 500
-            for old_model in out.glob("model-*.pt"):
-                try:
-                    old_it = int(old_model.stem.split("-")[1])
-                    if old_it <= cutoff:
-                        old_model.unlink(missing_ok=True)
-                except (ValueError, IndexError):
-                    pass
+            deleted = prune_snapshots(out, iteration=550, window=500, keep=0)
 
             remaining = {f.name for f in out.iterdir()}
-            self.assertIn("best.pt", remaining)
-            self.assertIn("latest.pt", remaining)
+            self.assertEqual([p.name for p in deleted], ["model-0050.pt"])
             self.assertNotIn("model-0050.pt", remaining)
             self.assertIn("model-0100.pt", remaining)
             self.assertIn("model-0550.pt", remaining)
+            self.assertIn("best.pt", remaining)
+            self.assertIn("latest.pt", remaining)
+
+    def test_pruning_keeps_only_the_last_n_snapshots(self):
+        """Count cap: it holds even when the age window would keep everything."""
+        import tempfile
+        from pathlib import Path
+        from sttt.ai import prune_snapshots
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = Path(tmpdir)
+            for it in range(10, 161, 10):      # 16 snapshots, all recent
+                (out / f"model-{it:04d}.pt").touch()
+
+            prune_snapshots(out, iteration=160, window=500, keep=10)
+
+            kept = sorted(f.name for f in out.glob("model-*.pt"))
+            self.assertEqual(len(kept), 10)
+            self.assertEqual(kept[0], "model-0070.pt")
+            self.assertEqual(kept[-1], "model-0160.pt")
+
+    def test_production_cadence_settles_at_ten_snapshots(self):
+        """save-every 50 with window 500 and keep 10: the directory stops growing."""
+        import tempfile
+        from pathlib import Path
+        from sttt.ai import prune_snapshots
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = Path(tmpdir)
+            counts = []
+            for iteration in range(50, 2001, 50):
+                (out / f"model-{iteration:04d}.pt").touch()
+                prune_snapshots(out, iteration, window=500, keep=10)
+                counts.append(len(list(out.glob("model-*.pt"))))
+            self.assertEqual(max(counts), 10)
+            self.assertEqual(counts[-1], 10)
+            kept = sorted(int(f.stem.split("-")[1]) for f in out.glob("model-*.pt"))
+            self.assertEqual(kept, list(range(1550, 2001, 50)))
+
+    def test_pruning_ignores_unparsable_names_and_disabled_caps(self):
+        import tempfile
+        from pathlib import Path
+        from sttt.ai import prune_snapshots
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = Path(tmpdir)
+            (out / "model-notanumber.pt").touch()
+            for it in (50, 100, 150):
+                (out / f"model-{it:04d}.pt").touch()
+
+            self.assertEqual(prune_snapshots(out, 150, window=0, keep=0), [])
+            self.assertEqual(len(list(out.glob("model-*.pt"))), 4)
+            prune_snapshots(out, 150, window=500, keep=2)
+            remaining = {f.name for f in out.iterdir()}
+            self.assertIn("model-notanumber.pt", remaining,
+                          "a name the pruner cannot parse must never be deleted")
+            self.assertNotIn("model-0050.pt", remaining)
 
 
 if __name__ == '__main__':

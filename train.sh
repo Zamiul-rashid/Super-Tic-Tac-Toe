@@ -23,6 +23,11 @@
 #   WORKERS     self-play worker processes (default 16: one per game, so no worker plays two games back to back)
 #   ITERATIONS  additional iterations to run (default 5000)
 #   LR_HORIZON  cosine horizon in completed iterations (default = ITERATIONS)
+#
+# Storage: latest.pt (full resume state, ~320 MB) is rewritten every iteration;
+# a model-NNNN.pt weights snapshot (~7 MB) is written every 50 iterations and
+# pruned to the last 500 iterations AND the last 10 snapshots, so the run
+# directory settles at roughly 320 MB + 70 MB. best.pt is never pruned.
 set -euo pipefail
 
 if [[ $# -lt 2 || $# -gt 3 ]]; then
@@ -90,6 +95,7 @@ echo "==========================================================================
   --buffer 200000 \
   --save-every 50 \
   --keep-checkpoint-window 500 \
+  --keep-checkpoints 10 \
   --eval-every 100 \
   --eval-games 20 \
   --eval-simulations 512 \
