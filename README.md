@@ -1,5 +1,8 @@
 # Super Tic Tac Toe Console Game
 
+The implementation and validation checklist for long native/GPU training runs is
+in [Training readiness and improvement plan](TRAINING_READINESS_PLAN.md).
+
 ## Learning AI (4 GB GPU preset)
 
 The learning agent uses a 1.77M-parameter residual policy/value network by default
