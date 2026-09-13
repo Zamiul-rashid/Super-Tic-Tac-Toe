@@ -8,8 +8,36 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <new>
+#include <stdexcept>
 
 using namespace sttt;
+
+// M1: mcts.cpp had no exception handling at all. The engine allocates freely
+// (arena.resize/push_back, std::vector), so a std::bad_alloc -- or anything
+// else -- would unwind straight through the CPython C boundary, which is
+// undefined behaviour and in practice terminates the interpreter. Every
+// entry point is wrapped so native failures become ordinary Python errors:
+// bad_alloc -> MemoryError, invalid argument/range -> ValueError, everything
+// else -> RuntimeError.
+#define STTT_NATIVE_GUARD(FAILVAL)                                             \
+    catch (const std::bad_alloc&) {                                            \
+        PyErr_SetString(PyExc_MemoryError,                                     \
+                        "native search exhausted memory");                     \
+        return FAILVAL;                                                        \
+    } catch (const std::invalid_argument& e) {                                 \
+        PyErr_SetString(PyExc_ValueError, e.what());                           \
+        return FAILVAL;                                                        \
+    } catch (const std::out_of_range& e) {                                     \
+        PyErr_SetString(PyExc_ValueError, e.what());                           \
+        return FAILVAL;                                                        \
+    } catch (const std::exception& e) {                                        \
+        PyErr_SetString(PyExc_RuntimeError, e.what());                         \
+        return FAILVAL;                                                        \
+    } catch (...) {                                                            \
+        PyErr_SetString(PyExc_RuntimeError, "unknown native error");           \
+        return FAILVAL;                                                        \
+    }
 
 // Forward declaration from python_module.cpp
 extern PyTypeObject PyFastStateType;
@@ -271,7 +299,7 @@ static void PyFastTreeSearch_dealloc(PyFastTreeSearch* self) {
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static int PyFastTreeSearch_init(PyFastTreeSearch* self, PyObject* args, PyObject* kwds) {
+static int PyFastTreeSearch_init_impl(PyFastTreeSearch* self, PyObject* args, PyObject* kwds) {
     static const char* kwlist[] = {"model", "rng", "config", "opponent", "agent_side", NULL};
     PyObject* model = NULL;
     PyObject* rng = NULL;
@@ -375,14 +403,14 @@ static int PyFastTreeSearch_init(PyFastTreeSearch* self, PyObject* args, PyObjec
     return 0;
 }
 
-static PyObject* PyFastTreeSearch_reset(PyFastTreeSearch* self, PyObject* /*args*/) {
+static PyObject* PyFastTreeSearch_reset_impl(PyFastTreeSearch* self, PyObject* /*args*/) {
     if (self->engine) {
         self->engine->reset();
     }
     Py_RETURN_NONE;
 }
 
-static PyObject* PyFastTreeSearch_advance(PyFastTreeSearch* self, PyObject* args) {
+static PyObject* PyFastTreeSearch_advance_impl(PyFastTreeSearch* self, PyObject* args) {
     int action;
     if (!PyArg_ParseTuple(args, "i", &action)) {
         return NULL;
@@ -422,7 +450,7 @@ static int dict_set_steal(PyObject* dict, const char* key, PyObject* val) {
     return rc;
 }
 
-static PyObject* PyFastTreeSearch_get_stats(PyFastTreeSearch* self, void* /*closure*/) {
+static PyObject* PyFastTreeSearch_get_stats_impl(PyFastTreeSearch* self, void* /*closure*/) {
     if (!self->engine) {
         Py_RETURN_NONE;
     }
@@ -430,19 +458,35 @@ static PyObject* PyFastTreeSearch_get_stats(PyFastTreeSearch* self, void* /*clos
     PyObject* d = PyDict_New();
     if (!d) return NULL;
 
-    dict_set_steal(d, "completed_simulations", PyLong_FromLong(st.completed_simulations));
-    dict_set_steal(d, "neural_positions", PyLong_FromLong(st.neural_positions));
-    dict_set_steal(d, "inference_batches", PyLong_FromLong(st.inference_batches));
-    dict_set_steal(d, "max_depth", PyLong_FromLong(st.max_depth));
-    dict_set_steal(d, "hard_pruned_choices", PyLong_FromLong(st.hard_pruned_choices));
-    dict_set_steal(d, "soft_rechecks", PyLong_FromLong(st.soft_rechecks));
-    dict_set_steal(d, "retained_visits", PyLong_FromLong(st.retained_visits));
+    // Every insertion is checked: a silently dropped key used to leave callers
+    // reading a stats dict with missing fields.
+    int rc = 0;
+    rc |= dict_set_steal(d, "completed_simulations", PyLong_FromLong(st.completed_simulations));
+    rc |= dict_set_steal(d, "neural_positions", PyLong_FromLong(st.neural_positions));
+    rc |= dict_set_steal(d, "inference_batches", PyLong_FromLong(st.inference_batches));
+    rc |= dict_set_steal(d, "max_depth", PyLong_FromLong(st.max_depth));
+    rc |= dict_set_steal(d, "hard_pruned_choices", PyLong_FromLong(st.hard_pruned_choices));
+    rc |= dict_set_steal(d, "soft_rechecks", PyLong_FromLong(st.soft_rechecks));
+    rc |= dict_set_steal(d, "retained_visits", PyLong_FromLong(st.retained_visits));
+    // Arena occupancy, needed by the M9 memory gate: live nodes vs the capacity
+    // the vector is actually holding on to.
+    rc |= dict_set_steal(d, "arena_nodes",
+                         PyLong_FromSize_t(self->engine->arena.size()));
+    rc |= dict_set_steal(d, "arena_capacity",
+                         PyLong_FromSize_t(self->engine->arena.capacity()));
 
     if (st.root_solved == RESULT_ONGOING) {
         Py_INCREF(Py_None);
-        dict_set_steal(d, "root_solved", Py_None);
+        rc |= dict_set_steal(d, "root_solved", Py_None);
     } else {
-        dict_set_steal(d, "root_solved", PyLong_FromLong(st.root_solved));
+        rc |= dict_set_steal(d, "root_solved", PyLong_FromLong(st.root_solved));
+    }
+    if (rc != 0) {
+        Py_DECREF(d);
+        if (!PyErr_Occurred()) {
+            PyErr_SetString(PyExc_RuntimeError, "failed to build the stats dictionary");
+        }
+        return NULL;
     }
     return d;
 }
@@ -480,6 +524,35 @@ static PyObject* PyFastTreeSearch_get_config(PyFastTreeSearch* self, void* /*clo
     Py_RETURN_NONE;
 }
 
+// Defined below the getset table; declared here for the guarded wrapper.
+static PyObject* PyFastTreeSearch_run_impl(PyFastTreeSearch* self, PyObject* args, PyObject* kwds);
+
+// Guarded public entry points.
+static int PyFastTreeSearch_init(PyFastTreeSearch* self, PyObject* args, PyObject* kwds) {
+    try { return PyFastTreeSearch_init_impl(self, args, kwds); }
+    STTT_NATIVE_GUARD(-1)
+}
+
+static PyObject* PyFastTreeSearch_run(PyFastTreeSearch* self, PyObject* args, PyObject* kwds) {
+    try { return PyFastTreeSearch_run_impl(self, args, kwds); }
+    STTT_NATIVE_GUARD(NULL)
+}
+
+static PyObject* PyFastTreeSearch_advance(PyFastTreeSearch* self, PyObject* args) {
+    try { return PyFastTreeSearch_advance_impl(self, args); }
+    STTT_NATIVE_GUARD(NULL)
+}
+
+static PyObject* PyFastTreeSearch_reset(PyFastTreeSearch* self, PyObject* args) {
+    try { return PyFastTreeSearch_reset_impl(self, args); }
+    STTT_NATIVE_GUARD(NULL)
+}
+
+static PyObject* PyFastTreeSearch_get_stats(PyFastTreeSearch* self, void* closure) {
+    try { return PyFastTreeSearch_get_stats_impl(self, closure); }
+    STTT_NATIVE_GUARD(NULL)
+}
+
 static PyGetSetDef PyFastTreeSearch_getseters[] = {
     {(char*)"stats", (getter)PyFastTreeSearch_get_stats, NULL, (char*)"Search statistics dictionary", NULL},
     {(char*)"root", (getter)PyFastTreeSearch_get_root, NULL, (char*)"Root node of search tree", NULL},
@@ -489,7 +562,7 @@ static PyGetSetDef PyFastTreeSearch_getseters[] = {
     {NULL, NULL, NULL, NULL, NULL}
 };
 
-static PyObject* PyFastTreeSearch_run(PyFastTreeSearch* self, PyObject* args, PyObject* kwds) {
+static PyObject* PyFastTreeSearch_run_impl(PyFastTreeSearch* self, PyObject* args, PyObject* kwds) {
     static const char* kwlist[] = {"state", "simulations", "batch_size", "noise", NULL};
     PyObject* state_obj;
     int simulations;

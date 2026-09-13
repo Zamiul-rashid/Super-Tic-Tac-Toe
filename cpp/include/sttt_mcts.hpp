@@ -68,9 +68,61 @@ public:
     // a DIFFERENT node, so views compare this before dereferencing.
     uint64_t generation = 0;
 
+    // Capacity floor: the arena never shrinks below this, so ordinary
+    // move-to-move churn does no reallocation.
+    static constexpr size_t ARENA_RESERVE = 65536;
+
     explicit MCTSEngine(const MCTSConfig& cfg = MCTSConfig(), uint64_t seed = 42)
         : config(cfg), rng(seed) {
-        arena.reserve(65536);
+        arena.reserve(ARENA_RESERVE);
+    }
+
+    // Rebuild the arena holding only the subtree reachable from root_idx.
+    //
+    // Re-rooting used to keep every discarded sibling subtree alive: measured
+    // over one 60-move game at 1024 simulations/move the arena reached 437,343
+    // nodes (40 MiB) of which 212 were reachable -- 99.9% garbage, growing with
+    // game length and multiplied by every worker. BFS order preserves the
+    // contiguity of each node's children, which the selection loop relies on,
+    // and parent indices are remapped as we go.
+    //
+    // Node INDICES change, so every caller-visible view is invalidated; the
+    // generation counter is bumped accordingly. Never call this while inference
+    // paths are outstanding -- advance() is the only caller and runs strictly
+    // between searches, when nothing is pending.
+    void compact() {
+        if (root_idx < 0 || arena.empty()) {
+            return;
+        }
+        std::vector<MCTSNode> next;
+        next.reserve(arena.size());
+        next.push_back(arena[root_idx]);
+        next[0].parent = -1;
+        for (size_t i = 0; i < next.size(); ++i) {
+            const int32_t old_first = next[i].first_child;
+            const uint8_t num_children = next[i].num_children;
+            if (old_first < 0 || num_children == 0) {
+                next[i].first_child = -1;
+                continue;
+            }
+            next[i].first_child = static_cast<int32_t>(next.size());
+            for (uint8_t c = 0; c < num_children; ++c) {
+                MCTSNode child = arena[old_first + c];
+                child.parent = static_cast<int32_t>(i);
+                next.push_back(child);
+            }
+        }
+        // Release capacity only when it is wildly out of proportion to what is
+        // live, so a steady-state search never thrashes the allocator.
+        if (next.capacity() > ARENA_RESERVE && next.capacity() > 4 * next.size()) {
+            next.shrink_to_fit();
+        }
+        if (next.capacity() < ARENA_RESERVE) {
+            next.reserve(ARENA_RESERVE);
+        }
+        arena.swap(next);
+        root_idx = 0;
+        ++generation;
     }
 
     inline bool use_proofs() const {
@@ -80,6 +132,10 @@ public:
     void reset() {
         ++generation;
         arena.clear();
+        if (arena.capacity() > ARENA_RESERVE) {
+            arena.shrink_to_fit();
+            arena.reserve(ARENA_RESERVE);
+        }
         root_idx = -1;
         stats = MCTSStats();
         root_priors_override.clear();
@@ -103,6 +159,8 @@ public:
                 root_idx = target_child;
                 arena[root_idx].parent = -1;
                 root_priors_override.clear();
+                // Drop the sibling subtrees this move just made unreachable.
+                compact();
                 return;
             }
             // Subtree child not found: create state from played action
