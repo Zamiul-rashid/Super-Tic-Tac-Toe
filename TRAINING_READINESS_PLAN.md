@@ -315,10 +315,10 @@ For each row, replace Pending with the actual result only after recording the co
 | --- | --- | --- |
 | M0 fresh build/provenance | **Done** (verify-only) | `a837fa2` predates this ledger and already ships `scripts/check_training_ready.py` + build-provenance fixes. Verified 2026-09-13: fresh `make -C cpp` uses the *selected* interpreter's headers; extension imports in a fresh subprocess; discovered test count is **311**, not the assumed 258. |
 | M1 native robustness | **Done** | `0bd9d8a`, `b58ffcd`, `997c42a`, `9dd3387`. 42 new regression tests; suite 356, 1 pre-existing skip. See notes below. |
-| M2 backend/worker contract | Pending | — |
-| M3 encoding/IPC integration | Pending | — |
-| M4 AMP/resume/ownership | Pending | — |
-| M5 LR policy and resume tests | Pending | — |
+| M2 backend/worker contract | **Done** | `a3a61d3`, `f019007`. `sttt/backends.py`; strict `cpp` raises instead of falling back; worker handshake before dispatch. 25 tests. |
+| M3 encoding/IPC integration | **Done** | `41293d5`. Owned buffers, explicit encode backend, **removed an unreachable fp16 branch that meant `--fp16` never applied to inference**. 14 tests. |
+| M4 AMP/resume/ownership | **Done** | `1e7e503`. GradScaler once per process (was per iteration), full checkpoint schema, nonfinite/all-skipped guards, per-output flock. 12 tests. |
+| M5 LR policy and resume tests | **Done** | `328f047`. `sttt/training_schedule.py`, horizon in completed iterations, verified continuity across a real save/resume. 24 tests. |
 | M6 curriculum configuration | Pending | — |
 | M7 controlled evaluation | Pending | — |
 | M8 honest benchmarks | Pending | — |
@@ -326,6 +326,36 @@ For each row, replace Pending with the actual result only after recording the co
 | M9 GPU certification and soak | Pending | Requires real CUDA access |
 | M10 bounded strength experiments | Pending | No Elo outcome assumed |
 | M11 docs/launch/rollback | Pending | — |
+
+### M2-M5 evidence (2026-09-13)
+
+- **M2 `a3a61d3`, `f019007`.** `CheckpointBot` re-probed for the extension inside
+  `choose()` and, on ImportError, ran the **Python** search while still reporting
+  `backend="cpp"` — a whole tournament's artifacts could name a backend that never
+  executed. `selfplay.play_game` had the same shape: each spawned worker
+  re-evaluated its own `_HAS_CPP`, so one degraded worker produced Python-search
+  data recorded as native. Now: one `resolve_backend()` up front (strict `cpp`
+  raises), a worker handshake that aborts before dispatch if any worker lacks the
+  build or loaded a different one, and named RNG streams so no game defaults to
+  seed 42.
+- **M3 `41293d5`.** `evaluate_many` held a *second copy of its body* after an
+  unconditional `return`, and that dead copy was the only one honouring
+  `use_fp16` — **`--fp16` never applied to self-play inference**, so any speed
+  figure credited to FP16 inference measured something else. Also: `encode_batch`
+  returned a read-only `np.frombuffer` view over immutable bytes (not a valid
+  owner for `torch.from_numpy`), and native encoding was used even in runs that
+  explicitly requested the Python reference path.
+- **M4 `1e7e503`.** `GradScaler` was constructed **inside** the iteration loop, so
+  every iteration discarded the converged loss scale and restarted discovery —
+  and discovery skips updates while halving. Checkpoints lacked scaler state,
+  torch RNG state, precision and backend info. Added nonfinite-loss and
+  all-updates-skipped guards, and a per-output-directory `flock` so two trainers
+  cannot interleave writes to one `latest.pt`.
+- **M5 `328f047`.** Schedule horizon is in **completed iterations**; `advance()`
+  runs only after a successful optimization block. Verified across a real
+  save/resume: iteration 2 ended at `next_lr=9.055e-04` and iteration 3 resumed at
+  exactly `lr=9.055e-04`. Mid-phase `--lr` changes are refused rather than applied
+  silently.
 
 ### M1 evidence (2026-09-13)
 
