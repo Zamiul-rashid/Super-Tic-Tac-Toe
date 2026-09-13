@@ -91,6 +91,7 @@ typedef struct {
     PyObject_HEAD
     PyFastTreeSearch* tree;
     int32_t node_idx;
+    uint64_t generation;   // engine generation this view was captured under
 } PyFastNode;
 
 #pragma GCC diagnostic push
@@ -112,8 +113,34 @@ static PyObject* PyFastNode_new(PyFastTreeSearch* tree, int32_t node_idx) {
         Py_INCREF(tree);
         self->tree = tree;
         self->node_idx = node_idx;
+        self->generation = tree->engine ? tree->engine->generation : 0;
     }
     return (PyObject*)self;
+}
+
+// M1: a node view holds an arena INDEX, not a pointer. reset(), init_root() and
+// re-rooting all rebuild the arena, after which the same index names a
+// different node -- the old code happily returned that unrelated node's
+// statistics. Every accessor now goes through here, which fails loudly instead.
+static const MCTSNode* node_view(PyFastNode* self) {
+    if (!self->tree || !self->tree->engine) {
+        PyErr_SetString(PyExc_RuntimeError,
+                        "node view refers to a tree that no longer exists");
+        return NULL;
+    }
+    MCTSEngine* engine = self->tree->engine;
+    if (self->generation != engine->generation) {
+        PyErr_SetString(PyExc_RuntimeError,
+                        "stale node view: the tree was reset or re-rooted after "
+                        "this node was obtained; re-read tree.root");
+        return NULL;
+    }
+    if (self->node_idx < 0 ||
+        self->node_idx >= static_cast<int32_t>(engine->arena.size())) {
+        PyErr_SetString(PyExc_RuntimeError, "node view index is out of range");
+        return NULL;
+    }
+    return &engine->arena[self->node_idx];
 }
 
 static void PyFastNode_dealloc(PyFastNode* self) {
@@ -122,69 +149,53 @@ static void PyFastNode_dealloc(PyFastNode* self) {
 }
 
 static PyObject* PyFastNode_get_solved(PyFastNode* self, void* /*closure*/) {
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
+    if (node->solved == RESULT_ONGOING) {
         Py_RETURN_NONE;
     }
-    int8_t s = self->tree->engine->arena[self->node_idx].solved;
-    if (s == RESULT_ONGOING) {
-        Py_RETURN_NONE;
-    }
-    return PyLong_FromLong(s);
+    return PyLong_FromLong(node->solved);
 }
 
 static PyObject* PyFastNode_get_n(PyFastNode* self, void* /*closure*/) {
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
-        return PyLong_FromLong(0);
-    }
-    return PyLong_FromLong(self->tree->engine->arena[self->node_idx].n);
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
+    return PyLong_FromLong(node->n);
 }
 
 static PyObject* PyFastNode_get_total(PyFastNode* self, void* /*closure*/) {
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
-        return PyFloat_FromDouble(0.0);
-    }
-    return PyFloat_FromDouble(self->tree->engine->arena[self->node_idx].total);
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
+    return PyFloat_FromDouble(node->total);
 }
 
 static PyObject* PyFastNode_get_in_flight(PyFastNode* self, void* /*closure*/) {
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
-        return PyLong_FromLong(0);
-    }
-    return PyLong_FromLong(self->tree->engine->arena[self->node_idx].in_flight);
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
+    return PyLong_FromLong(node->in_flight);
 }
 
 static PyObject* PyFastNode_get_pending(PyFastNode* self, void* /*closure*/) {
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
-        Py_RETURN_FALSE;
-    }
-    if (self->tree->engine->arena[self->node_idx].pending) {
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
+    if (node->pending) {
         Py_RETURN_TRUE;
     }
     Py_RETURN_FALSE;
 }
 
 static PyObject* PyFastNode_get_prior(PyFastNode* self, void* /*closure*/) {
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
-        return PyFloat_FromDouble(1.0);
-    }
-    return PyFloat_FromDouble(self->tree->engine->arena[self->node_idx].prior);
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
+    return PyFloat_FromDouble(node->prior);
 }
 
 static PyObject* PyFastNode_get_state(PyFastNode* self, void* /*closure*/) {
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
-        Py_RETURN_NONE;
-    }
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
     PyObject* fs = PyObject_CallObject((PyObject*)&PyFastStateType, NULL);
     if (!fs) return NULL;
-    // Set state
-    const BoardState& bs = self->tree->engine->arena[self->node_idx].state;
+    const BoardState& bs = node->state;
     // FastState layout: head followed by BoardState state
     // Let's copy state directly
     struct RawFastState {
@@ -196,21 +207,23 @@ static PyObject* PyFastNode_get_state(PyFastNode* self, void* /*closure*/) {
 }
 
 static PyObject* PyFastNode_get_children(PyFastNode* self, void* /*closure*/) {
+    const MCTSNode* node = node_view(self);
+    if (!node) return NULL;
     PyObject* dict = PyDict_New();
     if (!dict) return NULL;
-    if (!self->tree || !self->tree->engine || self->node_idx < 0 ||
-        self->node_idx >= static_cast<int32_t>(self->tree->engine->arena.size())) {
-        return dict;
-    }
-
-    const MCTSNode& node = self->tree->engine->arena[self->node_idx];
-    if (node.first_child >= 0) {
-        for (uint8_t i = 0; i < node.num_children; ++i) {
-            int32_t child_idx = node.first_child + i;
-            const MCTSNode& child = self->tree->engine->arena[child_idx];
+    if (node->first_child >= 0) {
+        MCTSEngine* engine = self->tree->engine;
+        for (uint8_t i = 0; i < node->num_children; ++i) {
+            int32_t child_idx = node->first_child + i;
+            const MCTSNode& child = engine->arena[child_idx];
             PyObject* key = PyLong_FromLong(child.action);
             PyObject* child_obj = PyFastNode_new(self->tree, child_idx);
-            PyDict_SetItem(dict, key, child_obj);
+            if (!key || !child_obj || PyDict_SetItem(dict, key, child_obj) < 0) {
+                Py_XDECREF(key);
+                Py_XDECREF(child_obj);
+                Py_DECREF(dict);
+                return NULL;
+            }
             Py_DECREF(key);
             Py_DECREF(child_obj);
         }
@@ -377,6 +390,23 @@ static PyObject* PyFastTreeSearch_advance(PyFastTreeSearch* self, PyObject* args
     if (action < 0 || action >= 81) {
         PyErr_Format(PyExc_ValueError, "Action %d is out of range [0, 81)", action);
         return NULL;
+    }
+    // An in-range but ILLEGAL action used to be applied anyway: advance() would
+    // fall through to root.state.play(action) and re-root onto a board that the
+    // rules cannot produce, silently corrupting the whole search from there on.
+    if (self->engine && self->engine->root_idx >= 0 &&
+        self->engine->root_idx < static_cast<int32_t>(self->engine->arena.size())) {
+        const BoardState& root_state = self->engine->arena[self->engine->root_idx].state;
+        if (root_state.is_terminal()) {
+            PyErr_SetString(PyExc_ValueError,
+                            "cannot advance past a terminal state");
+            return NULL;
+        }
+        if (!root_state.is_legal(static_cast<uint8_t>(action))) {
+            PyErr_Format(PyExc_ValueError,
+                         "Illegal action %d for the current root state", action);
+            return NULL;
+        }
     }
     if (self->engine) {
         self->engine->advance(static_cast<uint8_t>(action));

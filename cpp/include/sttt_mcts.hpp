@@ -63,6 +63,10 @@ public:
     int8_t agent_side = 0;
     FastRng rng;
     std::vector<float> root_priors_override;
+    // Bumped whenever the arena layout is invalidated (reset / re-root). A node
+    // view captured under an older generation refers to an index that now names
+    // a DIFFERENT node, so views compare this before dereferencing.
+    uint64_t generation = 0;
 
     explicit MCTSEngine(const MCTSConfig& cfg = MCTSConfig(), uint64_t seed = 42)
         : config(cfg), rng(seed) {
@@ -74,6 +78,7 @@ public:
     }
 
     void reset() {
+        ++generation;
         arena.clear();
         root_idx = -1;
         stats = MCTSStats();
@@ -94,6 +99,7 @@ public:
                 }
             }
             if (target_child >= 0) {
+                ++generation;
                 root_idx = target_child;
                 arena[root_idx].parent = -1;
                 root_priors_override.clear();
@@ -106,6 +112,7 @@ public:
     }
 
     void init_root(const BoardState& state) {
+        ++generation;
         arena.clear();
         root_idx = 0;
         stats = MCTSStats();

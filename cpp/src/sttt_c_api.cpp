@@ -2,6 +2,8 @@
 #include "sttt_core.hpp"
 #include "sttt_search.hpp"
 #include <thread>
+#include <mutex>
+#include <exception>
 #include <vector>
 #include <atomic>
 
@@ -118,11 +120,20 @@ int8_t sttt_rollout(CBoardState state, uint64_t seed) {
 
 void sttt_benchmark_rollouts(int num_games, uint64_t seed, int num_threads, double* out_elapsed, uint64_t* out_total_moves) {
     if (num_threads < 1) num_threads = 1;
+    if (num_games < 0) num_games = 0;
+    // More threads than games would spawn workers with zero work; cap instead so
+    // benchmark_rollouts(1, 2, seed) is a valid one-thread run, not an abort.
+    if (num_games > 0 && num_threads > num_games) num_threads = num_games;
 
     std::atomic<uint64_t> total_moves(0);
     auto t_start = std::chrono::high_resolution_clock::now();
 
+    // An exception escaping a std::thread calls std::terminate and aborts the
+    // whole interpreter. Capture instead, and rethrow on the joining thread.
+    std::mutex err_mutex;
+    std::exception_ptr first_error;
     auto worker = [&](int games_for_thread, uint64_t thread_seed) {
+      try {
         FastRng rng(thread_seed);
         uint64_t moves = 0;
         uint8_t legal[81];
@@ -137,6 +148,10 @@ void sttt_benchmark_rollouts(int num_games, uint64_t seed, int num_threads, doub
             }
         }
         total_moves.fetch_add(moves, std::memory_order_relaxed);
+      } catch (...) {
+        std::lock_guard<std::mutex> lock(err_mutex);
+        if (!first_error) first_error = std::current_exception();
+      }
     };
 
     if (num_threads == 1) {
@@ -152,6 +167,10 @@ void sttt_benchmark_rollouts(int num_games, uint64_t seed, int num_threads, doub
         for (auto& th : threads) {
             th.join();
         }
+    }
+    // Joined: it is now safe to surface a worker failure to the caller.
+    if (first_error) {
+        std::rethrow_exception(first_error);
     }
 
     auto t_end = std::chrono::high_resolution_clock::now();
