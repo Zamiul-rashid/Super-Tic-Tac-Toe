@@ -281,7 +281,7 @@ Promote a new `best` only with recorded held-out evidence, acceptable score agai
 These templates describe the intended interface after the relevant milestone exists. Do not run a command with a not-yet-implemented flag and count argparse failure as a successful readiness test. Set the interpreter to the environment verified at M0; the current launcher uses `.venv`, while older docs use Conda.
 
 ```bash
-STTT_PY=/home/entropy/miniconda3/envs/sttt/bin/python
+STTT_PY=/home/mt/miniconda3/envs/sttt/bin/python
 
 # Existing validation entry points, using the isolated implementation checkout.
 "$STTT_PY" -m unittest tests.test_cpp_engine tests.test_cpp_mcts -v
@@ -320,12 +320,48 @@ For each row, replace Pending with the actual result only after recording the co
 | M4 AMP/resume/ownership | **Done** | `1e7e503`. GradScaler once per process (was per iteration), full checkpoint schema, nonfinite/all-skipped guards, per-output flock. 12 tests. |
 | M5 LR policy and resume tests | **Done** | `328f047`. `sttt/training_schedule.py`, horizon in completed iterations, verified continuity across a real save/resume. 24 tests. |
 | M6 curriculum configuration | Pending | — |
-| M7 controlled evaluation | Pending | — |
+| M7 controlled evaluation | **Done** | `6140465`, `1941ea9`, `b575e3f`, `3ca848d`. `sttt/evaluation.py`; shared openings across budgets; pair-level bootstrap; provenance manifests. 56 tests; suite 481. See notes below. |
 | M8 honest benchmarks | Pending | — |
 | M9 CPU certification | Pending | — |
 | M9 GPU certification and soak | Pending | Requires real CUDA access |
 | M10 bounded strength experiments | Pending | No Elo outcome assumed |
 | M11 docs/launch/rollback | Pending | — |
+
+### M7 evidence (2026-09-13)
+
+- **`6140465`.** New `sttt/evaluation.py` holds the identity, ordering, interval
+  and provenance logic both scripts had duplicated and both had wrong.
+  `freeze_checkpoint` moved here from the readiness runner, which re-exports it.
+- **`1941ea9`.** `run_v2_vs_bigrun_comparison.py` **passed `pairs=` to
+  `run_matchup`, which has no such parameter** — the first call raised
+  `TypeError`, so the script cannot have produced the report it describes. It
+  also called 50 games "100", labelled entrants `run_v2-s512`/`big_run-best-s512`
+  regardless of what loaded, kept no per-game rows, and leaked external engine
+  subprocesses on any exception.
+- **`b575e3f`.** The budget sweep used **`seed=100 + sims`**, so 512 played
+  openings from seed 612 and 2000 from seed 2100. The arms never faced the same
+  positions, so the 512-vs-2000 gap that motivated the 1,024-simulation proposal
+  is confounded with the opening corpus. Budgets now share one seed; differences
+  are paired per-pair deltas with a bootstrap interval.
+- **`3ca848d`.** Neither script was launchable as documented: `python
+  scripts/x.py` puts `scripts/` on `sys.path`, so `import sttt` failed before
+  anything ran.
+
+**Measured, not mocked** (`runs/evaluation/m7-wiring-check/budget_sweep/`):
+big_run `best.pt` (iteration 5750) vs `cpp-alphabeta:6`, native backend, CPU,
+20 games per budget, identical opening corpus verified by digest —
+512: 47.5% (95% pair CI 27.5–65.0), 7.7 s; 1024: 57.5% (35.0–80.0), 14.1 s;
+2000: 65.0% (47.5–82.5), 27.0 s. Paired differences **512→1024 +10.0 pts (CI
+−17.5 to +35.0)** and **512→2000 +17.5 pts (CI −12.5 to +45.0)**; both span
+zero. A 20-game sample does not resolve a search-budget effect in either
+direction, and no equal-time claim is derived from the latencies.
+
+**Checkpoint identities confirmed** (§2 table verified, not assumed):
+`big_run/latest.pt` 6155, `big_run/best.pt` **5750**, `run_v2/latest.pt` 2007,
+`run_v2/best.pt` 1600 — all `resnet`.
+
+**Still open in M7's scope:** the pair-bootstrap machinery exists and is tested,
+but no held-out 200-game confirmation set has been run; that belongs to M10.
 
 ### M2-M5 evidence (2026-09-13)
 
