@@ -9,6 +9,7 @@ import time
 import numpy as np
 import torch
 from .env import State
+from .training_schedule import LRSchedule, apply_lr, build_schedule
 from .learning import ResNet, create_model, encode, load_model
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
@@ -136,6 +137,14 @@ def train(args):
         scaler.load_state_dict(saved['scaler'])
     if 'optimizer' in saved:
         optimizer.load_state_dict(saved['optimizer'])
+    # M5: built AFTER optimizer state is restored, so an explicit LR override
+    # lands on restored moments rather than discarding them. A legacy resume
+    # with no saved schedule inherits its restored optimizer LR, so continuing
+    # a decayed run never silently jumps back to 1e-3.
+    legacy_lr = optimizer.param_groups[0]['lr'] if 'optimizer' in saved else None
+    schedule = build_schedule(args, saved.get('lr_schedule'), legacy_lr=legacy_lr)
+    apply_lr(optimizer, schedule.current_lr)
+    print(schedule.describe(), flush=True)
     replay = deque(saved.get('replay', []), maxlen=args.buffer)
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -165,7 +174,7 @@ def train(args):
     try:
         with SelfPlayPool(min(args.workers, args.games), args.inference_batch, args.inference_wait_ms) as pool:
             _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
-                        engine_registry, scaler=scaler, use_fp16=use_fp16)
+                        engine_registry, scaler=scaler, use_fp16=use_fp16, schedule=schedule)
     finally:
         ownership.release()
 
@@ -177,7 +186,7 @@ def _utttai_command_parts(engine_registry):
 
 
 def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
-                engine_registry=None, scaler=None, use_fp16=False):
+                engine_registry=None, scaler=None, use_fp16=False, schedule=None):
     start_iteration = saved.get('iteration', 0)
     population_games = saved.get('population_games', 0)
     max_iter = getattr(args, 'max_iterations', None)
@@ -216,6 +225,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                   f'opponent={stats["match"]["kind"]}', flush=True)
 
         model.train()
+        if schedule is not None:
+            apply_lr(optimizer, schedule.current_lr)
         losses = []
         policy_losses, value_losses, grad_norms = [], [], []
         optimizer_updates = 0
@@ -278,9 +289,14 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 f'save this iteration as progress.')
 
         lr = optimizer.param_groups[0]['lr']
+        # Advance only now: the optimization block finished, so this iteration
+        # is genuinely complete. An interrupted iteration must not move the
+        # curve, or a resume would skip a step.
+        next_lr = schedule.advance() if schedule is not None else lr
         print(f'iteration {iteration}: loss={np.mean(losses):.4f} '
               f'policy={np.mean(policy_losses):.4f} value={np.mean(value_losses):.4f} '
               f'lr={lr:.3e} grad_norm={np.mean(grad_norms):.3f} '
+              f'next_lr={next_lr:.3e} '
               f'updates={optimizer_updates} skipped={skipped_updates}'
               + (f' scale={scaler.get_scale():.0f}' if use_fp16 else ''), flush=True)
 
@@ -295,12 +311,14 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                       'torch_rng_state': torch.get_rng_state(),
                       'scaler': scaler.state_dict() if use_fp16 else None,
                       'precision': 'fp16' if use_fp16 else 'fp32',
+                      'lr_schedule': schedule.state_dict() if schedule is not None else None,
                       'backend_info': getattr(args, '_backend_info', None),
                       'population_games': population_games,
                       'metrics': {'loss': float(np.mean(losses)),
                                   'policy_loss': float(np.mean(policy_losses)),
                                   'value_loss': float(np.mean(value_losses)),
                                   'lr': float(lr),
+                                  'next_lr': float(next_lr),
                                   'grad_norm': float(np.mean(grad_norms)),
                                   'optimizer_updates': optimizer_updates,
                                   'skipped_updates': skipped_updates}}
@@ -621,6 +639,16 @@ def main():
     t.add_argument('--backend', choices=['auto', 'cpp', 'python'], default='auto',
                    help='Search backend: cpp uses C++ bitboard engine, python uses pure Python (default: auto)')
     t.add_argument('--fp16', action='store_true', help='Use automatic mixed precision (FP16) on CUDA')
+    t.add_argument('--lr', type=float, default=None,
+                   help='Initial learning rate (default: 1e-3 fresh; a resume keeps its schedule)')
+    t.add_argument('--lr-schedule', choices=['constant', 'cosine'], default=None,
+                   help='Learning-rate policy. The cosine horizon is measured in COMPLETED ITERATIONS')
+    t.add_argument('--lr-min', type=float, default=0.0,
+                   help='Cosine floor; the schedule clamps here and never climbs back')
+    t.add_argument('--lr-iterations', type=int, default=0,
+                   help='Cosine horizon in completed iterations (not optimizer updates)')
+    t.add_argument('--reset-lr-schedule', action='store_true',
+                   help='Start a new, recorded schedule phase instead of continuing the saved one')
     t.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     t.add_argument('--output', default='runs/default')
     t.add_argument('--resume')
