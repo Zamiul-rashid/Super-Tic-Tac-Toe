@@ -24,13 +24,34 @@ add_executable(bench_main
 )
 target_link_libraries(bench_main PRIVATE pthread)
 
+# Git revision and build ID
+execute_process(
+    COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_REV
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(NOT GIT_REV)
+    set(GIT_REV "unknown")
+endif()
+
+string(TIMESTAMP BUILD_TIMESTAMP "%Y%m%d%H%M%S" UTC)
+set(BUILD_ID "${BUILD_TIMESTAMP}_${GIT_REV}")
+
 # Python Extension module
-find_package(Python3 COMPONENTS Development.Module QUIET)
+find_package(Python3 COMPONENTS Interpreter Development.Module QUIET)
 if (Python3_FOUND)
     Python3_add_library(sttt_cpp MODULE
         cpp/src/python_module.cpp
         cpp/src/sttt_c_api.cpp
         cpp/src/mcts.cpp
+    )
+    target_compile_definitions(sttt_cpp PRIVATE
+        STTT_CPP_VERSION="${PROJECT_VERSION}"
+        STTT_BUILD_ID="${BUILD_ID}"
+        STTT_SOURCE_REVISION="${GIT_REV}"
+        STTT_COMPILER_FLAGS="-O3 -march=native -Wall -Wextra -Werror -pthread"
     )
     target_include_directories(sttt_cpp PRIVATE ${Python3_INCLUDE_DIRS} cpp/include)
     target_link_libraries(sttt_cpp PRIVATE ${Python3_LIBRARIES} pthread)

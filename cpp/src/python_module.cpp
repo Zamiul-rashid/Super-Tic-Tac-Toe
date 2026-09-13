@@ -6,6 +6,22 @@
 #include <vector>
 #include <exception>
 
+#ifndef STTT_CPP_VERSION
+#define STTT_CPP_VERSION "0.9.0"
+#endif
+
+#ifndef STTT_BUILD_ID
+#define STTT_BUILD_ID "unknown"
+#endif
+
+#ifndef STTT_SOURCE_REVISION
+#define STTT_SOURCE_REVISION "unknown"
+#endif
+
+#ifndef STTT_COMPILER_FLAGS
+#define STTT_COMPILER_FLAGS ""
+#endif
+
 using namespace sttt;
 
 typedef struct {
@@ -561,6 +577,13 @@ PyMODINIT_FUNC PyInit_sttt_cpp(void) {
     if (m == NULL) {
         return NULL;
     }
+
+    PyModule_AddStringConstant(m, "__version__", STTT_CPP_VERSION);
+    PyModule_AddStringConstant(m, "VERSION", STTT_CPP_VERSION);
+    PyModule_AddStringConstant(m, "BUILD_ID", STTT_BUILD_ID);
+    PyModule_AddStringConstant(m, "SOURCE_REVISION", STTT_SOURCE_REVISION);
+    PyModule_AddStringConstant(m, "COMPILER_FLAGS", STTT_COMPILER_FLAGS);
+
     Py_INCREF(&PyFastStateType);
     if (PyModule_AddObject(m, "FastState", (PyObject*)&PyFastStateType) < 0) {
         Py_DECREF(&PyFastStateType);

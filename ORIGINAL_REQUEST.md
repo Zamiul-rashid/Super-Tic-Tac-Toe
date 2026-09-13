@@ -10,25 +10,32 @@ Integrity mode: development
 ## Requirements
 
 ### R1. External Engine Adapter Subsystem
+
 Build pluggable engine adapters for open-source Super Tic-Tac-Toe opponents in `sttt/bots.py`:
+
 - `ExternalProcessBot`: Spawns external engine binaries (e.g. CodinGame C++/Rust engines) via `subprocess.Popen` communicating over `stdin`/`stdout` with configurable timeouts and robust error handling.
 - `StyleBot`: Wraps behavioral policies (`center`, `corners`, `local-win`, `global-win`) into the standard bot interface.
 - Native heuristic search bots: `AlphaBetaBot` and `TacticalBot`.
 - Generational neural checkpoint matching: Load and pit different model checkpoints against each other.
 
 ### R2. Tournament & Rating Engine (`sttt/tournament.py`)
+
 Implement an automated multi-round tournament orchestrator:
+
 - Paired seat alternation: Each matchup plays in pairs from identical seeded random opening plies (0–4 plies), alternating who plays X and O to eliminate first-player color bias.
 - Configurable sample sizes (20 to 500 games per matchup).
 - Simulation budget sweeps (128, 512, 1024, 5000 simulations).
 - Mathematical Bayesian Elo and Glicko-2 skill rating calculation from tournament outcome matrices with 95% confidence intervals.
 
 ### R3. Opponent Adaptation Verifier (`tests/test_adaptation.py`)
+
 A dedicated automated test suite that verifies the Bayesian opponent modeling module (`sttt/opponent.py`:
+
 - Measures how quickly the agent's belief state detects skewed styles (e.g. corner-heavy, center-heavy, local greed).
 - Validates win-rate delta with adaptation enabled vs. disabled against predictable opponents.
 
 ### R4. CLI Integration & Visualization
+
 - Add `tournament` command to `sttt/ai.py` allowing one-line tournament execution:
   `python -m sttt.ai tournament --checkpoint runs/big_run/latest.pt --opponents alphabeta tactical corners --games 50 --simulations 512`
 - Export clean tournament scoreboards, win-rate breakdown charts, and CSV summaries to `runs/<run>/tournaments/`.
@@ -36,16 +43,19 @@ A dedicated automated test suite that verifies the Bayesian opponent modeling mo
 ## Acceptance Criteria
 
 ### Adapter Integrity
+
 - [ ] All external and internal bots conform to a uniform `choose(state, rng)` interface.
 - [ ] `ExternalProcessBot` cleanly handles process crashes, timeouts (max 5s per move), and invalid output without freezing.
 - [ ] Mock external echo bot unit tests pass.
 
 ### Tournament Verification
+
 - [ ] Automated tournament executes cleanly with opening pairs ensuring zero first-player color bias.
 - [ ] Elo ratings and error margins are mathematically calculated and exported to CSV/JSON reports.
 - [ ] Simulation sweeps (128 to 5000) produce structured scaling reports.
 
 ### Codebase Non-Regression
+
 - [ ] All 26 existing unit tests continue to pass with 0 failures on Conda `sttt`.
 - [ ] All code strictly lives on the `testing` branch without disturbing active training in tmux.
 
@@ -61,6 +71,7 @@ Integrity mode: development
 ## Requirements
 
 ### R1. OpenSpiel Engine Adapter (`sttt/bots.py`)
+
 - Install / verify `open_spiel` in the Conda environment (`/home/entropy/miniconda3/envs/sttt`).
 - Implement `OpenSpielBot` in `sttt/bots.py` conforming to the uniform `Bot` interface (`name`, `choose`, `advance`, `reset`, `close`).
 - Implement bidirectional state/action translation between `sttt.State` and OpenSpiel's `ultimate_tic_tac_toe` environment.
@@ -68,6 +79,7 @@ Integrity mode: development
 - Register `openspiel-mcts` in the `create_bot` polymorphic factory.
 
 ### R2. Verification & Test Tournament Execution
+
 - Add unit tests in `tests/test_openspiel.py` verifying state mapping, legal action consistency, move generation, and reset/advance semantics.
 - Execute an automated test tournament (minimum 20 paired games) between `OpenSpielBot` and the neural agent / tactical bot using `python -m sttt.ai tournament`.
 - Verify that tournament ratings (Bayesian Elo and Glicko-2) and summary reports export cleanly.
@@ -75,15 +87,18 @@ Integrity mode: development
 ## Acceptance Criteria
 
 ### Functional & Behavioral Verification
+
 - [ ] `OpenSpielBot` loads `pyspiel.load_game("ultimate_tic_tac_toe")` and correctly chooses legal moves in any legal board state.
 - [ ] Action index translation between `sttt` (0..80) and `open_spiel` is verified exact with zero illegal moves across full games.
 - [ ] `create_bot("openspiel-mcts")` successfully instantiates the bot.
 
 ### Tournament Verification
+
 - [ ] An automated 20-game paired tournament runs to completion without errors or hangs.
 - [ ] Matchup produces valid Elo/Glicko-2 ratings and saves output to `runs/tournaments/`.
 
 ### Non-Regression
+
 - [ ] All existing 206 unit tests on branch `testing` continue to pass without regression.
 - [ ] Active background training session in tmux remains undisturbed.
 
@@ -97,36 +112,43 @@ Integrity mode: development
 ## Requirements
 
 ### R1. Branch Isolation & Build Infrastructure (`cpp` branch)
+
 - Check out a dedicated `cpp` git branch branched cleanly from current codebase.
 - Ensure the active background training session in tmux `game:0` is completely untouched and uninterrupted.
 - Set up a robust CMake / `pybind11` (or `setuptools`) build pipeline configured for the Conda environment (`/home/entropy/miniconda3/envs/sttt`).
 
 ### R2. High-Performance C++ Bitboard Game Engine
+
 - Represent Super Tic-Tac-Toe board state using 64-bit/16-bit bitboards for maximum cache locality and SIMD/bitwise efficiency.
 - Implement O(1) win checking via bitwise masks across subgrids and global grid.
 - Implement ultra-fast legal move mask computation and state transitions (`apply_move`, `undo_move` or lightweight copy-on-write).
 - Support random rollout playouts entirely in C++ with minimal branching and zero heap allocations.
 
 ### R3. Python Bindings & Drop-In Compatibility
+
 - Expose the C++ engine to Python (via `pybind11`) as a high-performance drop-in replacement or accelerator for `sttt.env.State`.
 - Provide tensor/NumPy export functions for board representations compatible with the neural network's spatial input format.
 
 ### R4. Differential Parity Verification
+
 - Implement a comprehensive differential test suite pitting C++ bitboard state transitions against Python `sttt.State` across 10,000+ random and edge-case game positions.
 - Verify 100% exact parity for: legal moves, active board constraints, local wins, global wins, and draw detection.
 
 ### R5. Throughput Benchmarks & Profiling
+
 - Measure raw moves/second, random rollouts/second, and MCTS simulation rate comparing Python vs C++ bitboard engine.
 - Generate structured benchmark reports and comparison tables demonstrating the achieved speedup factor (targeting >= 50x speedup).
 
 ## Acceptance Criteria
 
 ### Correctness & Integrity
+
 - [ ] Dedicated git branch `cpp` created without disturbing active tmux training in `game:0`.
 - [ ] Differential test suite verifies 100% identical state transitions and terminal outcomes across >= 10,000 paired moves vs Python `sttt.State`.
 - [ ] All 251 existing Python unit tests continue to pass.
 
 ### Performance & Compilation
+
 - [ ] C++ extension builds cleanly in `/home/entropy/miniconda3/envs/sttt` with zero compiler warnings/errors.
 - [ ] Benchmark script measures >= 50x throughput speedup on game rollouts vs pure Python.
 - [ ] Memory footprint per state is minimal (< 64 bytes per state in C++).
@@ -136,5 +158,66 @@ Integrity mode: development
 Resume active execution following server restart.
 
 Current state:
+
 1. Branch `cpp` contains the clean compilation of `sttt_cpp` with `-Werror`, 46-byte packed `BoardState`, 100% 251/251 passing tests, and verified benchmarks (136x single-thread, 914x 10-thread rollout speedups) in commit `be29e46`.
 2. Resume the verification audit and proceed with Phase 2: Implement the C++ MCTS search engine and node arena to accelerate neural self-play simulations.
+
+## Follow-up — 2026-09-13T12:35:05Z
+
+Implement the Training Readiness and Improvement Plan specified in `TRAINING_READINESS_PLAN.md` to harden the Super Tic-Tac-Toe engine, native search boundary, resumable training state, learning rate schedules, and staged verification runner.
+
+Working directory: /home/entropy/Code/Super-Tic-Tac-Toe
+Integrity mode: development
+
+## Requirements
+
+### R1. Provenance, Reproducible Builds & Readiness Runner (M0 & M9)
+
+- Implement `scripts/check_training_ready.py` as a staged runner with `--backend python|cpp`, `--device cpu|cuda`, and `--stage [build|native|cpu|mixed|failure|gpu|memory|pilot]`.
+- Ensure native extension build uses the active environment (`.venv` / `sys.executable`) include headers and exposes version, build ID, and loaded binary path.
+- Isolate test runs into `runs/readiness/<unique-id>/` without overwriting or deleting production runs (`runs/big_run`, `runs/run_v2`).
+
+### R2. Native Correctness, Error Handling & State Lifecycle (M1)
+
+- In `cpp/src/mcts.cpp` and `cpp/src/python_module.cpp`, strictly validate all inputs before allocation; translate invalid inputs to `ValueError`, allocation failures to `MemoryError`, and internal failures to `RuntimeError`.
+- Ensure GIL-released blocks re-acquire the GIL before throwing Python exceptions.
+- Validate neural policy arrays (exact 81 finite nonnegative entries) and values (in [-1, 1]) at both root and leaf batches.
+- Ensure mutable `FastState` and `CppState` are unhashable and support an immutable canonical key via `state_key()`, with independent `clone()` support.
+
+### R3. Centralized Search Backend Contract & Encoding (M2 & M3)
+
+- Create `sttt/backends.py` with an explicit unified search contract (`run`, `advance`, `reset`, `root_state`, `stats`, `backend_info`) preserving `sttt.search.TreeSearch` as the pure Python reference without global monkey-patching.
+- Derive independent, reproducible RNG streams for search, move sampling, and opponents from game seeds.
+- Implement owned, C-contiguous tensor and mask encoding via `encode_states(states, backend)` ensuring memory safety and exact cross-backend parity across standard, forced, and color-swapped boards.
+
+### R4. Resumable Training State, AMP & Checkpoint Ownership (M4)
+
+- Persist `GradScaler` state, optimizer moments, and population cursors across iterations and checkpoint boundaries.
+- Support `--resume-mode continue|weights` (default: `continue`), where `continue` strictly requires full optimizer/replay states and `weights` cleanly reinitializes optimization for transfer learning.
+- Enforce per-output-directory exclusive OS file locks to reject duplicate concurrent writers.
+- Enforce rolling snapshot retention windows (default: 500 iterations) while preserving pinned checkpoints (`best.pt`, initial baselines).
+
+### R5. Resumable LR Scheduling & Curriculum Configuration (M5 & M6)
+
+- Implement `sttt/training_schedule.py` supporting `constant` and `cosine` schedules (`--lr`, `--lr-schedule`, `--lr-min`, `--lr-iterations`) stepped per completed training iteration (not per minibatch).
+- Ensure schedule state (phase start, horizon, completed count, current and next LR) is saved and restored seamlessly across checkpoint resumes.
+- Implement versioned JSON population configurations (`--population-config`) with exact integer quotas summing to 100, supporting baseline and candidate curriculum mixes.
+
+## Acceptance Criteria
+
+### Correctness & Robustness
+
+- [ ] `scripts/check_training_ready.py --backend cpp --device cpu --stage cpu` executes and logs passing manifests.
+- [ ] Native MCTS rejects out-of-range moves, nonpositive budgets, and NaN/nonfinite neural outputs with Python exceptions instead of SIGSEGV / SIGABRT.
+- [ ] Mutable C++ state classes are unhashable, with `state_key()` returning an immutable hashable representation.
+
+### Resumability & Schedulers
+
+- [ ] Two consecutive training iterations match the learning rate sequence of an iteration interrupted, saved, and resumed.
+- [ ] `GradScaler` state, optimizer moments, and replay buffer restore cleanly on `--resume-mode continue`.
+- [ ] Exclusive output directory locking raises an immediate error if a secondary process attempts to train into the same output folder.
+
+### Non-Regression
+
+- [ ] All 264 existing unit tests continue to pass (`python -m unittest discover -s tests`).
+- [ ] Production runs (`runs/big_run` and `runs/run_v2`) remain untouched.

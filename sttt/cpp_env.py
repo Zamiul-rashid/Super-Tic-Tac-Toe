@@ -8,24 +8,50 @@ import os
 import sys
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Any, Sequence
 
-# Attempt to load native sttt_cpp module
-_cpp_dir = str(Path(__file__).resolve().parent.parent / "cpp")
-if _cpp_dir not in sys.path:
-    sys.path.insert(0, _cpp_dir)
-
+# Attempt to load native sttt_cpp from standard sys.path first (prefers installed/wheel/editable build)
 try:
     import sttt_cpp
     _CPP_AVAILABLE = True
 except ImportError:
-    sttt_cpp = None
-    _CPP_AVAILABLE = False
+    # Development fallback to project cpp/ directory
+    _cpp_dir = str(Path(__file__).resolve().parent.parent / "cpp")
+    if _cpp_dir not in sys.path:
+        sys.path.append(_cpp_dir)
+    try:
+        import sttt_cpp
+        _CPP_AVAILABLE = True
+    except ImportError:
+        sttt_cpp = None
+        _CPP_AVAILABLE = False
+
+CPP_VERSION: str | None = (
+    getattr(sttt_cpp, "__version__", getattr(sttt_cpp, "VERSION", None))
+    if _CPP_AVAILABLE
+    else None
+)
+CPP_BUILD_ID: str | None = getattr(sttt_cpp, "BUILD_ID", None) if _CPP_AVAILABLE else None
+CPP_SOURCE_REVISION: str | None = getattr(sttt_cpp, "SOURCE_REVISION", None) if _CPP_AVAILABLE else None
+CPP_COMPILER_FLAGS: str | None = getattr(sttt_cpp, "COMPILER_FLAGS", None) if _CPP_AVAILABLE else None
+CPP_BINARY_PATH: str | None = getattr(sttt_cpp, "__file__", None) if _CPP_AVAILABLE else None
 
 
 def is_cpp_available() -> bool:
     """Return True if C++ bitboard extension is compiled and available."""
     return _CPP_AVAILABLE
+
+
+def get_cpp_provenance() -> dict[str, Any]:
+    """Return provenance metadata for the loaded C++ extension."""
+    return {
+        "available": _CPP_AVAILABLE,
+        "version": CPP_VERSION,
+        "build_id": CPP_BUILD_ID,
+        "source_revision": CPP_SOURCE_REVISION,
+        "compiler_flags": CPP_COMPILER_FLAGS,
+        "binary_path": CPP_BINARY_PATH,
+    }
 
 
 if _CPP_AVAILABLE:
