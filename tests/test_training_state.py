@@ -151,8 +151,10 @@ class TestReplayPacking(unittest.TestCase):
         for i in range(n):
             mask = torch.zeros(81, dtype=torch.bool)
             mask[torch.randperm(81, generator=g)[: 1 + i % 9]] = True
+            q = torch.rand(81, generator=g)
+            q_mask = torch.rand(81, generator=g) > 0.5
             rows.append((torch.randn(289, generator=g), torch.rand(81, generator=g),
-                         mask, float((-1) ** i) * (0.5 if i % 3 else 1.0)))
+                         mask, float((-1) ** i) * (0.5 if i % 3 else 1.0), q, q_mask))
         return rows
 
     def test_roundtrip_through_torch_save_is_exact(self):
@@ -164,13 +166,16 @@ class TestReplayPacking(unittest.TestCase):
         self.assertEqual(replay_length(loaded), 37)
         back = unpack_replay(loaded)
         self.assertEqual(len(back), 37)
-        for (x, pi, mask, z), (x2, pi2, mask2, z2) in zip(rows, back):
+        for (x, pi, mask, z, q, q_mask), (x2, pi2, mask2, z2, q2, q_mask2) in zip(rows, back):
             self.assertTrue(torch.equal(x, x2))
             self.assertTrue(torch.equal(pi, pi2))
             self.assertEqual(mask2.dtype, torch.bool)
             self.assertTrue(torch.equal(mask, mask2))
             self.assertEqual(z, z2)
             self.assertIsInstance(z2, float)
+            self.assertTrue(torch.equal(q, q2))
+            self.assertEqual(q_mask2.dtype, torch.bool)
+            self.assertTrue(torch.equal(q_mask, q_mask2))
 
     def test_rows_do_not_share_storage_with_the_packed_block(self):
         packed = pack_replay(self._rows(5))
@@ -191,3 +196,75 @@ class TestReplayPacking(unittest.TestCase):
         back = deque(unpack_replay(pack_replay(replay)), maxlen=10)
         self.assertEqual(len(back), 10)
         self.assertTrue(torch.equal(back[0][0], replay[0][0]))
+
+    def test_packed_v2_roundtrip_carries_q_and_mask(self):
+        rows = self._rows(9)
+        packed = pack_replay(rows)
+        self.assertEqual(packed['format'], 'packed-v2')
+        self.assertEqual(packed['q'].shape, (9, 81))
+        self.assertEqual(packed['q_mask'].dtype, torch.bool)
+        back = unpack_replay(packed)
+        for a, b in zip(rows, back):
+            self.assertEqual(len(b), 6)
+            self.assertTrue(torch.equal(a[4], b[4]))
+            self.assertTrue(torch.equal(a[5], b[5]))
+
+    def test_packed_v1_loads_with_zero_q_and_empty_mask(self):
+        rows = self._rows(4)
+        v1 = {'format': 'packed-v1', 'count': 4,
+              'x': torch.stack([r[0] for r in rows]), 'pi': torch.stack([r[1] for r in rows]),
+              'mask': torch.stack([r[2] for r in rows]),
+              'z': torch.tensor([r[3] for r in rows], dtype=torch.float64)}
+        back = unpack_replay(v1)
+        self.assertEqual(replay_length(v1), 4)
+        for row in back:
+            self.assertEqual(len(row), 6)
+            self.assertTrue(torch.equal(row[4], torch.zeros(81)))
+            self.assertFalse(row[5].any())
+
+    def test_legacy_four_tuple_list_is_widened(self):
+        rows = [r[:4] for r in self._rows(3)]
+        back = unpack_replay(rows)
+        self.assertEqual([len(r) for r in back], [6, 6, 6])
+        self.assertTrue(torch.equal(back[0][0], rows[0][0]))
+
+    def test_pack_omits_q_keys_on_disk_when_no_row_has_a_target(self):
+        """`resnet` never sets a q_mask bit (ResNet.forward_all returns q=None,
+        widen_row fills zeros), so those ~65MB + ~16MB of structurally-zero Q
+        bytes must not be written into latest.pt every iteration."""
+        rows = [(x, pi, mask, z, torch.zeros(81), torch.zeros(81, dtype=torch.bool))
+                for x, pi, mask, z, _, _ in self._rows(6)]
+        packed = pack_replay(rows)
+        self.assertNotIn('q', packed)
+        self.assertNotIn('q_mask', packed)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "ckpt.pt"
+            torch.save({"replay": packed}, path)
+            loaded = torch.load(path, map_location="cpu", weights_only=False)["replay"]
+        self.assertNotIn('q', loaded)
+        self.assertNotIn('q_mask', loaded)
+        back = unpack_replay(loaded)
+        self.assertEqual(len(back), 6)
+        for row in back:
+            self.assertEqual(len(row), 6)
+            self.assertTrue(torch.equal(row[4], torch.zeros(81)))
+            self.assertFalse(row[5].any())
+
+    def test_pack_keeps_q_keys_on_disk_when_any_row_has_a_target(self):
+        """A replay with at least one real Q target -- the `unet` case -- must
+        still carry q/q_mask through pack_replay/unpack_replay exactly."""
+        rows = self._rows(5)
+        self.assertTrue(any(bool(r[5].any()) for r in rows), "fixture must have a real target")
+        packed = pack_replay(rows)
+        self.assertIn('q', packed)
+        self.assertIn('q_mask', packed)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "ckpt.pt"
+            torch.save({"replay": packed}, path)
+            loaded = torch.load(path, map_location="cpu", weights_only=False)["replay"]
+        self.assertIn('q', loaded)
+        self.assertIn('q_mask', loaded)
+        back = unpack_replay(loaded)
+        for (x, pi, mask, z, q, q_mask), (x2, pi2, mask2, z2, q2, q_mask2) in zip(rows, back):
+            self.assertTrue(torch.equal(q, q2))
+            self.assertTrue(torch.equal(q_mask, q_mask2))

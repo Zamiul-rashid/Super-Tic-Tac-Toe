@@ -18,9 +18,10 @@ class SelfPlayTests(unittest.TestCase):
             self.assertGreater(stats['max_inference_batch'],1)
             self.assertLessEqual(stats['max_inference_batch'],8)
             for trajectory, outcome, _ in results:
-                for state, pi in trajectory:
+                for state, pi, q, q_mask in trajectory:
                     self.assertAlmostEqual(float(pi.sum()),1.,places=5)
                     self.assertTrue(set(np.flatnonzero(pi)).issubset(state.legal_actions()))
+                    self.assertEqual(q.shape, (81,)); self.assertTrue(q_mask.any())
                 self.assertIn(outcome,(-1,0,1))
             pool.run(model,[9],4,SearchConfig(),2)
             self.assertEqual([p.pid for p in pool.processes],pids)

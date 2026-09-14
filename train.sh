@@ -10,7 +10,10 @@
 # source checkpoint into the output directory and resumes from THAT copy, so a
 # rolling latest.pt cannot change under the run and the source run is never
 # written to. The training process itself refuses a second writer on the same
-# output directory before spawning any worker (RunOwnership).
+# output directory before spawning any worker (RunOwnership). The launcher is
+# ARCH-independent: it resumes whatever architecture the frozen checkpoint
+# carries (`resnet` or `unet`), so a bootstrapped U-Net checkpoint resumes here
+# unchanged.
 #
 # Verified 2026-09-14 on CUDA with the exact flags below: FP16 AMP active,
 # GradScaler state held across iterations and restored across a resume, cosine
@@ -20,14 +23,34 @@
 #
 # Environment overrides:
 #   STTT_PY     interpreter (default: python on PATH)
-#   WORKERS     self-play worker processes (default 16: one per game, so no worker plays two games back to back)
+#   WORKERS     self-play worker processes (default 8; the CPU-load rule caps this box at 10)
 #   ITERATIONS  additional iterations to run (default 5000)
 #   LR_HORIZON  cosine horizon in completed iterations (default = ITERATIONS)
 #
-# Storage: latest.pt (full resume state, ~320 MB) is rewritten every iteration;
-# a model-NNNN.pt weights snapshot (~7 MB) is written every 50 iterations and
-# pruned to the last 500 iterations AND the last 10 snapshots, so the run
-# directory settles at roughly 320 MB + 70 MB. best.pt is never pruned.
+# Bootstrapped start: generate a dataset and pretrain first, then resume here:
+#   nice -n 19 $PY -m sttt.ai generate-dataset --output data/bootstrap --games <N> --workers 8
+#   nice -n 19 $PY -m sttt.ai pretrain --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
+#   ./train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
+#
+# Storage: latest.pt (full resume state) is rewritten every iteration. pack_replay
+# (sttt/ai.py) omits the replay's Q/Q-mask block entirely when no row carries a
+# real target, so the two cases differ: `--arch resnet` never populates Q
+# (ResNet.forward_all returns q=None) and settles at ~320 MB; `--arch unet`
+# always does, adding a 200,000x81 fp32 Q tensor (~65 MB) plus a 200,000x81 bool
+# Q-mask (~16 MB), ~401 MB total. A model-NNNN.pt weights snapshot (~7 MB) is
+# written every 50 iterations and pruned to the last 500 iterations AND the
+# last 10 snapshots, so the run directory settles at roughly 320 MB + 70 MB
+# (resnet) or 400 MB + 70 MB (unet). best.pt is never pruned.
+#
+# Stratified replay sampling (sttt/replay_sampling.py, --replay-sampling
+# stratified) is implemented and tested but deliberately NOT enabled below.
+# Measured on the production replay (runs/run_v2/latest.pt, 200,000 rows): the
+# thinnest ply bin (63-71) held only 176 rows, yet StratifiedSampler's flat
+# 512/8=64-per-bin first pass gives it the same 64-row share as every other
+# bin before the remaining-share redistribution ever runs -- a ~141x oversample
+# of that bin sustained for hundreds of iterations (the FIFO replaces only
+# ~0.3 rows/iteration in that bin). Do not re-enable this flag here without
+# first adding a quota rule that bounds oversampling for thin bins.
 set -euo pipefail
 
 if [[ $# -lt 2 || $# -gt 3 ]]; then

@@ -25,7 +25,7 @@ python -m unittest discover -s tests -v
 production command: it freezes an immutable copy of the start checkpoint,
 resumes it on CUDA with FP16 AMP, the native search backend and the cosine
 learning-rate schedule, uses the population curriculum from
-`configs/population/*.json` (default `baseline.json`, 16 workers, leaf batch 64), prints its
+`configs/population/*.json` (default `baseline.json`, 8 workers, leaf batch 64), prints its
 effective configuration and refuses an output directory that already holds a
 run. `train_v2.sh` and the `run_v2`/`run_v3` naming are deprecated; existing
 `runs/run_v2` and `runs/big_run` are historical inputs, never outputs.
@@ -36,6 +36,46 @@ CPU, gpu/memory/pilot on CUDA). The pilot stage runs `train.sh` itself for
 20 measured iterations and writes the ETA; that ETA, not a fixed speed-up
 claim, is the runtime estimate. `TRAINING_READINESS_PLAN.md` is the canonical
 checklist and result ledger.
+
+### Bootstrapped training (two-stage)
+
+    # Stage 1: network-free native search games (C++ heuristic MCTS vs itself and alpha-beta d4-d6)
+    nice -n 19 python -m sttt.ai generate-dataset --output data/bootstrap --games 50000 --workers 8
+    # Stage 2: supervised fit; writes runs/bootstrap/latest.pt with a warm replay buffer
+    nice -n 19 python -m sttt.ai pretrain --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
+    # Online: the canonical launcher resumes the bootstrapped checkpoint
+    ./train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
+
+Architectures: `--arch resnet` (1.8M MLP-ResNet, default), `--arch unet` (hierarchical conv
+U-Net with a dense action-value head). Replay sampling: `--replay-sampling stratified`
+balances each batch across nine-ply game phases. Implemented and tested, but **not**
+enabled by `train.sh`: on the production replay (`runs/run_v2/latest.pt`, 200,000 rows)
+the thinnest ply bin held only 176 rows, and the sampler's flat per-bin share oversamples
+it ~141x; see `TRAINING_READINESS_PLAN.md` §7 before enabling it yourself.
+
+**Training opponents are alpha-beta depth 4-8, not 3.** The periodic in-training
+evaluation runs `--eval-opponent-depth 4` with a 50,000-node budget (was depth 3
+at 3,000 nodes), and depth 3 has been dropped from the `alphabeta` family in
+`configs/population/baseline.json`. The node budget matters as much as the
+depth: typical node counts are d3 ~1,453, d4 ~3,479, d5 ~20,514
+(`BENCHMARK_REPORT.md`), so the old 3,000-node cap truncated anything above d3
+and made a nominal "depth 4" no stronger than a depth 3. Use
+`--eval-opponent-depth 5` for a harder yardstick; raise the node budget with it.
+
+**`pretrain` learning rate — why the default is 3e-4, not 1e-3.** At a 1e-3
+peak with no warm-up, AdamW's first optimizer steps drove the value head's
+pre-tanh activation from ≈0 to +1.6 in one step and −5.3 in two, where
+tanh′ ≈ 2e-4; its gradient reached exactly 0.00 by step 8 and never recovered,
+leaving the head emitting one constant value while the policy and Q heads kept
+improving and the total loss still looked plausible. This hit **both**
+architectures (5 of 7 `unet` runs and 1 of 1 `resnet` run at 1e-3), and
+survival flipped on batch order alone. It is a schedule problem, not an
+architecture fault — `sttt/unet.py` was not changed. Two independent guards
+now ship: `--lr` defaults to 3e-4, and `--lr-warmup` (default 100 steps)
+ramps the LR in linearly; either alone was measured sufficient. `pretrain`
+also aborts if the value head's output std falls below 0.02 rather than
+writing a checkpoint that would search blind. Full evidence:
+`handover/value-head-check.txt`.
 
 ### High-Performance C++ Bitboard Engine
 

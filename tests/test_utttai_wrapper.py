@@ -60,7 +60,7 @@ class WrapperTests(unittest.TestCase):
                 trajectory, outcome, stats = play_game(Network().eval(), 2, 17,
                                                         SearchConfig(), 2, spec)
                 self.assertTrue(trajectory)
-                self.assertTrue(all(s.turn == side for s, _ in trajectory))
+                self.assertTrue(all(s.turn == side for s, *_ in trajectory))
                 self.assertIn(outcome, (-1, 0, 1))
 
     def test_spawned_workers_mix_real_engines_and_reuse(self):

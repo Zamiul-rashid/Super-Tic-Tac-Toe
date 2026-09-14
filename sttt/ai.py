@@ -10,17 +10,19 @@ import numpy as np
 import torch
 from .env import State
 from .training_schedule import LRSchedule, apply_lr, build_schedule
-from .learning import ResNet, create_model, encode, load_model
+from .learning import arch_name, create_model, encode, load_model, policy_value_loss
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
 from .population import (sample_matches, augment_batch, family_report,
                          default_population_config, load_population_config, PopulationConfig)
+from .replay_sampling import StratifiedSampler, ply_bin, row_ply, sample_bin_fractions
 from .benchmarks.harness import StageTimer
 from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
 from .engine_registry import create_configured_engine, load_engine_registry
+from .bootstrap import generate_dataset, pretrain
 
 try:
     from .cpp_env import encode_batch as cpp_encode_batch, is_cpp_available
@@ -110,7 +112,7 @@ def train(args):
     print(describe_backend(backend_info), flush=True)
     if args.resume:
         model, saved = load_model(args.resume)
-        arch = 'resnet' if isinstance(model, ResNet) else 'mlp'
+        arch = arch_name(model)
     else:
         arch = getattr(args, 'arch', 'resnet')
         model = create_model(arch)
@@ -155,6 +157,9 @@ def train(args):
     replay_meta = deque(saved.get('replay_meta') or legacy_meta, maxlen=args.buffer)
     if len(replay_meta) != len(replay):
         raise ValueError(f'checkpoint replay ({len(replay)}) and replay_meta ({len(replay_meta)}) disagree')
+    # Game-phase bins for stratified sampling; derived from each row, so legacy
+    # checkpoints need no migration. Kept parallel to `replay` like replay_meta.
+    replay_bins = deque((ply_bin(row_ply(row[0])) for row in replay), maxlen=args.buffer)
     population_config, population_games, population_phases = resolve_population_config(args, saved)
     print(f'population config: {population_config.name} sha256={population_config.sha256[:12]} '
           f'cursor={population_games}' + (f' phases={len(population_phases)}' if population_phases else ''),
@@ -190,7 +195,7 @@ def train(args):
             _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
                         engine_registry, scaler=scaler, use_fp16=use_fp16, schedule=schedule,
                         population=(population_config, population_games, population_phases),
-                        replay_meta=replay_meta)
+                        replay_meta=replay_meta, replay_bins=replay_bins)
     finally:
         ownership.release()
 
@@ -233,44 +238,74 @@ def prune_snapshots(output, iteration, window=500, keep=10):
     return sorted(doomed)
 
 
-REPLAY_PACKED_FORMAT = 'packed-v1'
+REPLAY_PACKED_FORMAT = 'packed-v2'
+REPLAY_PACKED_FORMATS = ('packed-v1', 'packed-v2')
+
+
+def widen_row(row):
+    """Legacy (x, pi, mask, z) -> (x, pi, mask, z, q, q_mask) with no Q targets."""
+    if len(row) == 6:
+        return row
+    x, pi, mask, z = row
+    return (x, pi, mask, z, torch.zeros(81, dtype=torch.float32), torch.zeros(81, dtype=torch.bool))
 
 
 def pack_replay(replay):
-    """Stack the replay's (x, pi, mask, z) rows into four tensors for saving.
+    """Stack the replay's (x, pi, mask, z, q, q_mask) rows into tensors for saving.
 
     Pickling 200k positions as 600k tiny tensors cost ~10 s per checkpoint
-    write, a quarter of every iteration. Four contiguous tensors serialise at
-    copy speed. Only the on-disk form changes; the in-RAM deque of tuples that
-    the optimizer samples from is untouched.
+    write, a quarter of every iteration. Contiguous tensors serialise at copy
+    speed. Only the on-disk form changes; the in-RAM deque of tuples that the
+    optimizer samples from is untouched.
+
+    The Q/Q-mask block (~65 MB + ~16 MB at a 200,000-row buffer) is omitted
+    entirely when no row has a set q_mask bit: for `resnet`, ResNet.forward_all
+    always returns q=None and policy_value_loss never reads a Q target back,
+    so those bytes would be structurally zero on every write of latest.pt
+    (measured: ~320 MB -> ~400 MB). `unet` rows carry real targets, so their
+    Q block is written as before.
     """
-    rows = list(replay)
+    rows = [widen_row(r) for r in replay]
     if not rows:
         return {'format': REPLAY_PACKED_FORMAT, 'count': 0}
-    return {'format': REPLAY_PACKED_FORMAT, 'count': len(rows),
-            'x': torch.stack([r[0] for r in rows]),
-            'pi': torch.stack([r[1] for r in rows]),
-            'mask': torch.stack([r[2] for r in rows]),
-            'z': torch.tensor([r[3] for r in rows], dtype=torch.float64)}
+    packed = {'format': REPLAY_PACKED_FORMAT, 'count': len(rows),
+              'x': torch.stack([r[0] for r in rows]),
+              'pi': torch.stack([r[1] for r in rows]),
+              'mask': torch.stack([r[2] for r in rows]),
+              'z': torch.tensor([r[3] for r in rows], dtype=torch.float64)}
+    q_mask = torch.stack([r[5] for r in rows])
+    if bool(q_mask.any()):
+        packed['q'] = torch.stack([r[4] for r in rows])
+        packed['q_mask'] = q_mask
+    return packed
 
 
 def unpack_replay(saved):
-    """Return a list of (x, pi, mask, z) rows from a packed or legacy replay."""
+    """Rows from packed-v1, packed-v2 or a legacy list; always 6-tuples."""
     if saved is None:
         return []
-    if isinstance(saved, dict) and saved.get('format') == REPLAY_PACKED_FORMAT:
-        if saved['count'] == 0:
+    if isinstance(saved, dict) and saved.get('format') in REPLAY_PACKED_FORMATS:
+        n = int(saved['count'])
+        if n == 0:
             return []
+        # Zero-fill whenever either key is ABSENT, not keyed on the format
+        # string: a packed-v2 dict with no real Q targets (pack_replay omits
+        # the keys in that case) must load exactly like a packed-v1 one.
+        q, q_mask = saved.get('q'), saved.get('q_mask')
+        if q is None or q_mask is None:
+            q = torch.zeros(n, 81, dtype=torch.float32)
+            q_mask = torch.zeros(n, 81, dtype=torch.bool)
         # clone() so a row does not keep the whole packed block alive after
         # the deque has evicted its neighbours.
-        return [(x.clone(), pi.clone(), mask.clone(), z) for x, pi, mask, z in
+        return [(x.clone(), pi.clone(), mask.clone(), z, qq.clone(), qm.clone())
+                for x, pi, mask, z, qq, qm in
                 zip(saved['x'].unbind(0), saved['pi'].unbind(0), saved['mask'].unbind(0),
-                    saved['z'].tolist())]
-    return list(saved)
+                    saved['z'].tolist(), q.unbind(0), q_mask.unbind(0))]
+    return [widen_row(r) for r in saved]
 
 
 def replay_length(saved):
-    if isinstance(saved, dict) and saved.get('format') == REPLAY_PACKED_FORMAT:
+    if isinstance(saved, dict) and saved.get('format') in REPLAY_PACKED_FORMATS:
         return int(saved['count'])
     return len(saved or [])
 
@@ -314,13 +349,15 @@ def _utttai_command_parts(engine_registry):
 
 def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
                 engine_registry=None, scaler=None, use_fp16=False, schedule=None,
-                population=None, replay_meta=None):
+                population=None, replay_meta=None, replay_bins=None):
     start_iteration = saved.get('iteration', 0)
     if population is None:
         population = resolve_population_config(args, saved)
     population_config, population_games, population_phases = population
     if replay_meta is None:
         replay_meta = deque([(start_iteration, 'legacy')] * len(replay), maxlen=replay.maxlen)
+    if replay_bins is None:
+        replay_bins = deque((ply_bin(row_ply(row[0])) for row in replay), maxlen=replay.maxlen)
     max_iter = getattr(args, 'max_iterations', None)
     end_iteration = min(start_iteration + args.iterations, max_iter) if max_iter else (start_iteration + args.iterations)
     for iteration in range(start_iteration + 1, end_iteration + 1):
@@ -352,21 +389,25 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         for game_idx, (trajectory, outcome, stats) in enumerate(results):
             origin = (iteration, stats['match']['kind'])
             if trajectory and use_cpp and _HAS_CPP and cpp_encode_batch is not None:
-                traj_states = [s for s, _ in trajectory]
+                traj_states = [s for s, *_ in trajectory]
                 encoded_batch = cpp_encode_batch(traj_states)
-                for i, (state, pi) in enumerate(trajectory):
+                for i, (state, pi, q, q_mask) in enumerate(trajectory):
                     mask = np.zeros(81, dtype=bool)
                     mask[state.legal_actions()] = True
                     replay.append((torch.from_numpy(encoded_batch[i].copy()), torch.from_numpy(pi),
-                                   torch.from_numpy(mask), float(outcome * state.turn)))
+                                   torch.from_numpy(mask), float(outcome * state.turn),
+                                   torch.from_numpy(q), torch.from_numpy(q_mask)))
                     replay_meta.append(origin)
+                    replay_bins.append(ply_bin(row_ply(replay[-1][0])))
             else:
-                for state, pi in trajectory:
+                for state, pi, q, q_mask in trajectory:
                     mask = np.zeros(81, dtype=bool)
                     mask[state.legal_actions()] = True
                     replay.append((torch.from_numpy(encode(state)), torch.from_numpy(pi),
-                                   torch.from_numpy(mask), float(outcome * state.turn)))
+                                   torch.from_numpy(mask), float(outcome * state.turn),
+                                   torch.from_numpy(q), torch.from_numpy(q_mask)))
                     replay_meta.append(origin)
+                    replay_bins.append(ply_bin(row_ply(replay[-1][0])))
             print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} training positions, '
                   f'opponent={stats["match"]["kind"]}', flush=True)
 
@@ -377,12 +418,18 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         if schedule is not None:
             apply_lr(optimizer, schedule.current_lr)
         losses = []
-        policy_losses, value_losses, grad_norms = [], [], []
+        policy_losses, value_losses, q_losses, grad_norms = [], [], [], []
         optimizer_updates = 0
         skipped_updates = 0
         sampled_kinds, sampled_ages = Counter(), []
+        sampler = StratifiedSampler(np.fromiter(replay_bins, dtype=np.int8, count=len(replay_bins)))
+        sampled_bins = []
         for _ in range(args.steps):
-            indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
+            if getattr(args, 'replay_sampling', 'uniform') == 'stratified':
+                indices = sampler.sample(min(args.batch, len(replay)), rng)
+            else:
+                indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
+            sampled_bins.append(indices)
             batch = [replay[int(i)] for i in indices]
             # M6: what the optimizer actually saw this iteration, by family and
             # age. Game quota is not replay quota; this is the replay side.
@@ -390,20 +437,13 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 origin_iteration, origin_kind = replay_meta[int(i)]
                 sampled_kinds[origin_kind] += 1
                 sampled_ages.append(iteration - origin_iteration)
-            x, pi, mask = [torch.stack([row[k] for row in batch]).to(device) for k in range(3)]
+            x, pi, mask, q, q_mask = [torch.stack([row[k] for row in batch]).to(device) for k in (0, 1, 2, 4, 5)]
             if getattr(args, 'augment_symmetry', False):
-                x, pi, mask = augment_batch(x, pi, mask, rng)
+                x, pi, mask, q, q_mask = augment_batch(x, pi, mask, rng, q, q_mask)
             z = torch.tensor([row[3] for row in batch], device=device)
             optimizer.zero_grad(set_to_none=True)
-            with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=use_fp16):
-                logits, value = model(x)
-                mask_val = -1e4 if use_fp16 else -1e9
-                logits = logits.masked_fill(~mask, mask_val)
-                log_p = logits.log_softmax(-1)
-                log_p = torch.where(mask, log_p, torch.zeros_like(log_p))
-                policy_loss = -(pi * log_p).sum(-1).mean()
-                value_loss = (value - z).square().mean()
-                loss = policy_loss + value_loss
+            loss, parts = policy_value_loss(model, x, pi, mask, z, use_fp16=use_fp16, q=q, q_mask=q_mask)
+            policy_loss, value_loss = parts['policy'], parts['value']
 
             # Never commit an iteration built on a nonfinite loss: the optimizer
             # would poison every parameter and the run would continue reporting
@@ -437,6 +477,12 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             losses.append(loss.item())
             policy_losses.append(policy_loss.item())
             value_losses.append(value_loss.item())
+            if parts['q'] is not None:
+                # .item(), not float(): parts['q'] still requires grad here
+                # (the graph is freed but the flag persists), and float() on
+                # such a tensor emits a UserWarning -- measured on every
+                # optimizer step of a multi-hour run.
+                q_losses.append(parts['q'].item())
             grad_norms.append(float(grad_norm))
         # CUDA kernels are asynchronous: without this the optimization stage
         # would appear instant and its cost would land in whatever synchronized
@@ -461,6 +507,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
               f'lr={lr:.3e} grad_norm={np.mean(grad_norms):.3f} '
               f'next_lr={next_lr:.3e} '
               f'updates={optimizer_updates} skipped={skipped_updates}'
+              + (f' q_loss={np.mean(q_losses):.4f}' if q_losses else '')
               + (f' scale={scaler.get_scale():.0f}' if use_fp16 else ''), flush=True)
 
         # M4: the checkpoint schema now carries everything a full resume needs.
@@ -486,6 +533,11 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                       'metrics': {'loss': float(np.mean(losses)),
                                   'policy_loss': float(np.mean(policy_losses)),
                                   'value_loss': float(np.mean(value_losses)),
+                                  # None for models without a Q head (or a batch with
+                                  # no visited-action targets) rather than omitted, so
+                                  # a later reader can distinguish "no Q head" from
+                                  # "key not written yet".
+                                  'q_loss': float(np.mean(q_losses)) if q_losses else None,
                                   'lr': float(lr),
                                   'next_lr': float(next_lr),
                                   'grad_norm': float(np.mean(grad_norms)),
@@ -506,6 +558,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                             keep=getattr(args, 'keep_checkpoints', 10))
         stage_timer.add('checkpoint_write', time.monotonic() - checkpoint_started)
         report = {'iteration': iteration, 'positions': len(replay), 'loss': float(np.mean(losses)),
+                  'q_loss': float(np.mean(q_losses)) if q_losses else None,
                   'seconds': round(time.monotonic() - started, 2), 'selfplay_seconds': selfplay_seconds,
                   'games': args.games, 'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
                   'search_config': asdict(search_config(args)), **inference_stats,
@@ -521,6 +574,10 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                                                    for k, v in sampled_kinds.items()},
                   'replay_sample_age': ({'min': int(min(sampled_ages)), 'mean': float(np.mean(sampled_ages)),
                                          'max': int(max(sampled_ages))} if sampled_ages else None),
+                  'replay_sampling': getattr(args, 'replay_sampling', 'uniform'),
+                  'replay_depth_histogram': sampler.histogram(),
+                  'replay_sample_depth_fractions': sample_bin_fractions(
+                      sampler.bins, np.concatenate(sampled_bins) if sampled_bins else np.empty(0, dtype=int)),
                   'completed_simulations': sum(r[2]['completed_simulations'] for r in results),
                   'max_search_depth': max(r[2]['max_depth'] for r in results),
                   'soft_rechecks': sum(r[2]['soft_rechecks'] for r in results),
@@ -556,7 +613,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             evaluation.games, evaluation.simulations = args.eval_games, args.eval_simulations
             evaluation.opponent = 'alphabeta'
             evaluation.opponent_checkpoint = None
-            evaluation.opponent_depth, evaluation.opponent_nodes = 3, 3000
+            evaluation.opponent_depth = getattr(args, 'eval_opponent_depth', 4)
+            evaluation.opponent_nodes = getattr(args, 'eval_opponent_nodes', 50000)
             evaluation.opponent_simulations = 256
             evaluate(evaluation)
             # Periodic evaluation is real wall time the ETA must include; it
@@ -832,7 +890,7 @@ def main():
     for name,default in [('iterations',20),('games',8),('simulations',64),('steps',100),
                          ('batch',128),('buffer',50000)]:
         t.add_argument('--'+name,type=positive,default=default)
-    t.add_argument('--arch', choices=['resnet', 'mlp'], default='resnet')
+    t.add_argument('--arch', choices=['resnet', 'mlp', 'unet'], default='resnet')
     t.add_argument('--workers', type=positive, default=8)
     t.add_argument('--backend', choices=['auto', 'cpp', 'python'], default='auto',
                    help='Search backend: cpp uses C++ bitboard engine, python uses pure Python (default: auto)')
@@ -852,6 +910,9 @@ def main():
     t.add_argument('--resume')
     t.add_argument('--population', action='store_true', help='Quota-controlled league of self-play and strong opponents')
     t.add_argument('--augment-symmetry', action='store_true', help='Random rotations/reflections of training positions')
+    t.add_argument('--replay-sampling', choices=['uniform', 'stratified'], default='uniform',
+                   help='stratified: equal share of each nine-ply game phase per batch (uttt.ai-style '
+                        'depth balancing); uniform: the historical FIFO sampler')
     t.add_argument('--population-checkpoints', help='Directory of frozen model-*.pt and best.pt opponents; defaults to output')
     t.add_argument('--population-config', default=None,
                    help='Versioned JSON curriculum (quotas summing to 100 + per-family budgets). '
@@ -873,6 +934,14 @@ def main():
     t.add_argument('--eval-every', type=int, default=0, help='Evaluate every N iterations; 0 disables')
     t.add_argument('--eval-games', type=positive, default=20)
     t.add_argument('--eval-simulations', type=positive, default=512)
+    t.add_argument('--eval-opponent-depth', type=positive, default=4,
+                   help='Alpha-beta depth for the periodic in-training evaluation (default 4). '
+                        'Depth 3 was the old default and is too weak to be informative once the '
+                        'model is past the opening stages')
+    t.add_argument('--eval-opponent-nodes', type=positive, default=50000,
+                   help='Node budget for that opponent. Must exceed the depth\'s typical node '
+                        'count or the depth is nominal only: d3 ~1,453, d4 ~3,479, d5 ~20,514 '
+                        '(BENCHMARK_REPORT.md). The old 3,000 truncated anything above d3')
     t.add_argument('--max-iterations', type=positive, default=None,
                    help='Stop training once total cumulative iterations reach N')
     p = commands.add_parser('play')
@@ -903,6 +972,37 @@ def main():
     tourn.add_argument('--output', help='Report directory (default: runs/<run>/tournaments/ or runs/tournaments/)')
     tourn.add_argument('--engine-config', help='JSON registry of named external engines')
     tourn.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='cpu')
+    gen = commands.add_parser('generate-dataset', help='Stage-1 bootstrap: network-free native search games')
+    gen.add_argument('--output', required=True)
+    gen.add_argument('--games', type=positive, default=20000)
+    gen.add_argument('--workers', type=positive, default=8)
+    gen.add_argument('--simulations', type=positive, default=512)
+    gen.add_argument('--leaf-batch', type=positive, default=64)
+    gen.add_argument('--shard-games', type=positive, default=500)
+    gen.add_argument('--alphabeta-share', type=float, default=0.5)
+    gen.add_argument('--depths', nargs='+', type=positive, default=[4, 5, 6])
+    gen.add_argument('--seed', type=int, default=1)
+    pre = commands.add_parser('pretrain', help='Stage-2 bootstrap: supervised fit to a generated dataset')
+    pre.add_argument('--dataset', required=True)
+    pre.add_argument('--output', required=True)
+    pre.add_argument('--arch', choices=['resnet', 'mlp', 'unet'], default='unet')
+    pre.add_argument('--epochs', type=positive, default=10)
+    pre.add_argument('--batch', type=positive, default=1024)
+    pre.add_argument('--lr', type=float, default=3e-4,
+                     help='Peak learning rate after warm-up. Default 3e-4, NOT 1e-3: at 1e-3 '
+                          "AdamW's first steps saturate the value head's tanh and its gradient "
+                          'reaches zero permanently (measured for both resnet and unet; see '
+                          'handover/value-head-check.txt)')
+    pre.add_argument('--lr-warmup', type=int, default=100,
+                     help='Optimizer steps of linear warm-up before the cosine decay; clamped to '
+                          'one less than the total step count. 0 disables it')
+    pre.add_argument('--lr-min', type=float, default=1e-5)
+    pre.add_argument('--weight-decay', type=float, default=1e-4)
+    pre.add_argument('--holdout', type=float, default=0.02)
+    pre.add_argument('--replay-buffer', type=positive, default=200000)
+    pre.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
+    pre.add_argument('--fp16', action='store_true')
+    pre.add_argument('--seed', type=int, default=0)
     for sub in (p,e):
         sub.add_argument('--device', choices=['auto','cpu','cuda'], default='cpu')
         sub.add_argument('--checkpoint',required=True)
@@ -927,6 +1027,10 @@ def main():
             parser.error('Games per matchup must be between 20 and 500')
         if not 0 <= args.opening_plies <= 4:
             parser.error('Opening plies must be between 0 and 4')
+    if args.command == 'generate-dataset' and not 0. <= args.alphabeta_share <= 1.:
+        parser.error('--alphabeta-share must be between 0 and 1')
+    if args.command == 'pretrain' and not 0. <= args.holdout < 1.:
+        parser.error('--holdout must be at least 0 and less than 1')
     try:
         if args.command == 'evaluate':
             for seed in args.seeds or [args.seed]:
@@ -935,7 +1039,8 @@ def main():
                     if evaluate(args)['status'] != 'complete':
                         return  # Ctrl+C ends the whole sweep, not just one budget.
         else:
-            {'train': train, 'play': play, 'evaluate': evaluate, 'tournament': tournament_cmd}[args.command](args)
+            {'train': train, 'play': play, 'evaluate': evaluate, 'tournament': tournament_cmd,
+             'generate-dataset': generate_dataset, 'pretrain': pretrain}[args.command](args)
     except (KeyboardInterrupt,EOFError):
         print('\nStopped. Completed training iterations and observed human moves are saved.')
 

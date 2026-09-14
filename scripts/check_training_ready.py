@@ -501,7 +501,7 @@ class ReadinessRunner:
                         for trajectory, outcome, stats in results:
                             if outcome not in (-1, 0, 1):
                                 return fail(f"illegal game outcome {outcome}")
-                            for state, pi in trajectory:
+                            for state, pi, *_ in trajectory:
                                 if pi.shape != (81,):
                                     return fail(f"policy shape {pi.shape}")
                                 if not np.isclose(pi.sum(), 1.0, atol=1e-3):
@@ -828,7 +828,7 @@ class ReadinessRunner:
                     if outcome not in (-1, 0, 1):
                         return fail(f"{family}: illegal outcome {outcome}")
                     actual = stats["match"]["kind"]
-                    for state, pi in trajectory:
+                    for state, pi, *_ in trajectory:
                         # Only meaningful when an opponent actually plays: in
                         # self-play the learner holds both seats, so the turn
                         # alternates by design.

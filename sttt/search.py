@@ -28,6 +28,26 @@ class Node:
         self.solved = state.result * state.turn if state.result is not None else None
 
 
+def root_action_values(root):
+    """Q(s, a) targets from a finished search: mean backed-up value of each
+    visited root child from the root player's view, and which actions were
+    visited. Works for both `Node` and the native `FastNode` (same `n`,
+    `total`, `solved`, `children` attributes). Proven children report their
+    exact proof value. Unvisited and illegal actions are 0 / False.
+    """
+    q = np.zeros(81, dtype=np.float32)
+    visited = np.zeros(81, dtype=bool)
+    for action, child in root.children.items():
+        solved = getattr(child, 'solved', None)
+        if solved is not None:
+            q[action] = -float(solved)
+            visited[action] = True
+        elif child.n > 0:
+            q[action] = -float(child.total) / child.n
+            visited[action] = True
+    return q, visited
+
+
 class TreeSearch:
     def __init__(self, model, rng=None, config=None, opponent=None, agent_side=None):
         self.model = model

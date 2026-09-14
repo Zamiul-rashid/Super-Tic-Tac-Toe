@@ -511,6 +511,108 @@ which §4.2 mandates. Not weakened (§4.6); it passes once merged to `main`.
 **Environment note:** `engines/runtime/` is gitignored, so a fresh worktree or
 clone must have it copied in or 8 OpenSpiel/uttt.ai tests error spuriously.
 
+### Blueprint evidence (2026-09-14)
+
+The 14-task blueprint plan (game-phase-stratified replay sampling, a dense
+action-value/Q head, the `--arch unet` hierarchical convolutional U-Net, and
+the two-stage bootstrap `generate-dataset` → `pretrain` → resume into
+`./train.sh`) is implemented and gated part by part. All numbers below are
+from real runs on this machine (RTX 4090, CUDA, FP16) done today; none is a
+forecast.
+
+| Part | Commits | Gate | Measured numbers |
+| --- | --- | --- | --- |
+| 1 — dihedral symmetry proof | `8349e66` | not separately re-gated in this dispatch | 8-fold augmentation already existed (`--augment-symmetry`); now backed by an explicit symmetry-group proof, `tests/test_population.py::SymmetryGroupTests`. |
+| 2 — game-phase-stratified replay sampling | `d03411a` (sampler), `5b33b6e` (trainer wiring) | `$PY -m unittest discover -s tests`: **554 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`, a git-branch-name assertion) | `StratifiedSampler` bins replay rows by ply (`ply_bin`/`row_ply`) into game-phase strata; `--replay-sampling {uniform,stratified}` wired through the trainer, default stays `uniform`. **Superseded:** `train.sh` briefly passed `--replay-sampling stratified` (Task 7.1); see the measurement below — it no longer does. |
+| 3 — shared policy/value loss | `9de6805` | not separately re-gated in this dispatch | `policy_value_loss` unified across call sites (reused again at 4.3 and 6.3). |
+| 4 — dense action-value (Q) head | `00d25e4` (root action values), `c36d062` (Q in replay, `packed-v2`), `baefe24` (Q loss) | `$PY -m unittest discover -s tests`: **568 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`) | Legacy checkpoints/replay widen to zero-Q rows (behaviour-preserving default). |
+| 5 — hierarchical convolutional U-Net (`--arch unet`) | `ed877c6` (plane geometry), `88af2d4` + `8899b3e` (U-Net + test strengthening), `41e47bf` (trainer smoke: q_loss reported, packed-v2 replay, resume works) | `$PY -m unittest discover -s tests`: **580 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`) | U-Net vs ResNet at identical flags (4 games, 64 sims, 2 iterations, CUDA+FP16): `unet` 0.59 s/iteration warm, 69.4 MB peak GPU, 1,560,835 params; `resnet` 0.37 s/iteration warm, 50.2 MB peak GPU, 1,773,650 params. |
+| 6 — two-stage bootstrap (`generate-dataset` → `pretrain`) | `4951aa4` (network-free native game generation, packed shards), `3bd1c2a` + `0adea17` (spawn-pool generator, manifest/throughput, `OMP_NUM_THREADS` timing fix), `b4a775d` (supervised bootstrap fit, warm resumable checkpoint) | `$PY -m unittest discover -s tests`: **588 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`) | `generate-dataset`, 8 workers, 512 simulations, alphabeta-share 0.5, depths 4/5/6: 200 games → 7,905 positions in 1.62 s = 4,886 positions/s; 2,000 games → 79,965 positions in 6.15 s = 13,004 positions/s (rate climbs as the pool warms); ≈40 positions/game, so ≈50,000 games ⇒ ≈2,000,000 positions in roughly 150 s. `pretrain --arch unet --epochs 3 --fp16 --device cuda` on that 79,965-position dataset: ~1.2–1.7 s/epoch. `./train.sh <pretrained latest.pt> <out>` with `WORKERS=4 ITERATIONS=3`: resumed the bootstrapped U-Net, attached a fresh cosine phase, 100/100 optimizer updates per iteration, exit status 0. Evaluation of the pretrained-only U-Net vs `alphabeta` depth 3, 20 games, 128 simulations: **5 wins / 3 draws / 12 losses = 32.5% score rate**. |
+
+**Value-head collapse in `pretrain` — diagnosed, fixed, and the first diagnosis
+was wrong.** Evidence file: `handover/value-head-check.txt`.
+
+*The symptom, which was real.* With `pretrain`'s original `--lr 1e-3` default,
+the value head emitted one constant value over all 4,096 probe positions
+(min = mean = max = −1.0, std = 0.0000), and `val_value` was bit-identical to
+16 significant figures across every epoch (1.3552220251651166 ×3). Policy and
+Q heads on the same positions were healthy.
+
+*The first diagnosis, which was wrong.* It was recorded here as a U-Net
+architecture defect — the head reading the unnormalised macro residual stream
+and saturating **at initialisation**, with `ResNet` immune via LayerNorm.
+Direct measurement refuted every part of that: at init the U-Net's pre-tanh is
+bounded by |0.87| with output std 0.10–0.14 across three seeds (nothing is
+saturated), the untrained `ResNet`'s pre-tanh is *larger* (|1.96|), and
+`ResNet` collapses identically in the real `pretrain` path at 1e-3, reaching
+the same `val_value` 1.3552 and v = −1.000.
+
+*The actual cause.* The head dies in optimizer **steps 1–2**, not at init. Its
+input is a large all-positive ReLU vector (mean ≈1.1), so AdamW's first steps
+move every weight coherently and shift the pre-tanh by O(1)–O(5): step 1 takes
+it from −0.05 to +1.61, step 2 to −5.27 where tanh′ ≈ 2e-4. The value-head
+gradient is exactly 0.00 by step 8. Survival at 1e-3 was a coin flip on batch
+order — changing only `--holdout 0.05→0.02` flipped one run from alive to dead.
+Tally at 1e-3: 5 of 7 `unet` dead, 1 of 1 `resnet` dead. At 3e-4 or 1e-4: 4 of
+4 alive, both architectures.
+
+*The fix (commit below).* Schedule only; `sttt/unet.py` unchanged. `pretrain`'s
+`--lr` default is now 3e-4, `LRSchedule` gained a `warmup` field and `pretrain`
+a `--lr-warmup` (default 100 steps) linear ramp, and `pretrain` aborts when the
+value head's output std drops below 0.02 rather than writing a blind
+checkpoint. Either guard alone was measured sufficient: at the old 1e-3 peak
+with `--lr-warmup 100` the head survives (value_std 0.30); with
+`--lr-warmup 0` it collapses and the detector now stops the run.
+
+*Re-measured on the same 2,000-game dataset, 3 epochs, fp16, CUDA:*
+
+| model | `val_value` per epoch | value std | corr(v, z) |
+| --- | --- | --- | --- |
+| before (unet, lr 1e-3) | 1.3552 / 1.3552 / 1.3552 | 0.0000 | — (constant) |
+| after (unet, lr 3e-4 + warm-up) | 0.6584 / 0.5188 / 0.5104 | 0.3230 | +0.423 |
+| after (resnet, same) | 0.5532 / 0.6012 / 0.5112 | 0.3107 | +0.412 |
+
+*Playing strength did NOT improve, and the earlier claim that it would is also
+withdrawn.* It was recorded here that the 32.5% gate score meant "search is
+running blind" and understated the architecture. Measured over 100 paired
+games vs `alphabeta` depth 3 at 128 simulations: the dead-head model scores
+**39.0%**, the fixed model at an identical LR/epoch budget (1e-3 + warm-up,
+so the policy is trained equally far) scores **32.0%**, and the paired
+difference is **−0.070 ± 0.111 (95% CI) — not significant**. A constant value
+makes every backup equal, so PUCT simply follows the policy prior, which at
+128 simulations with a barely-trained policy is no worse than a weak real
+value function. The value head is now correct rather than degenerate, which
+matters for deeper search and a stronger network; it is not a measured
+strength win at this scale, and the Part 6 row's 32.5% should be read as a
+small-sample figure (20 games), not as evidence either way.
+
+**Stratified replay sampling is implemented, not enabled.**
+`--replay-sampling stratified` (`sttt/replay_sampling.py`, Part 2 above) is
+implemented and gated by its own tests, and `train.sh` briefly enabled it by
+default (`785d2ac`). A whole-branch review then measured the real ply
+distribution of the production checkpoint `runs/run_v2/latest.pt` (200,000
+replay rows):
+
+```
+bin 0 (0-8):  28,702  14.35%     bin 4 (36-44): 34,478  17.24%
+bin 1 (9-17): 36,770  18.39%     bin 5 (45-53): 21,995  11.00%
+bin 2 (18-26):36,667  18.33%     bin 6 (54-62):  4,839   2.42%
+bin 3 (27-35):36,373  18.19%     bin 7 (63-71):    176   0.09%
+```
+
+`StratifiedSampler.sample` gives each of the 8 non-empty bins a flat
+`512 // 8 = 64` on its first pass, and `remaining` reaches zero before any
+redistribution runs. Bin 7 (176 rows) would then supply 64 of every 512-row
+batch (12.5%) from a pool of only 176 unique rows — each row seen roughly 36
+times per iteration versus ~0.26 under the uniform sampler, a ~141x
+oversample, sustained for hundreds of iterations because the FIFO replaces
+only ~0.3 bin-7 rows per iteration. **Decision:** `train.sh` no longer passes
+`--replay-sampling stratified`; the flag, `StratifiedSampler`, and its tests
+are unchanged and remain available opt-in. The feature stays disabled by
+default pending a quota rule that bounds oversampling for bins thinner than
+their flat share — that rule is a design decision reserved for the user, not
+implemented here.
+
 ## 8. Research and API references
 
 - [PyTorch CosineAnnealingLR documentation](https://docs.pytorch.org/docs/2.14/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html): defines schedule stepping and serializable state. The schedule unit/horizon and clamping rules above are this project's explicit design choices; the API alone does not choose a useful LR.

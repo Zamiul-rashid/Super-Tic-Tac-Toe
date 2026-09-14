@@ -49,7 +49,7 @@ FAMILIES = tuple(POPULATION_WEIGHTS)
 # population config may override any of them per family.
 DEFAULT_FAMILY_SETTINGS = {
     'self': {},
-    'alphabeta': {'depth': [3, 4, 5, 6, 7, 8], 'nodes': [100000, 250000, 500000],
+    'alphabeta': {'depth': [4, 5, 6, 7, 8], 'nodes': [100000, 250000, 500000],
                   'epsilon': [0., .02], 'simulations': [128, 256, 512]},
     'tactical': {'depth': [2], 'nodes': [6000, 10000, 16000], 'epsilon': [0., .12],
                  'simulations': [128, 256, 512]},
@@ -179,10 +179,12 @@ def population_quota_counts(games: int, offset: int = 0, config: PopulationConfi
     return counts
 
 
-def augment_batch(x, pi, mask, rng):
-    """Transform inputs, forced board, legal mask and policy together."""
+def augment_batch(x, pi, mask, rng, *cell_tensors):
+    """Transform inputs, forced board, legal mask, policy and any further
+    per-action tensors (Q targets and their mask) together."""
     import torch
     out_x, out_pi, out_mask = x.clone(), pi.clone(), mask.clone()
+    extras = [t.clone() for t in cell_tensors]
     choices = rng.integers(8, size=len(x))
     for sym, (inputs, cells) in enumerate(SYMMETRIES):
         rows = torch.as_tensor(np.flatnonzero(choices == sym), device=x.device)
@@ -193,7 +195,9 @@ def augment_batch(x, pi, mask, rng):
         out_x[rows[:, None], ii] = x[rows]
         out_pi[rows[:, None], cc] = pi[rows]
         out_mask[rows[:, None], cc] = mask[rows]
-    return out_x, out_pi, out_mask
+        for out, src in zip(extras, cell_tensors):
+            out[rows[:, None], cc] = src[rows]
+    return (out_x, out_pi, out_mask, *extras)
 
 
 @dataclass(frozen=True)

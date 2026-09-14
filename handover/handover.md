@@ -1,3 +1,12 @@
+> **Status, 2026-09-14 (post-blueprint reconciliation).** Paths below are from
+> the laptop (`/home/entropy/...`, Python 3.14.4); on this machine the
+> interpreter is `/home/mt/miniconda3/envs/sttt/bin/python` and the repo is
+> `/home/mt/Zami/Super-Tic-Tac-Toe`. Corrections: the input width is 289
+> floats, not 172 (`sttt/learning.py: INPUTS`); 8-fold symmetry augmentation
+> already existed (`--augment-symmetry`, on in `train.sh`) and is proved in
+> `tests/test_population.py::SymmetryGroupTests`; `WORKERS` defaults to 8.
+> The implementation of §5–§6 Steps 1–3 is tracked in `handover/plan.md`.
+
 # Super Tic-Tac-Toe: Project Handover & Superhuman AI Blueprint
 
 **Date:** September 14, 2026

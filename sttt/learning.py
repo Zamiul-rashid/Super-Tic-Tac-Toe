@@ -61,7 +61,34 @@ def encode_states(states, backend='auto'):
     return features, legal_masks(states)
 
 
+def policy_value_loss(model, x, pi, mask, z, *, use_fp16=False, q=None, q_mask=None):
+    """AlphaZero objective plus, when the model has an action-value head and the
+    batch carries visited-action targets, uttt.ai's dense Q regression: masked
+    MSE over visited legal actions, averaged over the number of targets so rows
+    without targets (legacy replay) contribute nothing.
+    """
+    with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=use_fp16):
+        logits, value, q_pred = model.forward_all(x)
+        mask_val = -1e4 if use_fp16 else -1e9
+        logits = logits.masked_fill(~mask, mask_val)
+        log_p = logits.log_softmax(-1)
+        log_p = torch.where(mask, log_p, torch.zeros_like(log_p))
+        policy_loss = -(pi * log_p).sum(-1).mean()
+        value_loss = (value - z).square().mean()
+        loss = policy_loss + value_loss
+        q_loss = None
+        if q_pred is not None and q is not None and q_mask is not None and bool(q_mask.any()):
+            q_loss = ((q_pred.float() - q).square() * q_mask).sum() / q_mask.sum()
+            loss = loss + q_loss
+    return loss, {'policy': policy_loss, 'value': value_loss, 'q': q_loss}
+
+
 class BasePolicyValue(nn.Module):
+    def forward_all(self, x):
+        """(logits, value, q) — q is None for architectures without an action-value head."""
+        logits, value = self(x)
+        return logits, value, None
+
     @torch.inference_mode()
     def evaluate_many(self, states):
         # M3: there used to be a second copy of this body below an unconditional
@@ -139,25 +166,33 @@ class ResNet(BasePolicyValue):
             h = b(h)
         return self.policy(h), self.value(h).tanh().squeeze(-1)
 
+def arch_name(model):
+    from .unet import UNet          # local import: unet imports BasePolicyValue from here
+    if isinstance(model, UNet):
+        return 'unet'
+    return 'resnet' if isinstance(model, ResNet) else 'mlp'
+
 def create_model(arch='resnet'):
     if arch == 'resnet':
         return ResNet()
     if arch == 'mlp':
         return Network()
+    if arch == 'unet':
+        from .unet import UNet      # local import: unet imports BasePolicyValue from here
+        return UNet()
     raise ValueError(f"Unknown architecture: {arch}")
 
 def load_model(path):
     checkpoint = torch.load(path, map_location='cpu', weights_only=True)
     arch = checkpoint.get('arch')
-    if arch == 'resnet':
-        model = ResNet()
-    elif arch == 'mlp':
-        model = Network()
-    else:
-        state = checkpoint['model']
-        if 'in_proj.0.weight' in state or 'blocks.0.net.0.weight' in state:
-            model = ResNet()
+    state = checkpoint['model']
+    if arch is None:
+        if 'stem.0.weight' in state:
+            arch = 'unet'
+        elif 'in_proj.0.weight' in state or 'blocks.0.net.0.weight' in state:
+            arch = 'resnet'
         else:
-            model = Network()
-    model.load_state_dict(checkpoint['model'])
+            arch = 'mlp'
+    model = create_model(arch)
+    model.load_state_dict(state)
     return model.eval(), checkpoint

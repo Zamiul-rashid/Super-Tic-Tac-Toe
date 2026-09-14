@@ -11,7 +11,7 @@ from dataclasses import asdict
 import os
 import numpy as np
 from .env import State
-from .search import TreeSearch
+from .search import TreeSearch, root_action_values
 from .population import MatchSpec, make_opponent
 
 try:
@@ -96,7 +96,8 @@ def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cp
         for key in totals:
             totals[key] = (max(totals[key], tree.stats[key]) if key == 'max_depth'
                            else totals[key] + tree.stats[key])
-        trajectory.append((state, pi))
+        q, q_mask = root_action_values(tree.root)
+        trajectory.append((state, pi, q, q_mask))
         # Normalize in float64 to avoid categorical sampler tolerance differences.
         p = pi.astype(float); p /= p.sum()
         action = int(rng.choice(81, p=p)) if ply < 8 else int(pi.argmax())
