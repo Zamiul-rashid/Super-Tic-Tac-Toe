@@ -511,6 +511,36 @@ which §4.2 mandates. Not weakened (§4.6); it passes once merged to `main`.
 **Environment note:** `engines/runtime/` is gitignored, so a fresh worktree or
 clone must have it copied in or 8 OpenSpiel/uttt.ai tests error spuriously.
 
+### Blueprint evidence (2026-09-14)
+
+The 14-task blueprint plan (game-phase-stratified replay sampling, a dense
+action-value/Q head, the `--arch unet` hierarchical convolutional U-Net, and
+the two-stage bootstrap `generate-dataset` → `pretrain` → resume into
+`./train.sh`) is implemented and gated part by part. All numbers below are
+from real runs on this machine (RTX 4090, CUDA, FP16) done today; none is a
+forecast.
+
+| Part | Commits | Gate | Measured numbers |
+| --- | --- | --- | --- |
+| 1 — dihedral symmetry proof | `8349e66` | covered under M1 evidence above | 8-fold augmentation already existed (`--augment-symmetry`); now backed by an explicit symmetry-group proof, `tests/test_population.py::SymmetryGroupTests`. |
+| 2 — game-phase-stratified replay sampling | `d03411a` (sampler), `5b33b6e` (trainer wiring) | `$PY -m unittest discover -s tests`: **554 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`, a git-branch-name assertion) | `StratifiedSampler` bins replay rows by ply (`ply_bin`/`row_ply`) into game-phase strata; `--replay-sampling {uniform,stratified}` wired through the trainer, default stays `uniform`. `train.sh` now passes `--replay-sampling stratified` (Task 7.1). |
+| 3 — shared policy/value loss | `9de6805` | not separately re-gated in this dispatch | `policy_value_loss` unified across call sites (reused again at 4.3 and 6.3). |
+| 4 — dense action-value (Q) head | `00d25e4` (root action values), `c36d062` (Q in replay, `packed-v2`), `baefe24` (Q loss) | `$PY -m unittest discover -s tests`: **568 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`) | Legacy checkpoints/replay widen to zero-Q rows (behaviour-preserving default). |
+| 5 — hierarchical convolutional U-Net (`--arch unet`) | `ed877c6` (plane geometry), `88af2d4` + `8899b3e` (U-Net + test strengthening), `41e47bf` (trainer smoke: q_loss reported, packed-v2 replay, resume works) | `$PY -m unittest discover -s tests`: **580 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`) | U-Net vs ResNet at identical flags (4 games, 64 sims, 2 iterations, CUDA+FP16): `unet` 0.59 s/iteration warm, 69.4 MB peak GPU, 1,560,835 params; `resnet` 0.37 s/iteration warm, 50.2 MB peak GPU, 1,773,650 params. |
+| 6 — two-stage bootstrap (`generate-dataset` → `pretrain`) | `4951aa4` (network-free native game generation, packed shards), `3bd1c2a` + `0adea17` (spawn-pool generator, manifest/throughput, `OMP_NUM_THREADS` timing fix), `b4a775d` (supervised bootstrap fit, warm resumable checkpoint) | full-suite count not separately supplied for this dispatch (controller is running the part gate) | `generate-dataset`, 8 workers, 512 simulations, alphabeta-share 0.5, depths 4/5/6: 200 games → 7,905 positions in 1.62 s = 4,886 positions/s; 2,000 games → 79,965 positions in 6.15 s = 13,004 positions/s (rate climbs as the pool warms); ≈40 positions/game, so ≈50,000 games ⇒ ≈2,000,000 positions in roughly 150 s. `pretrain --arch unet --epochs 3 --fp16 --device cuda` on that 79,965-position dataset: ~1.2–1.7 s/epoch. `./train.sh <pretrained latest.pt> <out>` with `WORKERS=4 ITERATIONS=3`: resumed the bootstrapped U-Net, attached a fresh cosine phase, 100/100 optimizer updates per iteration, exit status 0. Evaluation of the pretrained-only U-Net vs `alphabeta` depth 3, 20 games, 128 simulations: **5 wins / 3 draws / 12 losses = 32.5% score rate**. |
+
+**U-Net value head is dead — read before starting a long U-Net run.** Measured
+on 4,096 dataset positions: value output is constant −1.0 (min = mean = max =
+−1.0, std = 0.0), i.e. its tanh gradient has vanished and it cannot recover.
+Policy and Q heads on the same positions are healthy (policy logit std 0.245,
+q std 0.290, both losses falling). Cause: the value head reads the macro
+residual stream unnormalised, so the pre-tanh activation saturates at
+initialisation; `ResNet` avoids this because its trunk is LayerNormed
+throughout. **Not fixed in this task** — this is an architecture decision for
+the user, not a bug with an obvious one-line patch; the fix is deferred until
+that decision is made. Do not start a long `--arch unet` run expecting a
+working value signal until this is addressed.
+
 ## 8. Research and API references
 
 - [PyTorch CosineAnnealingLR documentation](https://docs.pytorch.org/docs/2.14/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html): defines schedule stepping and serializable state. The schedule unit/horizon and clamping rules above are this project's explicit design choices; the API alone does not choose a useful LR.

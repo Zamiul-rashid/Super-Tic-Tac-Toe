@@ -37,6 +37,27 @@ CPU, gpu/memory/pilot on CUDA). The pilot stage runs `train.sh` itself for
 claim, is the runtime estimate. `TRAINING_READINESS_PLAN.md` is the canonical
 checklist and result ledger.
 
+### Bootstrapped training (two-stage)
+
+    # Stage 1: network-free native search games (C++ heuristic MCTS vs itself and alpha-beta d4-d6)
+    nice -n 19 python -m sttt.ai generate-dataset --output data/bootstrap --games 50000 --workers 8
+    # Stage 2: supervised fit; writes runs/bootstrap/latest.pt with a warm replay buffer
+    nice -n 19 python -m sttt.ai pretrain --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
+    # Online: the canonical launcher resumes the bootstrapped checkpoint
+    ./train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
+
+Architectures: `--arch resnet` (1.8M MLP-ResNet, default), `--arch unet` (hierarchical conv
+U-Net with a dense action-value head). Replay sampling: `--replay-sampling stratified`
+balances each batch across nine-ply game phases (`train.sh` enables it).
+
+**`--arch unet` caveat:** its value head is measured dead — on 4,096 dataset
+positions the output is constant −1.0 (min = mean = max = −1.0, std = 0.0),
+saturated pre-tanh at initialisation because the head reads the unnormalised
+macro residual stream (`ResNet` avoids this; its trunk is LayerNormed
+throughout). Policy and Q heads are healthy on the same positions. Not fixed
+in this task — see the ledger in `TRAINING_READINESS_PLAN.md` §7 before
+starting a long U-Net run.
+
 ### High-Performance C++ Bitboard Engine
 
 Build the native C++ extension for hardware-accelerated bitboard rules, MCTS search, and batch encoding:
