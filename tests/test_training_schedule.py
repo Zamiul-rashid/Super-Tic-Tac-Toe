@@ -185,3 +185,55 @@ class TestApplyLR(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestWarmup(unittest.TestCase):
+    """Linear warm-up before the curve.
+
+    Reason it exists (handover/value-head-check.txt): starting AdamW at 1e-3 on
+    a fresh network drove the value head's pre-tanh activation from ~0 to +1.6
+    in one step and -5.3 in two, saturating tanh permanently. It killed both
+    architectures, so the lever is the schedule, not the model.
+    """
+
+    def test_ramps_linearly_then_hands_over_to_cosine(self):
+        s = LRSchedule(kind=COSINE, lr_start=1e-3, lr_min=1e-5, horizon=100, warmup=10)
+        self.assertAlmostEqual(s.lr_at(0), 1e-4)        # first step is 1/10 of peak
+        self.assertAlmostEqual(s.lr_at(4), 5e-4)
+        self.assertAlmostEqual(s.lr_at(9), 1e-3)        # peak at the end of warm-up
+        self.assertAlmostEqual(s.lr_at(10), 1e-3)       # cosine starts at the peak
+        self.assertLess(s.lr_at(50), s.lr_at(10))       # and then decays
+        self.assertAlmostEqual(s.lr_at(100), 1e-5)      # floor at the horizon
+        self.assertAlmostEqual(s.lr_at(500), 1e-5)      # clamped past it
+
+    def test_warmup_also_applies_to_a_constant_schedule(self):
+        s = LRSchedule(kind=CONSTANT, lr_start=1e-3, warmup=4)
+        self.assertAlmostEqual(s.lr_at(0), 2.5e-4)
+        self.assertAlmostEqual(s.lr_at(3), 1e-3)
+        self.assertAlmostEqual(s.lr_at(99), 1e-3)
+
+    def test_zero_warmup_is_the_previous_behaviour_exactly(self):
+        warm = LRSchedule(kind=COSINE, lr_start=1e-3, lr_min=1e-5, horizon=50, warmup=0)
+        for k in (0, 1, 7, 25, 49, 50, 80):
+            expected = 1e-5 + (1e-3 - 1e-5) * 0.5 * (1 + math.cos(math.pi * min(k, 50) / 50))
+            self.assertAlmostEqual(warm.lr_at(k), expected)
+
+    def test_lr_never_exceeds_the_peak_anywhere(self):
+        s = LRSchedule(kind=COSINE, lr_start=1e-3, lr_min=1e-5, horizon=200, warmup=100)
+        self.assertLessEqual(max(s.lr_at(k) for k in range(300)), 1e-3 + 1e-12)
+
+    def test_warmup_must_be_shorter_than_the_horizon(self):
+        with self.assertRaises(ValueError):
+            LRSchedule(kind=COSINE, lr_start=1e-3, horizon=10, warmup=10)
+        with self.assertRaises(ValueError):
+            LRSchedule(kind=COSINE, lr_start=1e-3, horizon=10, warmup=-1)
+
+    def test_round_trips_through_state_and_defaults_to_zero_for_legacy(self):
+        s = LRSchedule(kind=COSINE, lr_start=1e-3, lr_min=1e-5, horizon=100, warmup=7, completed=3)
+        self.assertEqual(LRSchedule.from_state(s.state_dict()), s)
+        legacy = {'kind': COSINE, 'lr_start': 1e-3, 'lr_min': 1e-5, 'horizon': 100, 'completed': 3}
+        self.assertEqual(LRSchedule.from_state(legacy).warmup, 0)
+
+    def test_describe_names_the_warmup(self):
+        self.assertIn('warm-up', LRSchedule(kind=COSINE, lr_start=1e-3, horizon=9, warmup=4).describe())
+        self.assertNotIn('warm-up', LRSchedule(kind=COSINE, lr_start=1e-3, horizon=9).describe())

@@ -37,6 +37,7 @@ class LRSchedule:
     horizon: int = 0          # iterations; only meaningful for cosine
     completed: int = 0
     phase: int = 0            # bumped by an explicit --reset-lr-schedule
+    warmup: int = 0           # units: same as `completed`. 0 disables it.
 
     def __post_init__(self):
         self.validate()
@@ -55,17 +56,35 @@ class LRSchedule:
                 raise ValueError(f"cosine needs a positive integer horizon, got {self.horizon!r}")
         if self.completed < 0:
             raise ValueError("completed iterations cannot be negative")
+        if int(self.warmup) != self.warmup or self.warmup < 0:
+            raise ValueError(f"warmup must be a non-negative integer, got {self.warmup!r}")
+        if self.warmup and self.kind == COSINE and self.warmup >= self.horizon:
+            raise ValueError(
+                f"warmup ({self.warmup}) must be shorter than the cosine horizon "
+                f"({self.horizon}), or the curve never decays")
         return self
 
     # -- the curve ----------------------------------------------------------
     def lr_at(self, completed: int) -> float:
         """LR for the iteration that follows ``completed`` finished iterations."""
+        k = max(int(completed), 0)
+        # Linear warm-up, applied to BOTH kinds. Measured reason (see
+        # handover/value-head-check.txt): starting AdamW at 1e-3 on a fresh
+        # network drives the value head's pre-tanh activation from ~0 to +1.6
+        # in one step and to -5.3 in two, where tanh' ~ 2e-4 -- the head
+        # saturates, its gradient reaches exactly 0, and it never recovers.
+        # The head's input is a large all-positive ReLU vector, so the first
+        # steps move every weight coherently; ramping in avoids that overshoot.
+        # This killed BOTH resnet and unet, so it is not architecture-specific.
+        if self.warmup and k < self.warmup:
+            return self.lr_start * (k + 1) / self.warmup
         if self.kind == CONSTANT:
             return self.lr_start
-        # Clamped at both ends: start LR at k=0, midpoint at H/2, floor at and
-        # after H. It never restarts and never climbs back up.
-        k = min(max(int(completed), 0), int(self.horizon))
-        cosine = 0.5 * (1.0 + math.cos(math.pi * k / self.horizon))
+        # Clamped at both ends: start LR at k=0 (or at the end of warm-up),
+        # midpoint at H/2, floor at and after H. Never restarts, never climbs.
+        span = int(self.horizon) - int(self.warmup)
+        k = min(k - int(self.warmup), span)
+        cosine = 0.5 * (1.0 + math.cos(math.pi * k / span))
         return self.lr_min + (self.lr_start - self.lr_min) * cosine
 
     @property
@@ -100,10 +119,11 @@ class LRSchedule:
         return cls(**known)
 
     def describe(self) -> str:
+        warm = f", {self.warmup}-step linear warm-up" if self.warmup else ""
         if self.kind == CONSTANT:
-            return f"lr schedule: constant {self.lr_start:.3e} (phase {self.phase})"
+            return f"lr schedule: constant {self.lr_start:.3e}{warm} (phase {self.phase})"
         return (f"lr schedule: cosine {self.lr_start:.3e} -> {self.lr_min:.3e} over "
-                f"{self.horizon} iterations, {self.completed} completed "
+                f"{self.horizon} iterations{warm}, {self.completed} completed "
                 f"(phase {self.phase})")
 
 

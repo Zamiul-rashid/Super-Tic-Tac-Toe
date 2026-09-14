@@ -9,7 +9,6 @@ import json
 import multiprocessing as mp
 import os
 from pathlib import Path
-import sys
 import time
 import numpy as np
 from .population import MatchSpec, make_opponent
@@ -193,26 +192,10 @@ def generate_dataset(args):
     return manifest
 
 
+VALUE_COLLAPSE_STD = 0.02
+
+
 def pretrain(args):
-    if args.arch == 'unet':
-        # --arch unet is pretrain's DEFAULT, so the shortest documented pretrain
-        # command silently produces this. Measured (TRAINING_READINESS_PLAN.md
-        # section 7, README.md): value output is constant -1.0 over 4,096
-        # dataset positions (std 0.0, tanh saturated at init, gradient
-        # vanished); policy and Q heads are healthy (std 0.245 and 0.290).
-        # Printed unconditionally to stderr so it cannot be missed, because a
-        # constant value head means MCTS backups carry no positional
-        # information -- search degenerates to policy-prior rollouts.
-        print(
-            'WARNING: --arch unet has a measured-dead value head.\n'
-            '  Measured on 4,096 dataset positions: value output is constant -1.0\n'
-            '  (min = mean = max = -1.0, std = 0.0) -- its tanh gradient has vanished\n'
-            '  and cannot recover. Policy (std 0.245) and Q (std 0.290) heads are healthy.\n'
-            '  Consequence: a constant value head means MCTS backups carry no positional\n'
-            '  information, so search degenerates to policy-prior rollouts.\n'
-            '  See README.md and TRAINING_READINESS_PLAN.md section 7 before starting a\n'
-            '  long run on the checkpoint this command writes.',
-            file=sys.stderr, flush=True)
     # Stage 2: torch and its friends are imported HERE, not at module level --
     # sttt.bootstrap must stay importable (and torch-free) for spawned
     # generate-dataset workers, which unpickle _worker_init/_generate_task from
@@ -248,8 +231,18 @@ def pretrain(args):
     # Per-OPTIMIZER-STEP cosine over the whole pretraining run, unlike the online
     # trainer's per-ITERATION schedule -- there is no "iteration" concept here,
     # just steps, so the horizon is measured in the unit that actually advances.
+    # Linear warm-up before the cosine. Without it, AdamW's first steps at
+    # lr 1e-3 saturate the value head's tanh and its gradient reaches exactly
+    # zero by step 8 -- measured for BOTH resnet and unet, 5 of 7 unet runs and
+    # 1 of 1 resnet run at lr 1e-3, and survival flipped on batch order alone.
+    # See handover/value-head-check.txt. Clamped so a tiny run still decays.
+    # Capped at a quarter of the run as well as by the flag: on a very short run
+    # `total_steps - 1` would leave the whole schedule ramping and never decaying.
+    warmup_steps = max(0, min(int(getattr(args, 'lr_warmup', 100)), total_steps // 4))
     schedule = LRSchedule(kind='cosine', lr_start=args.lr, lr_min=args.lr_min, horizon=total_steps,
-                          completed=0, phase=0)
+                          warmup=warmup_steps, completed=0, phase=0)
+    print(f'pretrain: {args.arch}, {total_steps} steps ({steps_per_epoch}/epoch); '
+          f'{schedule.describe()}', flush=True)
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
 
@@ -281,6 +274,22 @@ def pretrain(args):
         return {'val_policy': float(sums[0] / count), 'val_value': float(sums[1] / count),
                 'val_q': (q_sum / q_n) if q_n else None}
 
+    def value_spread():
+        """Std of the value head's output over real positions.
+
+        A saturated value head emits one constant, so std collapses to 0 while
+        every other metric still looks plausible -- the only visible tell today
+        is val_value being bit-identical across epochs, which nobody watches.
+        Measured on the holdout when there is one, else on training rows.
+        """
+        probe = (val_idx[:2048] if holdout else train_idx[:2048])
+        model.eval()
+        with torch.no_grad():
+            x = data['x'][torch.as_tensor(probe)].to(device)
+            _, value, _ = model.forward_all(x)
+        model.train()
+        return float(value.float().std())
+
     model.train()
     last = None
     for epoch in range(1, args.epochs + 1):
@@ -307,13 +316,27 @@ def pretrain(args):
             losses.append(loss.item()); p_l.append(parts['policy'].item()); v_l.append(parts['value'].item())
             if parts['q'] is not None:
                 q_l.append(parts['q'].item())
+        spread = value_spread()
         row = {'epoch': epoch, 'lr': float(optimizer.param_groups[0]['lr']),
                'train_loss': float(np.mean(losses)), 'train_policy': float(np.mean(p_l)),
                'train_value': float(np.mean(v_l)), 'train_q': float(np.mean(q_l)) if q_l else None,
-               **evaluate_holdout(), 'seconds': round(time.monotonic() - started, 2)}
+               **evaluate_holdout(), 'value_std': spread,
+               'seconds': round(time.monotonic() - started, 2)}
         with (output / 'pretrain_metrics.jsonl').open('a') as f:
             f.write(json.dumps(row) + '\n')
         print(json.dumps(row), flush=True)
+        # Fail loudly rather than write a checkpoint whose value head is a
+        # constant. Such a run reports a falling policy loss and a plausible
+        # total loss while MCTS backups carry no positional information at all.
+        if spread < VALUE_COLLAPSE_STD:
+            raise RuntimeError(
+                f'epoch {epoch}: the value head has collapsed -- its output std over real '
+                f'positions is {spread:.2e} (threshold {VALUE_COLLAPSE_STD}), i.e. it emits a '
+                f'near-constant value and its tanh gradient has vanished. Refusing to write a '
+                f'checkpoint that would search blind. This is a learning-rate overshoot in the '
+                f'first optimizer steps, not an architecture fault: retry with a lower --lr '
+                f'(3e-4 and 1e-4 were both measured safe) or a longer --lr-warmup (currently '
+                f'{warmup_steps} steps). See handover/value-head-check.txt.')
         last = row
 
     # Warm replay: a random subset of the dataset in the trainer's row format.

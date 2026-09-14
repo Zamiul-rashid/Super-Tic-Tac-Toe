@@ -173,3 +173,65 @@ class PretrainCommandTests(unittest.TestCase):
         self.assertEqual(out[-1]['iteration'], 1)
         self.assertGreater(out[-1]['positions'], 50)          # warm buffer plus the new game
         self.assertIsNotNone(out[-1]['q_loss'])
+
+
+class ValueHeadHealthTests(unittest.TestCase):
+    """The value head must not collapse under pretrain's DEFAULT flags.
+
+    History (handover/value-head-check.txt): pretrain shipped with --lr 1e-3,
+    and AdamW's first steps drove the value head's pre-tanh activation from ~0
+    to +1.6 in one step and -5.3 in two, where tanh' ~ 2e-4. Its gradient
+    reached exactly zero by step 8 and never recovered, so the head emitted one
+    constant value forever while policy and Q kept improving and the total loss
+    still looked plausible. It killed resnet as well as unet, and survival at
+    1e-3 flipped on batch order alone. The fix was the schedule (lower default
+    peak + linear warm-up), not the architecture.
+    """
+
+    def _pretrain(self, tmp, arch, extra=()):
+        import json, subprocess, sys
+        from pathlib import Path
+        data, run = Path(tmp, 'data'), Path(tmp, f'boot-{arch}')
+        subprocess.run([sys.executable, '-m', 'sttt.ai', 'generate-dataset', '--output', str(data),
+                        '--games', '60', '--workers', '2', '--simulations', '64', '--leaf-batch', '8',
+                        '--shard-games', '30', '--depths', '3', '--seed', '7'],
+                       check=True, capture_output=True, text=True, timeout=900)
+        proc = subprocess.run([sys.executable, '-m', 'sttt.ai', 'pretrain', '--dataset', str(data),
+                               '--output', str(run), '--arch', arch, '--epochs', '2', '--batch', '64',
+                               '--holdout', '0.1', '--replay-buffer', '50', '--device', 'cpu',
+                               '--seed', '0', *extra],
+                              capture_output=True, text=True, timeout=900)
+        rows = ([json.loads(l) for l in Path(run, 'pretrain_metrics.jsonl').read_text().splitlines()]
+                if Path(run, 'pretrain_metrics.jsonl').is_file() else [])
+        return proc, rows
+
+    def test_default_flags_leave_the_value_head_alive(self):
+        import tempfile
+        if not is_cpp_available():
+            self.fail('native extension required')
+        for arch in ('unet', 'resnet'):
+            with self.subTest(arch=arch), tempfile.TemporaryDirectory() as tmp:
+                proc, rows = self._pretrain(tmp, arch)
+                self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+                self.assertTrue(rows, 'pretrain wrote no metrics')
+                for row in rows:
+                    self.assertGreater(row['value_std'], 0.02,
+                                       f'{arch}: value head collapsed at epoch {row["epoch"]}')
+                # A live head also means val_value actually moves between epochs;
+                # a dead one is bit-identical because the output is constant.
+                self.assertNotEqual(rows[0]['val_value'], rows[-1]['val_value'])
+
+    def test_collapse_is_detected_and_refuses_to_write_a_checkpoint(self):
+        import tempfile
+        from pathlib import Path
+        if not is_cpp_available():
+            self.fail('native extension required')
+        # Force the failure the detector exists for: the old default peak with
+        # no warm-up. If this ever stops collapsing the detector is untested,
+        # so assert on the run rather than skipping.
+        with tempfile.TemporaryDirectory() as tmp:
+            proc, rows = self._pretrain(tmp, 'unet', extra=('--lr', '5e-2', '--lr-warmup', '0'))
+            self.assertNotEqual(proc.returncode, 0, 'expected the collapse detector to fire')
+            self.assertIn('value head has collapsed', proc.stderr)
+            self.assertFalse(Path(tmp, 'boot-unet', 'latest.pt').exists(),
+                             'a collapsed run must not leave a resumable checkpoint')

@@ -979,7 +979,14 @@ def main():
     pre.add_argument('--arch', choices=['resnet', 'mlp', 'unet'], default='unet')
     pre.add_argument('--epochs', type=positive, default=10)
     pre.add_argument('--batch', type=positive, default=1024)
-    pre.add_argument('--lr', type=float, default=1e-3)
+    pre.add_argument('--lr', type=float, default=3e-4,
+                     help='Peak learning rate after warm-up. Default 3e-4, NOT 1e-3: at 1e-3 '
+                          "AdamW's first steps saturate the value head's tanh and its gradient "
+                          'reaches zero permanently (measured for both resnet and unet; see '
+                          'handover/value-head-check.txt)')
+    pre.add_argument('--lr-warmup', type=int, default=100,
+                     help='Optimizer steps of linear warm-up before the cosine decay; clamped to '
+                          'one less than the total step count. 0 disables it')
     pre.add_argument('--lr-min', type=float, default=1e-5)
     pre.add_argument('--weight-decay', type=float, default=1e-4)
     pre.add_argument('--holdout', type=float, default=0.02)
