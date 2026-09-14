@@ -135,3 +135,32 @@ class UNetModuleTests(unittest.TestCase):
         with torch.autocast('cuda', dtype=torch.float16):
             logits, value, q = model.forward_all(x)
         self.assertTrue(torch.isfinite(logits).all() and torch.isfinite(value).all() and torch.isfinite(q).all())
+
+
+class UNetTrainerSmokeTests(unittest.TestCase):
+    def test_one_iteration_reports_q_loss_and_resumes(self):
+        import json, subprocess, sys, tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            base = [sys.executable, '-m', 'sttt.ai', 'train', '--backend', 'python', '--device', 'cpu',
+                    '--arch', 'unet', '--games', '2', '--simulations', '6', '--steps', '3', '--batch', '8',
+                    '--workers', '1', '--leaf-batch', '2', '--save-every', '0', '--augment-symmetry',
+                    '--replay-sampling', 'stratified', '--output', tmp, '--seed', '3']
+            subprocess.run(base + ['--iterations', '1'], check=True, capture_output=True, text=True, timeout=600)
+            subprocess.run(base + ['--iterations', '1', '--resume', str(Path(tmp, 'latest.pt'))],
+                           check=True, capture_output=True, text=True, timeout=600)
+            rows = [json.loads(l) for l in Path(tmp, 'metrics.jsonl').read_text().splitlines()]
+            # NOTE: the brief's original code dedented from here, reading
+            # latest.pt AFTER `with tempfile.TemporaryDirectory()` exits. The
+            # directory (and the checkpoint) is deleted on exit, so
+            # `torch.load` raised FileNotFoundError every run. Keep the
+            # checkpoint read inside the `with` block, alongside the
+            # metrics.jsonl read it mirrors.
+            ckpt = torch.load(Path(tmp, 'latest.pt'), map_location='cpu', weights_only=False)
+        rows = [r for r in rows if 'q_loss' in r]
+        self.assertEqual([r['iteration'] for r in rows], [1, 2])
+        for r in rows:
+            self.assertIsNotNone(r['q_loss'])
+            self.assertTrue(np.isfinite(r['q_loss']))
+        self.assertEqual(ckpt['arch'], 'unet')
+        self.assertEqual(ckpt['replay']['format'], 'packed-v2')
