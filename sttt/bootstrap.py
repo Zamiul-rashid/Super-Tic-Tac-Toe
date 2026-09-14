@@ -172,3 +172,127 @@ def generate_dataset(args):
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2))
     print(json.dumps(manifest), flush=True)
     return manifest
+
+
+def pretrain(args):
+    # Stage 2: torch and its friends are imported HERE, not at module level --
+    # sttt.bootstrap must stay importable (and torch-free) for spawned
+    # generate-dataset workers, which unpickle _worker_init/_generate_task from
+    # this module without ever needing a network.
+    import torch
+    from .ai import resolve_device, pack_replay, unpack_replay
+    from .learning import create_model, policy_value_loss, arch_name
+    from .population import augment_batch
+    from .replay_sampling import StratifiedSampler, ply_bin
+    from .training_schedule import LRSchedule, apply_lr
+    torch.manual_seed(args.seed)
+    rng = np.random.default_rng(args.seed)
+    device = resolve_device(args.device)
+    data = load_shards(args.dataset)
+    manifest_path = Path(args.dataset) / 'manifest.json'
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
+    n = data['x'].shape[0]
+    order = rng.permutation(n)
+    holdout = int(round(n * args.holdout))
+    val_idx, train_idx = order[:holdout], order[holdout:]
+    if len(train_idx) < args.batch:
+        raise ValueError(f'{len(train_idx)} training rows is fewer than one batch of {args.batch}')
+    bins = np.fromiter((ply_bin(int(p)) for p in data['ply'][train_idx].tolist()), dtype=np.int8,
+                       count=len(train_idx))
+    sampler = StratifiedSampler(bins)
+    steps_per_epoch = max(1, len(train_idx) // args.batch)
+    total_steps = steps_per_epoch * args.epochs
+    model = create_model(args.arch).to(device)
+    use_fp16 = bool(args.fp16) and str(device) == 'cuda'
+    model.use_fp16 = use_fp16
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    scaler = torch.amp.GradScaler('cuda', enabled=use_fp16)
+    # Per-OPTIMIZER-STEP cosine over the whole pretraining run, unlike the online
+    # trainer's per-ITERATION schedule -- there is no "iteration" concept here,
+    # just steps, so the horizon is measured in the unit that actually advances.
+    schedule = LRSchedule(kind='cosine', lr_start=args.lr, lr_min=args.lr_min, horizon=total_steps,
+                          completed=0, phase=0)
+    output = Path(args.output)
+    output.mkdir(parents=True, exist_ok=True)
+
+    def to_device(idx):
+        idx = torch.as_tensor(idx)
+        return [data[k][idx].to(device) for k in ('x', 'pi', 'mask', 'z', 'q', 'q_mask')]
+
+    def evaluate_holdout():
+        if holdout == 0:
+            return {'val_policy': None, 'val_value': None, 'val_q': None}
+        model.eval()
+        sums, count, q_sum, q_n = np.zeros(2), 0, 0., 0
+        with torch.no_grad():
+            for start in range(0, holdout, 1024):
+                x, pi, mask, z, q, qm = to_device(val_idx[start:start + 1024])
+                _, parts = policy_value_loss(model, x, pi, mask, z.float(), use_fp16=use_fp16, q=q, q_mask=qm)
+                sums += np.array([float(parts['policy']), float(parts['value'])]) * len(x)
+                count += len(x)
+                if parts['q'] is not None:
+                    q_sum += float(parts['q']) * len(x); q_n += len(x)
+        model.train()
+        # float(...): every other metric in this function is cast from its
+        # numpy/tensor origin before it reaches the checkpoint. Leaving these
+        # two as numpy.float64 pickles a `numpy._core.multiarray.scalar`
+        # reference into checkpoint['metrics'], which torch.load(weights_only=
+        # True) -- what sttt.learning.load_model() uses on `train --resume` --
+        # refuses to unpickle (measured: UnpicklingError on the exact resume
+        # path this checkpoint exists to support).
+        return {'val_policy': float(sums[0] / count), 'val_value': float(sums[1] / count),
+                'val_q': (q_sum / q_n) if q_n else None}
+
+    model.train()
+    last = None
+    for epoch in range(1, args.epochs + 1):
+        started = time.monotonic()
+        losses, p_l, v_l, q_l = [], [], [], []
+        for _ in range(steps_per_epoch):
+            apply_lr(optimizer, schedule.current_lr)
+            picks = train_idx[sampler.sample(args.batch, rng)]
+            x, pi, mask, z, q, qm = to_device(picks)
+            x, pi, mask, q, qm = augment_batch(x, pi, mask, rng, q, qm)
+            optimizer.zero_grad(set_to_none=True)
+            loss, parts = policy_value_loss(model, x, pi, mask, z.float(), use_fp16=use_fp16, q=q, q_mask=qm)
+            if not torch.isfinite(loss):
+                raise RuntimeError(f'epoch {epoch}: nonfinite loss; refusing to continue')
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
+            scaler.step(optimizer); scaler.update()
+            schedule.advance()
+            losses.append(float(loss)); p_l.append(float(parts['policy'])); v_l.append(float(parts['value']))
+            if parts['q'] is not None:
+                q_l.append(float(parts['q']))
+        row = {'epoch': epoch, 'lr': float(optimizer.param_groups[0]['lr']),
+               'train_loss': float(np.mean(losses)), 'train_policy': float(np.mean(p_l)),
+               'train_value': float(np.mean(v_l)), 'train_q': float(np.mean(q_l)) if q_l else None,
+               **evaluate_holdout(), 'seconds': round(time.monotonic() - started, 2)}
+        with (output / 'pretrain_metrics.jsonl').open('a') as f:
+            f.write(json.dumps(row) + '\n')
+        print(json.dumps(row), flush=True)
+        last = row
+
+    # Warm replay: a random subset of the dataset in the trainer's row format.
+    warm = rng.choice(n, size=min(args.replay_buffer, n), replace=False)
+    packed_source = {'format': 'packed-v2', 'count': len(warm),
+                     **{k: data[k][torch.as_tensor(warm)] for k in ('x', 'pi', 'mask', 'z', 'q', 'q_mask')}}
+    rows = unpack_replay(packed_source)
+    arch = arch_name(model)
+    torch.save({'model': model.state_dict(), 'iteration': 0, 'arch': arch}, output / 'model-0000.pt')
+    # lr_schedule is None on purpose: this schedule's horizon was measured in
+    # pretraining STEPS, not the online trainer's ITERATIONS, so continuing it
+    # would be meaningless. `train --resume` attaches its own fresh cosine
+    # phase from --lr-schedule cosine instead (see sttt/training_schedule.py).
+    checkpoint = {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'iteration': 0,
+                  'arch': arch, 'replay': pack_replay(rows), 'replay_meta': [(0, 'bootstrap')] * len(rows),
+                  'lr_schedule': None, 'scaler': scaler.state_dict() if use_fp16 else None,
+                  'precision': 'fp16' if use_fp16 else 'fp32', 'training_config': vars(args),
+                  'search_config': None, 'backend_info': None, 'population_games': 0,
+                  'metrics': last, 'pretrain': {'dataset': str(args.dataset), 'manifest': manifest,
+                                                 'epochs': args.epochs, 'positions': n, 'holdout': holdout}}
+    torch.save(checkpoint, output / 'latest.tmp')
+    (output / 'latest.tmp').replace(output / 'latest.pt')
+    print(f'wrote {output / "latest.pt"} ({arch}, {len(rows)} warm replay rows)', flush=True)
+    return checkpoint

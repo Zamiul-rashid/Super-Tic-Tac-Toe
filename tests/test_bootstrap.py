@@ -112,3 +112,44 @@ class WorkerInitTests(unittest.TestCase):
             os.environ.pop('OMP_NUM_THREADS', None)
             if saved is not None:
                 os.environ['OMP_NUM_THREADS'] = saved
+
+
+class PretrainCommandTests(unittest.TestCase):
+    def test_pretrain_writes_a_checkpoint_that_train_resumes(self):
+        import json, subprocess, sys
+        if not is_cpp_available():
+            self.fail('native extension required')
+        with tempfile.TemporaryDirectory() as tmp:
+            data, run, cont = Path(tmp, 'data'), Path(tmp, 'boot'), Path(tmp, 'cont')
+            subprocess.run([sys.executable, '-m', 'sttt.ai', 'generate-dataset', '--output', str(data),
+                            '--games', '6', '--workers', '2', '--simulations', '8', '--leaf-batch', '4',
+                            '--shard-games', '3', '--depths', '2', '--seed', '4'],
+                           check=True, capture_output=True, text=True, timeout=600)
+            subprocess.run([sys.executable, '-m', 'sttt.ai', 'pretrain', '--dataset', str(data),
+                            '--output', str(run), '--arch', 'unet', '--epochs', '2', '--batch', '16',
+                            '--holdout', '0.2', '--replay-buffer', '50', '--device', 'cpu', '--seed', '0'],
+                           check=True, capture_output=True, text=True, timeout=600)
+            rows = [json.loads(l) for l in Path(run, 'pretrain_metrics.jsonl').read_text().splitlines()]
+            self.assertEqual([r['epoch'] for r in rows], [1, 2])
+            for r in rows:
+                for k in ('train_loss', 'train_policy', 'train_value', 'train_q', 'val_policy', 'val_value', 'val_q'):
+                    self.assertTrue(np.isfinite(r[k]), k)
+            self.assertLess(rows[1]['lr'], rows[0]['lr'])
+            ckpt = torch.load(Path(run, 'latest.pt'), map_location='cpu', weights_only=False)
+            self.assertEqual(ckpt['arch'], 'unet'); self.assertEqual(ckpt['iteration'], 0)
+            self.assertEqual(replay_length(ckpt['replay']), 50)
+            self.assertEqual(len(ckpt['replay_meta']), 50)
+            self.assertIsNone(ckpt['lr_schedule'])
+            self.assertTrue(Path(run, 'model-0000.pt').is_file())
+            # The online trainer resumes it and attaches a fresh cosine phase.
+            subprocess.run([sys.executable, '-m', 'sttt.ai', 'train', '--resume', str(run / 'latest.pt'),
+                            '--output', str(cont), '--backend', 'python', '--device', 'cpu', '--iterations', '1',
+                            '--games', '1', '--simulations', '4', '--steps', '2', '--batch', '8', '--workers', '1',
+                            '--leaf-batch', '2', '--save-every', '0', '--lr-schedule', 'cosine', '--lr', '0.001',
+                            '--lr-min', '0.00001', '--lr-iterations', '10', '--replay-sampling', 'stratified'],
+                           check=True, capture_output=True, text=True, timeout=600)
+            out = [json.loads(l) for l in Path(cont, 'metrics.jsonl').read_text().splitlines()]
+        out = [r for r in out if 'q_loss' in r]
+        self.assertEqual(out[-1]['iteration'], 1)
+        self.assertGreater(out[-1]['positions'], 50)          # warm buffer plus the new game
+        self.assertIsNotNone(out[-1]['q_loss'])

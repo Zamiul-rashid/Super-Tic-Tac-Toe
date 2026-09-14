@@ -22,7 +22,7 @@ from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
 from .engine_registry import create_configured_engine, load_engine_registry
-from .bootstrap import generate_dataset
+from .bootstrap import generate_dataset, pretrain
 
 try:
     from .cpp_env import encode_batch as cpp_encode_batch, is_cpp_available
@@ -957,6 +957,20 @@ def main():
     gen.add_argument('--alphabeta-share', type=float, default=0.5)
     gen.add_argument('--depths', nargs='+', type=positive, default=[4, 5, 6])
     gen.add_argument('--seed', type=int, default=1)
+    pre = commands.add_parser('pretrain', help='Stage-2 bootstrap: supervised fit to a generated dataset')
+    pre.add_argument('--dataset', required=True)
+    pre.add_argument('--output', required=True)
+    pre.add_argument('--arch', choices=['resnet', 'mlp', 'unet'], default='unet')
+    pre.add_argument('--epochs', type=positive, default=10)
+    pre.add_argument('--batch', type=positive, default=1024)
+    pre.add_argument('--lr', type=float, default=1e-3)
+    pre.add_argument('--lr-min', type=float, default=1e-5)
+    pre.add_argument('--weight-decay', type=float, default=1e-4)
+    pre.add_argument('--holdout', type=float, default=0.02)
+    pre.add_argument('--replay-buffer', type=positive, default=200000)
+    pre.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
+    pre.add_argument('--fp16', action='store_true')
+    pre.add_argument('--seed', type=int, default=0)
     for sub in (p,e):
         sub.add_argument('--device', choices=['auto','cpu','cuda'], default='cpu')
         sub.add_argument('--checkpoint',required=True)
@@ -983,6 +997,8 @@ def main():
             parser.error('Opening plies must be between 0 and 4')
     if args.command == 'generate-dataset' and not 0. <= args.alphabeta_share <= 1.:
         parser.error('--alphabeta-share must be between 0 and 1')
+    if args.command == 'pretrain' and not 0. <= args.holdout < 1.:
+        parser.error('--holdout must be at least 0 and less than 1')
     try:
         if args.command == 'evaluate':
             for seed in args.seeds or [args.seed]:
@@ -992,7 +1008,7 @@ def main():
                         return  # Ctrl+C ends the whole sweep, not just one budget.
         else:
             {'train': train, 'play': play, 'evaluate': evaluate, 'tournament': tournament_cmd,
-             'generate-dataset': generate_dataset}[args.command](args)
+             'generate-dataset': generate_dataset, 'pretrain': pretrain}[args.command](args)
     except (KeyboardInterrupt,EOFError):
         print('\nStopped. Completed training iterations and observed human moves are saved.')
 
