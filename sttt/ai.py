@@ -16,6 +16,7 @@ from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
 from .population import (sample_matches, augment_batch, family_report,
                          default_population_config, load_population_config, PopulationConfig)
+from .replay_sampling import StratifiedSampler, ply_bin, row_ply, sample_bin_fractions
 from .benchmarks.harness import StageTimer
 from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
@@ -155,6 +156,9 @@ def train(args):
     replay_meta = deque(saved.get('replay_meta') or legacy_meta, maxlen=args.buffer)
     if len(replay_meta) != len(replay):
         raise ValueError(f'checkpoint replay ({len(replay)}) and replay_meta ({len(replay_meta)}) disagree')
+    # Game-phase bins for stratified sampling; derived from each row, so legacy
+    # checkpoints need no migration. Kept parallel to `replay` like replay_meta.
+    replay_bins = deque((ply_bin(row_ply(row[0])) for row in replay), maxlen=args.buffer)
     population_config, population_games, population_phases = resolve_population_config(args, saved)
     print(f'population config: {population_config.name} sha256={population_config.sha256[:12]} '
           f'cursor={population_games}' + (f' phases={len(population_phases)}' if population_phases else ''),
@@ -190,7 +194,7 @@ def train(args):
             _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
                         engine_registry, scaler=scaler, use_fp16=use_fp16, schedule=schedule,
                         population=(population_config, population_games, population_phases),
-                        replay_meta=replay_meta)
+                        replay_meta=replay_meta, replay_bins=replay_bins)
     finally:
         ownership.release()
 
@@ -314,13 +318,15 @@ def _utttai_command_parts(engine_registry):
 
 def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device, pool,
                 engine_registry=None, scaler=None, use_fp16=False, schedule=None,
-                population=None, replay_meta=None):
+                population=None, replay_meta=None, replay_bins=None):
     start_iteration = saved.get('iteration', 0)
     if population is None:
         population = resolve_population_config(args, saved)
     population_config, population_games, population_phases = population
     if replay_meta is None:
         replay_meta = deque([(start_iteration, 'legacy')] * len(replay), maxlen=replay.maxlen)
+    if replay_bins is None:
+        replay_bins = deque((ply_bin(row_ply(row[0])) for row in replay), maxlen=replay.maxlen)
     max_iter = getattr(args, 'max_iterations', None)
     end_iteration = min(start_iteration + args.iterations, max_iter) if max_iter else (start_iteration + args.iterations)
     for iteration in range(start_iteration + 1, end_iteration + 1):
@@ -360,6 +366,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                     replay.append((torch.from_numpy(encoded_batch[i].copy()), torch.from_numpy(pi),
                                    torch.from_numpy(mask), float(outcome * state.turn)))
                     replay_meta.append(origin)
+                    replay_bins.append(ply_bin(row_ply(replay[-1][0])))
             else:
                 for state, pi in trajectory:
                     mask = np.zeros(81, dtype=bool)
@@ -367,6 +374,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                     replay.append((torch.from_numpy(encode(state)), torch.from_numpy(pi),
                                    torch.from_numpy(mask), float(outcome * state.turn)))
                     replay_meta.append(origin)
+                    replay_bins.append(ply_bin(row_ply(replay[-1][0])))
             print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} training positions, '
                   f'opponent={stats["match"]["kind"]}', flush=True)
 
@@ -381,8 +389,14 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         optimizer_updates = 0
         skipped_updates = 0
         sampled_kinds, sampled_ages = Counter(), []
+        sampler = StratifiedSampler(np.fromiter(replay_bins, dtype=np.int8, count=len(replay_bins)))
+        sampled_bins = []
         for _ in range(args.steps):
-            indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
+            if getattr(args, 'replay_sampling', 'uniform') == 'stratified':
+                indices = sampler.sample(min(args.batch, len(replay)), rng)
+            else:
+                indices = rng.choice(len(replay), size=min(args.batch, len(replay)), replace=False)
+            sampled_bins.append(indices)
             batch = [replay[int(i)] for i in indices]
             # M6: what the optimizer actually saw this iteration, by family and
             # age. Game quota is not replay quota; this is the replay side.
@@ -521,6 +535,10 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                                                    for k, v in sampled_kinds.items()},
                   'replay_sample_age': ({'min': int(min(sampled_ages)), 'mean': float(np.mean(sampled_ages)),
                                          'max': int(max(sampled_ages))} if sampled_ages else None),
+                  'replay_sampling': getattr(args, 'replay_sampling', 'uniform'),
+                  'replay_depth_histogram': sampler.histogram(),
+                  'replay_sample_depth_fractions': sample_bin_fractions(
+                      sampler.bins, np.concatenate(sampled_bins) if sampled_bins else np.empty(0, dtype=int)),
                   'completed_simulations': sum(r[2]['completed_simulations'] for r in results),
                   'max_search_depth': max(r[2]['max_depth'] for r in results),
                   'soft_rechecks': sum(r[2]['soft_rechecks'] for r in results),
@@ -852,6 +870,9 @@ def main():
     t.add_argument('--resume')
     t.add_argument('--population', action='store_true', help='Quota-controlled league of self-play and strong opponents')
     t.add_argument('--augment-symmetry', action='store_true', help='Random rotations/reflections of training positions')
+    t.add_argument('--replay-sampling', choices=['uniform', 'stratified'], default='uniform',
+                   help='stratified: equal share of each nine-ply game phase per batch (uttt.ai-style '
+                        'depth balancing); uniform: the historical FIFO sampler')
     t.add_argument('--population-checkpoints', help='Directory of frozen model-*.pt and best.pt opponents; defaults to output')
     t.add_argument('--population-config', default=None,
                    help='Versioned JSON curriculum (quotas summing to 100 + per-family budgets). '

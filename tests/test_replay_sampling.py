@@ -1,4 +1,9 @@
+import json
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 import numpy as np
 import torch
 from sttt.env import State
@@ -72,3 +77,34 @@ class StratifiedSamplerTests(unittest.TestCase):
         self.assertAlmostEqual(fractions['0-8'], 0.5)
         self.assertAlmostEqual(fractions['27-35'], 0.25)
         self.assertAlmostEqual(fractions['63-80'], 0.25)
+
+
+class TrainerWiringTests(unittest.TestCase):
+    def _run(self, sampling, output):
+        cmd = [sys.executable, '-m', 'sttt.ai', 'train', '--backend', 'python', '--device', 'cpu',
+               '--iterations', '1', '--games', '2', '--simulations', '4', '--steps', '3',
+               '--batch', '8', '--workers', '1', '--leaf-batch', '2', '--save-every', '0',
+               '--replay-sampling', sampling, '--output', output, '--seed', '5']
+        subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=300)
+        rows = [json.loads(l) for l in (Path(output) / 'metrics.jsonl').read_text().splitlines()]
+        return [r for r in rows if 'replay_sampling' in r][-1]
+
+    def test_stratified_run_reports_buffer_histogram_and_sampled_fractions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report = self._run('stratified', tmp)
+        self.assertEqual(report['replay_sampling'], 'stratified')
+        self.assertEqual(sum(report['replay_depth_histogram'].values()), report['positions'])
+        self.assertAlmostEqual(sum(report['replay_sample_depth_fractions'].values()), 1.0, places=6)
+        self.assertGreaterEqual(len(report['replay_sample_depth_fractions']), 2)
+
+    def test_uniform_is_the_default_and_still_reports_composition(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cmd = [sys.executable, '-m', 'sttt.ai', 'train', '--backend', 'python', '--device', 'cpu',
+                   '--iterations', '1', '--games', '1', '--simulations', '4', '--steps', '2',
+                   '--batch', '8', '--workers', '1', '--leaf-batch', '2', '--save-every', '0',
+                   '--output', tmp, '--seed', '5']
+            subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=300)
+            rows = [json.loads(l) for l in (Path(tmp) / 'metrics.jsonl').read_text().splitlines()]
+        report = [r for r in rows if 'replay_sampling' in r][-1]
+        self.assertEqual(report['replay_sampling'], 'uniform')
+        self.assertEqual(sum(report['replay_depth_histogram'].values()), report['positions'])
