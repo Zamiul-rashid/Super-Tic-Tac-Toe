@@ -32,10 +32,25 @@
 #   nice -n 19 $PY -m sttt.ai pretrain --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
 #   ./train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
 #
-# Storage: latest.pt (full resume state, ~320 MB) is rewritten every iteration;
-# a model-NNNN.pt weights snapshot (~7 MB) is written every 50 iterations and
-# pruned to the last 500 iterations AND the last 10 snapshots, so the run
-# directory settles at roughly 320 MB + 70 MB. best.pt is never pruned.
+# Storage: latest.pt (full resume state) is rewritten every iteration. pack_replay
+# (sttt/ai.py) omits the replay's Q/Q-mask block entirely when no row carries a
+# real target, so the two cases differ: `--arch resnet` never populates Q
+# (ResNet.forward_all returns q=None) and settles at ~320 MB; `--arch unet`
+# always does, adding a 200,000x81 fp32 Q tensor (~65 MB) plus a 200,000x81 bool
+# Q-mask (~16 MB), ~401 MB total. A model-NNNN.pt weights snapshot (~7 MB) is
+# written every 50 iterations and pruned to the last 500 iterations AND the
+# last 10 snapshots, so the run directory settles at roughly 320 MB + 70 MB
+# (resnet) or 400 MB + 70 MB (unet). best.pt is never pruned.
+#
+# Stratified replay sampling (sttt/replay_sampling.py, --replay-sampling
+# stratified) is implemented and tested but deliberately NOT enabled below.
+# Measured on the production replay (runs/run_v2/latest.pt, 200,000 rows): the
+# thinnest ply bin (63-71) held only 176 rows, yet StratifiedSampler's flat
+# 512/8=64-per-bin first pass gives it the same 64-row share as every other
+# bin before the remaining-share redistribution ever runs -- a ~141x oversample
+# of that bin sustained for hundreds of iterations (the FIFO replaces only
+# ~0.3 rows/iteration in that bin). Do not re-enable this flag here without
+# first adding a quota rule that bounds oversampling for thin bins.
 set -euo pipefail
 
 if [[ $# -lt 2 || $# -gt 3 ]]; then
@@ -108,7 +123,6 @@ echo "==========================================================================
   --eval-games 20 \
   --eval-simulations 512 \
   --augment-symmetry \
-  --replay-sampling stratified \
   --seed 42 \
   2>&1 | tee -a "$OUTPUT/train.log"
 

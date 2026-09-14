@@ -227,3 +227,44 @@ class TestReplayPacking(unittest.TestCase):
         back = unpack_replay(rows)
         self.assertEqual([len(r) for r in back], [6, 6, 6])
         self.assertTrue(torch.equal(back[0][0], rows[0][0]))
+
+    def test_pack_omits_q_keys_on_disk_when_no_row_has_a_target(self):
+        """`resnet` never sets a q_mask bit (ResNet.forward_all returns q=None,
+        widen_row fills zeros), so those ~65MB + ~16MB of structurally-zero Q
+        bytes must not be written into latest.pt every iteration."""
+        rows = [(x, pi, mask, z, torch.zeros(81), torch.zeros(81, dtype=torch.bool))
+                for x, pi, mask, z, _, _ in self._rows(6)]
+        packed = pack_replay(rows)
+        self.assertNotIn('q', packed)
+        self.assertNotIn('q_mask', packed)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "ckpt.pt"
+            torch.save({"replay": packed}, path)
+            loaded = torch.load(path, map_location="cpu", weights_only=False)["replay"]
+        self.assertNotIn('q', loaded)
+        self.assertNotIn('q_mask', loaded)
+        back = unpack_replay(loaded)
+        self.assertEqual(len(back), 6)
+        for row in back:
+            self.assertEqual(len(row), 6)
+            self.assertTrue(torch.equal(row[4], torch.zeros(81)))
+            self.assertFalse(row[5].any())
+
+    def test_pack_keeps_q_keys_on_disk_when_any_row_has_a_target(self):
+        """A replay with at least one real Q target -- the `unet` case -- must
+        still carry q/q_mask through pack_replay/unpack_replay exactly."""
+        rows = self._rows(5)
+        self.assertTrue(any(bool(r[5].any()) for r in rows), "fixture must have a real target")
+        packed = pack_replay(rows)
+        self.assertIn('q', packed)
+        self.assertIn('q_mask', packed)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "ckpt.pt"
+            torch.save({"replay": packed}, path)
+            loaded = torch.load(path, map_location="cpu", weights_only=False)["replay"]
+        self.assertIn('q', loaded)
+        self.assertIn('q_mask', loaded)
+        back = unpack_replay(loaded)
+        for (x, pi, mask, z, q, q_mask), (x2, pi2, mask2, z2, q2, q_mask2) in zip(rows, back):
+            self.assertTrue(torch.equal(q, q2))
+            self.assertTrue(torch.equal(q_mask, q_mask2))

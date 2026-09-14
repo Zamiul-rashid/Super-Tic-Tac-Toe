@@ -48,7 +48,10 @@ checklist and result ledger.
 
 Architectures: `--arch resnet` (1.8M MLP-ResNet, default), `--arch unet` (hierarchical conv
 U-Net with a dense action-value head). Replay sampling: `--replay-sampling stratified`
-balances each batch across nine-ply game phases (`train.sh` enables it).
+balances each batch across nine-ply game phases. Implemented and tested, but **not**
+enabled by `train.sh`: on the production replay (`runs/run_v2/latest.pt`, 200,000 rows)
+the thinnest ply bin held only 176 rows, and the sampler's flat per-bin share oversamples
+it ~141x; see `TRAINING_READINESS_PLAN.md` §7 before enabling it yourself.
 
 **`--arch unet` caveat:** its value head is measured dead — on 4,096 dataset
 positions the output is constant −1.0 (min = mean = max = −1.0, std = 0.0),

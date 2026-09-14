@@ -94,6 +94,26 @@ class GenerateDatasetCommandTests(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn('workers', proc.stderr)
 
+    def test_refuses_a_directory_that_already_holds_shards(self):
+        # A stale shard-*.pt from a different seed/simulation/depth config would
+        # otherwise be silently merged by load_shards, and manifest.json would be
+        # overwritten so it no longer describes the directory -- wrong data plus
+        # wrong provenance. Must be refused before anything is written, so a
+        # bogus placeholder file (no native extension needed) is enough to prove it.
+        from sttt.bootstrap import generate_dataset
+        import argparse
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, 'shard-0000.pt').write_bytes(b'not a real shard')
+            args = argparse.Namespace(output=tmp, workers=1, games=1, simulations=8, leaf_batch=4,
+                                      shard_games=1, alphabeta_share=0.5, depths=[2], seed=1)
+            with self.assertRaises(RuntimeError) as ctx:
+                generate_dataset(args)
+        self.assertIn(tmp, str(ctx.exception))
+        self.assertIn('shard', str(ctx.exception))
+        # Refusal must precede the native-extension check reordering concern:
+        # the manifest must not have been touched either.
+        self.assertFalse(Path(tmp, 'manifest.json').exists())
+
 
 class WorkerInitTests(unittest.TestCase):
     def test_niceness_and_thread_cap_are_applied(self):

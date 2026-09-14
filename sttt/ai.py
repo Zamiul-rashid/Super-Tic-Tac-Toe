@@ -257,17 +257,27 @@ def pack_replay(replay):
     write, a quarter of every iteration. Contiguous tensors serialise at copy
     speed. Only the on-disk form changes; the in-RAM deque of tuples that the
     optimizer samples from is untouched.
+
+    The Q/Q-mask block (~65 MB + ~16 MB at a 200,000-row buffer) is omitted
+    entirely when no row has a set q_mask bit: for `resnet`, ResNet.forward_all
+    always returns q=None and policy_value_loss never reads a Q target back,
+    so those bytes would be structurally zero on every write of latest.pt
+    (measured: ~320 MB -> ~400 MB). `unet` rows carry real targets, so their
+    Q block is written as before.
     """
     rows = [widen_row(r) for r in replay]
     if not rows:
         return {'format': REPLAY_PACKED_FORMAT, 'count': 0}
-    return {'format': REPLAY_PACKED_FORMAT, 'count': len(rows),
-            'x': torch.stack([r[0] for r in rows]),
-            'pi': torch.stack([r[1] for r in rows]),
-            'mask': torch.stack([r[2] for r in rows]),
-            'z': torch.tensor([r[3] for r in rows], dtype=torch.float64),
-            'q': torch.stack([r[4] for r in rows]),
-            'q_mask': torch.stack([r[5] for r in rows])}
+    packed = {'format': REPLAY_PACKED_FORMAT, 'count': len(rows),
+              'x': torch.stack([r[0] for r in rows]),
+              'pi': torch.stack([r[1] for r in rows]),
+              'mask': torch.stack([r[2] for r in rows]),
+              'z': torch.tensor([r[3] for r in rows], dtype=torch.float64)}
+    q_mask = torch.stack([r[5] for r in rows])
+    if bool(q_mask.any()):
+        packed['q'] = torch.stack([r[4] for r in rows])
+        packed['q_mask'] = q_mask
+    return packed
 
 
 def unpack_replay(saved):
@@ -278,9 +288,11 @@ def unpack_replay(saved):
         n = int(saved['count'])
         if n == 0:
             return []
-        q = saved.get('q') if saved.get('format') == 'packed-v2' else None
-        q_mask = saved.get('q_mask') if saved.get('format') == 'packed-v2' else None
-        if q is None:
+        # Zero-fill whenever either key is ABSENT, not keyed on the format
+        # string: a packed-v2 dict with no real Q targets (pack_replay omits
+        # the keys in that case) must load exactly like a packed-v1 one.
+        q, q_mask = saved.get('q'), saved.get('q_mask')
+        if q is None or q_mask is None:
             q = torch.zeros(n, 81, dtype=torch.float32)
             q_mask = torch.zeros(n, 81, dtype=torch.bool)
         # clone() so a row does not keep the whole packed block alive after
@@ -466,7 +478,11 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             policy_losses.append(policy_loss.item())
             value_losses.append(value_loss.item())
             if parts['q'] is not None:
-                q_losses.append(float(parts['q']))
+                # .item(), not float(): parts['q'] still requires grad here
+                # (the graph is freed but the flag persists), and float() on
+                # such a tensor emits a UserWarning -- measured on every
+                # optimizer step of a multi-hour run.
+                q_losses.append(parts['q'].item())
             grad_norms.append(float(grad_norm))
         # CUDA kernels are asynchronous: without this the optimization stage
         # would appear instant and its cost would land in whatever synchronized

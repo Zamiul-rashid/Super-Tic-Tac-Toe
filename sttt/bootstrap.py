@@ -9,6 +9,7 @@ import json
 import multiprocessing as mp
 import os
 from pathlib import Path
+import sys
 import time
 import numpy as np
 from .population import MatchSpec, make_opponent
@@ -38,6 +39,7 @@ def generate_rows(seed, games, simulations, leaf_batch, alphabeta_share, depths)
     """
     from .cpp_env import CppTreeSearch, encode_batch, is_cpp_available
     from .selfplay import _play_game
+    from .replay_sampling import row_ply
     if not is_cpp_available() or CppTreeSearch is None:
         raise RuntimeError('bootstrap generation requires the native extension; run make -C cpp')
     xs, pis, masks, zs, qs, qms, plies, kinds = [], [], [], [], [], [], [], []
@@ -62,7 +64,7 @@ def generate_rows(seed, games, simulations, leaf_batch, alphabeta_share, depths)
             mask[state.legal_actions()] = True
             xs.append(encoded[i].copy()); pis.append(pi.astype(np.float32)); masks.append(mask)
             zs.append(float(outcome * state.turn)); qs.append(q); qms.append(q_mask)
-            plies.append(81 - int(round(float(encoded[i][:81].sum()))))
+            plies.append(row_ply(encoded[i]))
         kinds.append(spec.kind)
     return {'x': np.stack(xs), 'pi': np.stack(pis), 'mask': np.stack(masks),
             'z': np.asarray(zs, dtype=np.float64), 'q': np.stack(qs), 'q_mask': np.stack(qms),
@@ -71,7 +73,8 @@ def generate_rows(seed, games, simulations, leaf_batch, alphabeta_share, depths)
 
 def pack_arrays(rows):
     import torch
-    return {'format': 'packed-v2', 'count': int(rows['x'].shape[0]),
+    from .ai import REPLAY_PACKED_FORMAT
+    return {'format': REPLAY_PACKED_FORMAT, 'count': int(rows['x'].shape[0]),
             'x': torch.from_numpy(rows['x']), 'pi': torch.from_numpy(rows['pi']),
             'mask': torch.from_numpy(rows['mask']), 'z': torch.from_numpy(rows['z']),
             'q': torch.from_numpy(rows['q']), 'q_mask': torch.from_numpy(rows['q_mask'])}
@@ -132,6 +135,22 @@ def generate_dataset(args):
         raise ValueError('--workers is capped at 10 on this machine (see CPU-load rule)')
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
+    # load_shards globs shard-*.pt unconditionally, so re-running into a
+    # directory that already holds shards from a different seed/simulation/
+    # depth configuration would silently merge them into the training set,
+    # and the manifest.json write below would silently overwrite the record
+    # of what is actually in the directory -- wrong data plus wrong
+    # provenance, with nothing in the output to say so. Refuse up front,
+    # before any task is built or any file is written.
+    existing = sorted(output.glob('shard-*.pt'))
+    if existing:
+        raise RuntimeError(
+            f'{output} already holds {len(existing)} shard file(s) '
+            f'({existing[0].name}..{existing[-1].name}) from a previous generate-dataset '
+            f'run; re-running here would silently merge shards from a possibly different '
+            f'seed/simulation/depth configuration and overwrite manifest.json so it no '
+            f'longer describes the directory. Pick a new --output directory, or remove '
+            f'the existing shard-*.pt files first.')
     tasks = []
     remaining, shard = args.games, 0
     while remaining > 0:
@@ -175,12 +194,31 @@ def generate_dataset(args):
 
 
 def pretrain(args):
+    if args.arch == 'unet':
+        # --arch unet is pretrain's DEFAULT, so the shortest documented pretrain
+        # command silently produces this. Measured (TRAINING_READINESS_PLAN.md
+        # section 7, README.md): value output is constant -1.0 over 4,096
+        # dataset positions (std 0.0, tanh saturated at init, gradient
+        # vanished); policy and Q heads are healthy (std 0.245 and 0.290).
+        # Printed unconditionally to stderr so it cannot be missed, because a
+        # constant value head means MCTS backups carry no positional
+        # information -- search degenerates to policy-prior rollouts.
+        print(
+            'WARNING: --arch unet has a measured-dead value head.\n'
+            '  Measured on 4,096 dataset positions: value output is constant -1.0\n'
+            '  (min = mean = max = -1.0, std = 0.0) -- its tanh gradient has vanished\n'
+            '  and cannot recover. Policy (std 0.245) and Q (std 0.290) heads are healthy.\n'
+            '  Consequence: a constant value head means MCTS backups carry no positional\n'
+            '  information, so search degenerates to policy-prior rollouts.\n'
+            '  See README.md and TRAINING_READINESS_PLAN.md section 7 before starting a\n'
+            '  long run on the checkpoint this command writes.',
+            file=sys.stderr, flush=True)
     # Stage 2: torch and its friends are imported HERE, not at module level --
     # sttt.bootstrap must stay importable (and torch-free) for spawned
     # generate-dataset workers, which unpickle _worker_init/_generate_task from
     # this module without ever needing a network.
     import torch
-    from .ai import resolve_device, pack_replay, unpack_replay
+    from .ai import REPLAY_PACKED_FORMAT, resolve_device, pack_replay, unpack_replay
     from .learning import create_model, policy_value_loss, arch_name
     from .population import augment_batch
     from .replay_sampling import StratifiedSampler, ply_bin
@@ -262,9 +300,13 @@ def pretrain(args):
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
             scaler.step(optimizer); scaler.update()
             schedule.advance()
-            losses.append(float(loss)); p_l.append(float(parts['policy'])); v_l.append(float(parts['value']))
+            # .item(), not float(): these tensors still require grad here (the
+            # graph is freed by backward() but the flag persists), and float()
+            # on such a tensor emits a UserWarning -- measured on every
+            # optimizer step of a multi-epoch pretraining run.
+            losses.append(loss.item()); p_l.append(parts['policy'].item()); v_l.append(parts['value'].item())
             if parts['q'] is not None:
-                q_l.append(float(parts['q']))
+                q_l.append(parts['q'].item())
         row = {'epoch': epoch, 'lr': float(optimizer.param_groups[0]['lr']),
                'train_loss': float(np.mean(losses)), 'train_policy': float(np.mean(p_l)),
                'train_value': float(np.mean(v_l)), 'train_q': float(np.mean(q_l)) if q_l else None,
@@ -276,7 +318,7 @@ def pretrain(args):
 
     # Warm replay: a random subset of the dataset in the trainer's row format.
     warm = rng.choice(n, size=min(args.replay_buffer, n), replace=False)
-    packed_source = {'format': 'packed-v2', 'count': len(warm),
+    packed_source = {'format': REPLAY_PACKED_FORMAT, 'count': len(warm),
                      **{k: data[k][torch.as_tensor(warm)] for k in ('x', 'pi', 'mask', 'z', 'q', 'q_mask')}}
     rows = unpack_replay(packed_source)
     arch = arch_name(model)

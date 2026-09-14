@@ -523,7 +523,7 @@ forecast.
 | Part | Commits | Gate | Measured numbers |
 | --- | --- | --- | --- |
 | 1 — dihedral symmetry proof | `8349e66` | not separately re-gated in this dispatch | 8-fold augmentation already existed (`--augment-symmetry`); now backed by an explicit symmetry-group proof, `tests/test_population.py::SymmetryGroupTests`. |
-| 2 — game-phase-stratified replay sampling | `d03411a` (sampler), `5b33b6e` (trainer wiring) | `$PY -m unittest discover -s tests`: **554 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`, a git-branch-name assertion) | `StratifiedSampler` bins replay rows by ply (`ply_bin`/`row_ply`) into game-phase strata; `--replay-sampling {uniform,stratified}` wired through the trainer, default stays `uniform`. `train.sh` now passes `--replay-sampling stratified` (Task 7.1). |
+| 2 — game-phase-stratified replay sampling | `d03411a` (sampler), `5b33b6e` (trainer wiring) | `$PY -m unittest discover -s tests`: **554 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`, a git-branch-name assertion) | `StratifiedSampler` bins replay rows by ply (`ply_bin`/`row_ply`) into game-phase strata; `--replay-sampling {uniform,stratified}` wired through the trainer, default stays `uniform`. **Superseded:** `train.sh` briefly passed `--replay-sampling stratified` (Task 7.1); see the measurement below — it no longer does. |
 | 3 — shared policy/value loss | `9de6805` | not separately re-gated in this dispatch | `policy_value_loss` unified across call sites (reused again at 4.3 and 6.3). |
 | 4 — dense action-value (Q) head | `00d25e4` (root action values), `c36d062` (Q in replay, `packed-v2`), `baefe24` (Q loss) | `$PY -m unittest discover -s tests`: **568 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`) | Legacy checkpoints/replay widen to zero-Q rows (behaviour-preserving default). |
 | 5 — hierarchical convolutional U-Net (`--arch unet`) | `ed877c6` (plane geometry), `88af2d4` + `8899b3e` (U-Net + test strengthening), `41e47bf` (trainer smoke: q_loss reported, packed-v2 replay, resume works) | `$PY -m unittest discover -s tests`: **580 tests**, 1 pre-existing failure (`test_f20_git_branch_isolation`) | U-Net vs ResNet at identical flags (4 games, 64 sims, 2 iterations, CUDA+FP16): `unet` 0.59 s/iteration warm, 69.4 MB peak GPU, 1,560,835 params; `resnet` 0.37 s/iteration warm, 50.2 MB peak GPU, 1,773,650 params. |
@@ -539,7 +539,37 @@ initialisation; `ResNet` avoids this because its trunk is LayerNormed
 throughout. **Not fixed in this task** — this is an architecture decision for
 the user, not a bug with an obvious one-line patch; the fix is deferred until
 that decision is made. Do not start a long `--arch unet` run expecting a
-working value signal until this is addressed.
+working value signal until this is addressed. A constant value head means
+MCTS backups carry no positional information, so search degenerates to
+policy-prior rollouts — read the Part 6 row's measured 5W/3D/12L (32.5%) score
+above as "search is running blind," not as a weak-but-learning baseline.
+
+**Stratified replay sampling is implemented, not enabled.**
+`--replay-sampling stratified` (`sttt/replay_sampling.py`, Part 2 above) is
+implemented and gated by its own tests, and `train.sh` briefly enabled it by
+default (`785d2ac`). A whole-branch review then measured the real ply
+distribution of the production checkpoint `runs/run_v2/latest.pt` (200,000
+replay rows):
+
+```
+bin 0 (0-8):  28,702  14.35%     bin 4 (36-44): 34,478  17.24%
+bin 1 (9-17): 36,770  18.39%     bin 5 (45-53): 21,995  11.00%
+bin 2 (18-26):36,667  18.33%     bin 6 (54-62):  4,839   2.42%
+bin 3 (27-35):36,373  18.19%     bin 7 (63-71):    176   0.09%
+```
+
+`StratifiedSampler.sample` gives each of the 8 non-empty bins a flat
+`512 // 8 = 64` on its first pass, and `remaining` reaches zero before any
+redistribution runs. Bin 7 (176 rows) would then supply 64 of every 512-row
+batch (12.5%) from a pool of only 176 unique rows — each row seen roughly 36
+times per iteration versus ~0.26 under the uniform sampler, a ~141x
+oversample, sustained for hundreds of iterations because the FIFO replaces
+only ~0.3 bin-7 rows per iteration. **Decision:** `train.sh` no longer passes
+`--replay-sampling stratified`; the flag, `StratifiedSampler`, and its tests
+are unchanged and remain available opt-in. The feature stays disabled by
+default pending a quota rule that bounds oversampling for bins thinner than
+their flat share — that rule is a design decision reserved for the user, not
+implemented here.
 
 ## 8. Research and API references
 
