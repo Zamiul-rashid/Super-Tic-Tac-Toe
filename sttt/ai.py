@@ -613,7 +613,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             evaluation.games, evaluation.simulations = args.eval_games, args.eval_simulations
             evaluation.opponent = 'alphabeta'
             evaluation.opponent_checkpoint = None
-            evaluation.opponent_depth, evaluation.opponent_nodes = 3, 3000
+            evaluation.opponent_depth = getattr(args, 'eval_opponent_depth', 4)
+            evaluation.opponent_nodes = getattr(args, 'eval_opponent_nodes', 50000)
             evaluation.opponent_simulations = 256
             evaluate(evaluation)
             # Periodic evaluation is real wall time the ETA must include; it
@@ -933,6 +934,14 @@ def main():
     t.add_argument('--eval-every', type=int, default=0, help='Evaluate every N iterations; 0 disables')
     t.add_argument('--eval-games', type=positive, default=20)
     t.add_argument('--eval-simulations', type=positive, default=512)
+    t.add_argument('--eval-opponent-depth', type=positive, default=4,
+                   help='Alpha-beta depth for the periodic in-training evaluation (default 4). '
+                        'Depth 3 was the old default and is too weak to be informative once the '
+                        'model is past the opening stages')
+    t.add_argument('--eval-opponent-nodes', type=positive, default=50000,
+                   help='Node budget for that opponent. Must exceed the depth\'s typical node '
+                        'count or the depth is nominal only: d3 ~1,453, d4 ~3,479, d5 ~20,514 '
+                        '(BENCHMARK_REPORT.md). The old 3,000 truncated anything above d3')
     t.add_argument('--max-iterations', type=positive, default=None,
                    help='Stop training once total cumulative iterations reach N')
     p = commands.add_parser('play')

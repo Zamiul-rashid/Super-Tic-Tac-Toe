@@ -53,6 +53,15 @@ enabled by `train.sh`: on the production replay (`runs/run_v2/latest.pt`, 200,00
 the thinnest ply bin held only 176 rows, and the sampler's flat per-bin share oversamples
 it ~141x; see `TRAINING_READINESS_PLAN.md` §7 before enabling it yourself.
 
+**Training opponents are alpha-beta depth 4-8, not 3.** The periodic in-training
+evaluation runs `--eval-opponent-depth 4` with a 50,000-node budget (was depth 3
+at 3,000 nodes), and depth 3 has been dropped from the `alphabeta` family in
+`configs/population/baseline.json`. The node budget matters as much as the
+depth: typical node counts are d3 ~1,453, d4 ~3,479, d5 ~20,514
+(`BENCHMARK_REPORT.md`), so the old 3,000-node cap truncated anything above d3
+and made a nominal "depth 4" no stronger than a depth 3. Use
+`--eval-opponent-depth 5` for a harder yardstick; raise the node budget with it.
+
 **`pretrain` learning rate — why the default is 3e-4, not 1e-3.** At a 1e-3
 peak with no warm-up, AdamW's first optimizer steps drove the value head's
 pre-tanh activation from ≈0 to +1.6 in one step and −5.3 in two, where

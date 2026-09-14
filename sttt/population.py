@@ -49,7 +49,7 @@ FAMILIES = tuple(POPULATION_WEIGHTS)
 # population config may override any of them per family.
 DEFAULT_FAMILY_SETTINGS = {
     'self': {},
-    'alphabeta': {'depth': [3, 4, 5, 6, 7, 8], 'nodes': [100000, 250000, 500000],
+    'alphabeta': {'depth': [4, 5, 6, 7, 8], 'nodes': [100000, 250000, 500000],
                   'epsilon': [0., .02], 'simulations': [128, 256, 512]},
     'tactical': {'depth': [2], 'nodes': [6000, 10000, 16000], 'epsilon': [0., .12],
                  'simulations': [128, 256, 512]},
