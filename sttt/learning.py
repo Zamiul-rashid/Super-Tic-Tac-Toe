@@ -166,25 +166,33 @@ class ResNet(BasePolicyValue):
             h = b(h)
         return self.policy(h), self.value(h).tanh().squeeze(-1)
 
+def arch_name(model):
+    from .unet import UNet          # local import: unet imports BasePolicyValue from here
+    if isinstance(model, UNet):
+        return 'unet'
+    return 'resnet' if isinstance(model, ResNet) else 'mlp'
+
 def create_model(arch='resnet'):
     if arch == 'resnet':
         return ResNet()
     if arch == 'mlp':
         return Network()
+    if arch == 'unet':
+        from .unet import UNet      # local import: unet imports BasePolicyValue from here
+        return UNet()
     raise ValueError(f"Unknown architecture: {arch}")
 
 def load_model(path):
     checkpoint = torch.load(path, map_location='cpu', weights_only=True)
     arch = checkpoint.get('arch')
-    if arch == 'resnet':
-        model = ResNet()
-    elif arch == 'mlp':
-        model = Network()
-    else:
-        state = checkpoint['model']
-        if 'in_proj.0.weight' in state or 'blocks.0.net.0.weight' in state:
-            model = ResNet()
+    state = checkpoint['model']
+    if arch is None:
+        if 'stem.0.weight' in state:
+            arch = 'unet'
+        elif 'in_proj.0.weight' in state or 'blocks.0.net.0.weight' in state:
+            arch = 'resnet'
         else:
-            model = Network()
-    model.load_state_dict(checkpoint['model'])
+            arch = 'mlp'
+    model = create_model(arch)
+    model.load_state_dict(state)
     return model.eval(), checkpoint

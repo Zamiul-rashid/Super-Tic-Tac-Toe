@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from .env import State
 from .training_schedule import LRSchedule, apply_lr, build_schedule
-from .learning import ResNet, create_model, encode, load_model, policy_value_loss
+from .learning import arch_name, create_model, encode, load_model, policy_value_loss
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
@@ -111,7 +111,7 @@ def train(args):
     print(describe_backend(backend_info), flush=True)
     if args.resume:
         model, saved = load_model(args.resume)
-        arch = 'resnet' if isinstance(model, ResNet) else 'mlp'
+        arch = arch_name(model)
     else:
         arch = getattr(args, 'arch', 'resnet')
         model = create_model(arch)
@@ -872,7 +872,7 @@ def main():
     for name,default in [('iterations',20),('games',8),('simulations',64),('steps',100),
                          ('batch',128),('buffer',50000)]:
         t.add_argument('--'+name,type=positive,default=default)
-    t.add_argument('--arch', choices=['resnet', 'mlp'], default='resnet')
+    t.add_argument('--arch', choices=['resnet', 'mlp', 'unet'], default='resnet')
     t.add_argument('--workers', type=positive, default=8)
     t.add_argument('--backend', choices=['auto', 'cpp', 'python'], default='auto',
                    help='Search backend: cpp uses C++ bitboard engine, python uses pure Python (default: auto)')
