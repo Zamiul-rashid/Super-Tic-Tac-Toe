@@ -53,13 +53,20 @@ enabled by `train.sh`: on the production replay (`runs/run_v2/latest.pt`, 200,00
 the thinnest ply bin held only 176 rows, and the sampler's flat per-bin share oversamples
 it ~141x; see `TRAINING_READINESS_PLAN.md` §7 before enabling it yourself.
 
-**`--arch unet` caveat:** its value head is measured dead — on 4,096 dataset
-positions the output is constant −1.0 (min = mean = max = −1.0, std = 0.0),
-saturated pre-tanh at initialisation because the head reads the unnormalised
-macro residual stream (`ResNet` avoids this; its trunk is LayerNormed
-throughout). Policy and Q heads are healthy on the same positions. Not fixed
-in this task — see the ledger in `TRAINING_READINESS_PLAN.md` §7 before
-starting a long U-Net run.
+**`pretrain` learning rate — why the default is 3e-4, not 1e-3.** At a 1e-3
+peak with no warm-up, AdamW's first optimizer steps drove the value head's
+pre-tanh activation from ≈0 to +1.6 in one step and −5.3 in two, where
+tanh′ ≈ 2e-4; its gradient reached exactly 0.00 by step 8 and never recovered,
+leaving the head emitting one constant value while the policy and Q heads kept
+improving and the total loss still looked plausible. This hit **both**
+architectures (5 of 7 `unet` runs and 1 of 1 `resnet` run at 1e-3), and
+survival flipped on batch order alone. It is a schedule problem, not an
+architecture fault — `sttt/unet.py` was not changed. Two independent guards
+now ship: `--lr` defaults to 3e-4, and `--lr-warmup` (default 100 steps)
+ramps the LR in linearly; either alone was measured sufficient. `pretrain`
+also aborts if the value head's output std falls below 0.02 rather than
+writing a checkpoint that would search blind. Full evidence:
+`handover/value-head-check.txt`.
 
 ### High-Performance C++ Bitboard Engine
 

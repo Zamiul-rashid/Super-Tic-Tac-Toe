@@ -1,0 +1,278 @@
+VALUE-HEAD CLAIM CHECK
+======================
+Date: 2026-09-14
+Branch: feat/blueprint-impl @ 661c394
+Machine: RTX 4090, CUDA, conda sttt env (Python 3.14.6, torch 2.14.0+cu130)
+Scope: measurement only. No repository code was edited. All artifacts in the session
+scratchpad; two throwaway datasets were generated with `generate-dataset` for the checks.
+
+The claim under test (verbatim, from the controller's summary):
+
+  "The U-Net's value head is dead, and it's a defect in my architecture spec ...
+   It emits constant -1.0 for every input, so the tanh gradient has vanished and it
+   cannot recover ... The cause: the value head reads the macro residual stream
+   unnormalised ... so the pre-tanh activation saturates at initialisation. ResNet
+   escapes this because its trunk is LayerNormed throughout ... several valid fixes:
+   normalise m before the head, LayerNorm after the Flatten, scale down the final
+   layer's init, or drop the tanh ... The 32.5% result understates the architecture:
+   MCTS is currently getting no positional signal from the value head."
+
+
+VERDICT AT A GLANCE
+-------------------
+  Symptom (dead head, constant -1.0, std 0, bit-identical val_value) ....... TRUE, reproduced exactly
+  "Cannot recover" once dead .............................................. TRUE
+  "Saturates at initialisation" ........................................... FALSE
+  "Defect in the U-Net architecture spec" ................................. FALSE
+  "ResNet escapes because its trunk is LayerNormed" ....................... FALSE
+  "Several valid fixes: normalise m / LayerNorm / init scale / drop tanh" . UNSUPPORTED (wrong lever)
+  "32.5% understates; MCTS gets no value signal" .......................... TRUE for the dead model
+  "Documented in README and ledger" ....................................... TRUE, but the documented
+                                                                            cause is wrong (see 6)
+
+  CORRECTED DIAGNOSIS: the collapse is a first-step optimisation blow-up driven by
+  `pretrain`'s learning rate (default --lr 1e-3). It kills the value head of BOTH
+  architectures, it happens in optimizer steps 1-2 (not at init), and it is a
+  coin-flip on batch order at 1e-3. At --lr 3e-4 or 1e-4 every run survived (4/4,
+  both archs). The defect is in the plan's pretrain LR default, not in sttt/unet.py.
+
+
+1. THE SYMPTOM IS REAL AND REPRODUCES BIT-FOR-BIT
+-------------------------------------------------
+Re-ran the exact gate configuration (2000-game dataset seed 1; pretrain --arch unet
+--epochs 3 --batch 512 --holdout 0.02 --replay-buffer 20000 --fp16 --seed 0):
+
+  val_value per epoch:  1.3552220251651166  1.3552220251651166  1.3552220251651166
+  direct measurement, 4096 positions:  min=-1.000 mean=-1.000 max=-1.000 std=0.0000
+  frac |v|>0.99 = 1.000    mse vs z = 1.3635
+
+Identical to 16 significant figures to the original gate run. The symptom is not a
+measurement artefact. fp32 and fp16 evaluation give the same numbers.
+
+
+2. "SATURATES AT INITIALISATION" IS FALSE
+-----------------------------------------
+Fresh, untrained UNet, 4096 real positions, fp32 CPU, three seeds:
+
+  seed  macro-stream m (mean/max)   value PRE-tanh (min/mean/max/std)   tanh output std   frac|v|>.99
+  0     1.122 / 9.38                -0.600 / -0.052 / +0.430 / 0.143     0.139             0.000
+  1     1.106 / 8.68                -0.018 / +0.382 / +0.865 / 0.114     0.098             0.000
+  2     1.122 / 10.44               -0.687 / -0.230 / +0.304 / 0.136     0.126             0.000
+
+The pre-tanh activation at init is bounded by |0.87|. Nothing is saturated. The
+macro stream IS unnormalised and all-positive (mean ~1.1, max ~10), as claimed, but
+that does not produce saturation at init.
+
+For comparison the untrained ResNet's pre-tanh is LARGER: min=-0.818 mean=+0.497
+max=+1.963 std=0.378, output std 0.281. If magnitude-at-init were the mechanism,
+ResNet would be the more fragile of the two.
+
+
+3. WHEN IT ACTUALLY DIES: OPTIMIZER STEPS 1-2
+--------------------------------------------
+Minimal fp32 CPU loop replicating pretrain's step (AdamW lr=1e-3, wd 1e-4, clip 1.0,
+batch 512), UNet seed 0, value head measured on 1024 positions after each step:
+
+  step  value_loss  pre-tanh mean  pre-tanh std  v.mean   v.std    grad-norm(value head)
+   1     0.5618        +1.61          0.10        +0.921   0.0147   8.55e-02
+   2     1.5542        -5.27          0.05        -1.000   0.0000   7.67e-01
+   3     1.4667        -7.52          0.03        -1.000   0.0000   3.54e-03
+   5     1.4648       -10.06          0.02        -1.000   0.0000   3.23e-06
+   8     1.4766       -12.68          0.03        -1.000   0.0000   0.00e+00
+  40     1.5605       -20.18          0.13        -1.000   0.0000   0.00e+00
+
+Step 1 moves the pre-tanh mean from -0.05 to +1.61. Step 2 overshoots to -5.27, where
+tanh'(x) ~ 2e-4. By step 8 the value-head gradient is exactly zero and Adam's momentum
+keeps drifting the pre-activation (to -20 by step 40) with no feedback. "Cannot
+recover" is TRUE once this state is reached.
+
+Mechanism (consistent with all measurements): the value head's input is a large,
+all-positive vector (1152 dims for UNet, 512 for ResNet, both ReLU outputs with mean
+~1.1). AdamW's first steps move every weight by ~lr in the sign of its gradient, and
+because the inputs share a sign those moves are coherent, so the pre-activation shifts
+by O(1)-O(5) per step at lr=1e-3. That is enough to overshoot tanh's linear region in
+one or two steps. This is an LR-vs-input-scale problem, not a saturation-at-init
+problem.
+
+
+4. LEARNING RATE IS THE LEVER; IT IS NOT U-NET-SPECIFIC
+-------------------------------------------------------
+4a. Isolated fp32 loop, 40 steps, DEAD = |v|>0.99 with std<1e-3:
+
+  unet   seed 0..4   lr 1e-3  clip 1.0   -> DEAD at step 1, all 5 seeds (final pre-tanh -17 to +38)
+  unet   seed 0      lr 3e-4  clip 1.0   -> alive  (v.std 0.35, value_loss 0.418)
+  unet   seed 0      lr 1e-4  clip 1.0   -> alive  (v.std 0.49, value_loss 0.278)
+  unet   seed 0      lr 1e-3  NO clip    -> DEAD at step 1   (clipping is not the cause)
+  resnet seed 0..2   lr 1e-3  clip 1.0   -> DEAD at step 1, all 3 seeds (final pre-tanh -11 to -12)
+
+4b. The REAL `pretrain` code path (fp16, CUDA, stratified sampling, symmetry
+    augmentation, cosine schedule), 3 epochs, val_value per epoch and direct v.std:
+
+  dataset    arch    lr     seed  holdout  val_value (3 epochs)          v.std    result
+  orig 2000g unet    1e-3   0     0.02     1.3552 1.3552 1.3552          0.0000   DEAD (v=-1)
+  orig 2000g unet    1e-3   1     0.02     1.3377 1.3377 1.3377          0.0000   DEAD (v=-1)
+  orig 2000g unet    3e-4   0     0.02     0.5281 0.5293 0.5160          0.3305   alive
+  orig 2000g unet    1e-4   0     0.02     0.5590 0.5879 0.5167          0.3170   alive
+  orig 2000g resnet  1e-3   0     0.02     1.3552 1.3552 1.3552          0.0000   DEAD (v=-1)
+  orig 2000g resnet  1e-4   0     0.02     0.6038 0.5301 0.5198          0.2859   alive
+  vh    600g unet    1e-3   0     0.05     0.5963 0.5382 0.5272          0.1910   alive
+  vh    600g unet    1e-3   1     0.05     1.3679 1.3679 1.3679          0.0000   DEAD (v=-1)
+  vh    600g unet    1e-3   2     0.05     1.7561 1.7561 1.7561          0.0000   DEAD (v=+1)
+  vh    600g unet    1e-3   0     0.02     1.3038 1.3038 1.3038          0.0000   DEAD (v=-1)
+  vh    600g unet    1e-3   0     0.05 x10ep  0.6057 ... 0.5010 (10 ep)  0.2489   alive
+
+  Tally at lr 1e-3:  unet 5 dead / 2 alive;  resnet 1 dead / 0 alive.
+  Tally at lr <= 3e-4: 4 alive / 0 dead (both architectures).
+
+Points established by 4b:
+  - ResNet dies in the real pretrain path at lr 1e-3 with the SAME val_value
+    (1.3552...) as UNet. The claim "ResNet escapes because its trunk is LayerNormed"
+    is false. LayerNorm inside the residual blocks does not protect the head.
+  - Survival at 1e-3 is luck of batch order: changing only --holdout 0.05->0.02 (which
+    only re-slices one permutation) flips seed 0 from alive to dead; seeds 1 and 2 die.
+  - The collapse direction is not systematically toward the majority target: one run
+    saturated at +1.0 (val_value 1.7561), the rest at -1.0.
+  - Survival, once achieved, is stable: the seed-0/holdout-0.05 run stays alive and
+    keeps improving through 10 epochs.
+  - Lowering the LR fixed every run tested, on both architectures, in the real code
+    path, with no architecture change.
+
+
+5. WHY THE PRODUCTION RESNET MODELS HAVE HEALTHY HEADS (OPEN QUESTION)
+---------------------------------------------------------------------
+The existing online-trained models were measured on the same 4096 bootstrap
+positions (fp32, CPU):
+
+  runs/run_v2/best.pt   iter 1600  resnet:  v min -1.000 mean -0.203 max +1.000 std 0.6118  frac|v|>.99 0.084  corr(v,z) +0.204
+  runs/big_run/best.pt  iter 5750  resnet:  v min -1.000 mean +0.108 max +1.000 std 0.5514  frac|v|>.99 0.027  corr(v,z) +0.166
+
+Both are healthy. The online trainer (sttt/ai.py) also uses AdamW at lr 1e-3 with
+clip 1.0, yet did not collapse. I did NOT diagnose why; the plausible differences
+are (a) the online loop's first iterations train on a tiny buffer (8 games) with
+batch = min(512, len(replay)), (b) different early z distributions, (c) 100 steps per
+iteration on near-identical data. This is stated as an open question, not a finding.
+Note: `train.sh` always resumes a checkpoint, so it never trains a fresh head; a
+fresh `--arch unet` online run at lr 1e-3 was NOT tested and may or may not collapse.
+
+
+6. THE DOCUMENTATION WRITTEN IN TASK 7.1 / THE FIX WAVE IS PARTLY WRONG
+-----------------------------------------------------------------------
+README.md, TRAINING_READINESS_PLAN.md section 7, and the stderr warning added to
+`pretrain` all state the cause as: U-Net-specific, unnormalised macro stream, tanh
+saturated at initialisation, ResNet immune via LayerNorm. Sections 2-4 show each of
+those four assertions is false. The symptom description and the consequence for MCTS
+(constant value -> no positional signal in backups) are correct and should stand.
+These documents need correcting; that is not done here.
+
+
+7. WHAT THE EVIDENCE SUPPORTS AS THE FIX (NOT APPLIED — for the user's decision)
+------------------------------------------------------------------------------
+The four fixes listed in the original claim (normalise m, LayerNorm after Flatten,
+scale down the head's init, drop the tanh) all target the wrong mechanism. Some might
+incidentally help by making the head less LR-sensitive, but none was tested and none
+addresses the measured lever.
+
+What WAS tested and worked, 4/4, both architectures, in the real code path:
+  - `pretrain --lr 3e-4` or `--lr 1e-4` instead of the default 1e-3.
+
+Reasonable options the evidence points at (untested unless stated):
+  a) Change `pretrain`'s --lr default from 1e-3 to 3e-4 or 1e-4.  [tested: works]
+  b) Add a short LR warm-up to `pretrain` (e.g. linear over the first ~50 steps).  [untested;
+     directly addresses the first-step overshoot]
+  c) A normalisation before the value head (LayerNorm on the flattened input) as a
+     robustness measure IN ADDITION to (a) or (b).  [untested; would apply to UNet only,
+     and ResNet has the same failure, so it cannot be the whole fix]
+  d) Add a health check to `pretrain` and `train` that aborts or warns when the value
+     head's output std on a held-out batch drops below a threshold after epoch 1 — the
+     collapse is silent today and val_value being bit-identical across epochs is the
+     only visible tell.
+
+The 32.5% (5W/3D/12L) gate result was produced by a dead-head model and is not a
+measurement of what the U-Net can do; it should be re-run after the LR is fixed
+before being quoted as a baseline.
+
+
+8. WHAT WAS NOT TESTED
+----------------------
+  - A fresh (non-resumed) online `train --arch unet` or `--arch resnet` run at lr 1e-3.
+  - Whether the collapse occurs at lr 1e-3 with LR warm-up.
+  - Any of the architecture-side mitigations in 7(c).
+  - Why the online loop historically avoided the collapse for ResNet (section 5).
+
+
+APPENDIX: SCRIPTS AND ARTIFACTS
+-------------------------------
+Session scratchpad (/tmp/claude-1000/.../scratchpad/):
+  vh-data/     600-game dataset, seed 3   (23,691 positions)
+  orig-data/   2000-game dataset, seed 1  (79,965 positions) — the gate configuration
+  vh-init.txt  Section 2/3 output;  vh-loops.txt  Section 4a output
+  t_*/ and t_*.log  the eleven real-path pretrain runs in 4b
+No file under runs/ was written. No repository source file was modified.
+
+
+================================================================================
+FOLLOW-UP: FIX APPLIED AND RE-MEASURED  (same day, after the check above)
+================================================================================
+The check above was accepted and items 1-8 of the proposed remediation were run.
+This section records what the fix changed and, importantly, one further claim
+from the original summary that the re-measurement ALSO refuted.
+
+WHAT WAS CHANGED (schedule only; sttt/unet.py untouched)
+  - sttt/training_schedule.py : LRSchedule gained a `warmup` field (linear ramp,
+    applies to both constant and cosine, 0 = previous behaviour exactly).
+  - sttt/ai.py                : pretrain --lr default 1e-3 -> 3e-4; new
+    --lr-warmup (default 100 steps).
+  - sttt/bootstrap.py         : warm-up wired in; per-epoch `value_std` recorded
+    in pretrain_metrics.jsonl; run ABORTS if value_std < 0.02 (VALUE_COLLAPSE_STD)
+    rather than writing a checkpoint that would search blind; the old, wrongly
+    diagnosed stderr warning removed.
+  - tests                     : 7 warm-up tests; 2 value-head health tests (one
+    proves default flags keep the head alive on both archs, one forces a
+    collapse and proves the detector fires and writes no latest.pt).
+
+RE-MEASUREMENT, same 2000-game dataset / 3 epochs / batch 512 / holdout .02 / fp16 / CUDA / seed 0
+
+  model                            val_value per epoch        value_std  corr(v,z)
+  before: unet  lr 1e-3            1.3552 1.3552 1.3552        0.0000    constant
+  after:  unet  lr 3e-4 + warmup   0.6584 0.5188 0.5104        0.3230    +0.423
+  after:  resnet lr 3e-4 + warmup  0.5532 0.6012 0.5112        0.3107    +0.412
+
+  Either guard alone suffices (unet, orig dataset, peak lr 1e-3):
+     --lr-warmup 0    -> collapsed, detector fired, exit 1, no checkpoint written
+     --lr-warmup 100  -> alive, value_std 0.299 / 0.295 / 0.314
+
+A SECOND CLAIM FROM THE ORIGINAL SUMMARY IS ALSO REFUTED
+  Claimed: "The 32.5% result understates the architecture: MCTS is currently
+  getting no positional signal from the value head."
+  That predicted the fix would raise playing strength. It does not, at this scale.
+
+  100 games vs alphabeta depth 3, 128 simulations, paired openings (same seed, so
+  every model saw the same 100 opening pairs):
+
+     dead-unet   (lr 1e-3, head dead)                    39.0%  (34W 10D 56L)
+     w100-unet   (lr 1e-3 + warm-up, head ALIVE)         32.0%  (22W 20D 58L)
+     fixed-unet  (lr 3e-4 + warm-up)                     34.5%  (25W 19D 56L)
+     fixed-resnet(lr 3e-4 + warm-up)                     25.0%  (16W 18D 66L)
+
+  The decisive pair is dead-unet vs w100-unet: identical dataset, seed, epochs
+  and peak LR, so the policy is trained equally far; the ONLY difference is that
+  warm-up keeps the value head alive.
+     paired difference = -0.070 +/- 0.111 (95% CI)  -> NOT SIGNIFICANT
+
+  Interpretation: a constant value head makes every MCTS backup equal, so PUCT
+  falls back to the policy prior, which at 128 simulations with a barely-trained
+  policy is no worse than a weak real value function. The value head is now
+  CORRECT (correlated +0.42 with the game outcome) rather than degenerate, which
+  is what matters for deeper search and a stronger network -- but calling the
+  32.5% an understatement was not supported by measurement. The original 20-game
+  32.5% figure is in any case too small a sample to compare anything with
+  (SE ~ 11 percentage points).
+
+STILL OPEN (unchanged from the check above)
+  - Why the online loop never killed run_v2's ResNet head at the same lr 1e-3.
+    The online trainer still has NO warm-up; train.sh always resumes a checkpoint
+    so it never trains a fresh head, but a fresh online run at lr 1e-3 is untested
+    and may collapse the same way.
+  - Whether a normalisation before the value head adds robustness on top of the
+    schedule fix. Untested; deliberately not done, since the measured lever was
+    the schedule and ResNet has the same failure.
