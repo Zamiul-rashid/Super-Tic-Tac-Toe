@@ -22,6 +22,7 @@ from .bots import TacticalBot, AlphaBetaBot, CheckpointBot, create_bot, Bot
 from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
 from .engine_registry import create_configured_engine, load_engine_registry
+from .bootstrap import generate_dataset
 
 try:
     from .cpp_env import encode_batch as cpp_encode_batch, is_cpp_available
@@ -946,6 +947,16 @@ def main():
     tourn.add_argument('--output', help='Report directory (default: runs/<run>/tournaments/ or runs/tournaments/)')
     tourn.add_argument('--engine-config', help='JSON registry of named external engines')
     tourn.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='cpu')
+    gen = commands.add_parser('generate-dataset', help='Stage-1 bootstrap: network-free native search games')
+    gen.add_argument('--output', required=True)
+    gen.add_argument('--games', type=positive, default=20000)
+    gen.add_argument('--workers', type=positive, default=8)
+    gen.add_argument('--simulations', type=positive, default=512)
+    gen.add_argument('--leaf-batch', type=positive, default=64)
+    gen.add_argument('--shard-games', type=positive, default=500)
+    gen.add_argument('--alphabeta-share', type=float, default=0.5)
+    gen.add_argument('--depths', nargs='+', type=positive, default=[4, 5, 6])
+    gen.add_argument('--seed', type=int, default=1)
     for sub in (p,e):
         sub.add_argument('--device', choices=['auto','cpu','cuda'], default='cpu')
         sub.add_argument('--checkpoint',required=True)
@@ -970,6 +981,8 @@ def main():
             parser.error('Games per matchup must be between 20 and 500')
         if not 0 <= args.opening_plies <= 4:
             parser.error('Opening plies must be between 0 and 4')
+    if args.command == 'generate-dataset' and not 0. <= args.alphabeta_share <= 1.:
+        parser.error('--alphabeta-share must be between 0 and 1')
     try:
         if args.command == 'evaluate':
             for seed in args.seeds or [args.seed]:
@@ -978,7 +991,8 @@ def main():
                     if evaluate(args)['status'] != 'complete':
                         return  # Ctrl+C ends the whole sweep, not just one budget.
         else:
-            {'train': train, 'play': play, 'evaluate': evaluate, 'tournament': tournament_cmd}[args.command](args)
+            {'train': train, 'play': play, 'evaluate': evaluate, 'tournament': tournament_cmd,
+             'generate-dataset': generate_dataset}[args.command](args)
     except (KeyboardInterrupt,EOFError):
         print('\nStopped. Completed training iterations and observed human moves are saved.')
 

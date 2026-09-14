@@ -106,3 +106,56 @@ def load_shards(dataset_dir):
             parts[k].append(r[k])
         parts['ply'].append(shard['ply'])
     return {k: torch.cat(v) for k, v in parts.items()}
+
+
+def _worker_init():
+    # The box hangs at 32 x 100 %; workers are polite by construction.
+    os.nice(10)
+    os.environ.setdefault('OMP_NUM_THREADS', '1')
+
+
+def _generate_task(task):
+    seed, games, simulations, leaf_batch, share, depths = task
+    return generate_rows(seed, games, simulations, leaf_batch, share, depths)
+
+
+def generate_dataset(args):
+    from .cpp_env import is_cpp_available
+    from .evaluation import native_build_info
+    if not is_cpp_available():
+        raise RuntimeError('generate-dataset requires the native extension; run make -C cpp')
+    if args.workers > 10:
+        raise ValueError('--workers is capped at 10 on this machine (see CPU-load rule)')
+    output = Path(args.output)
+    output.mkdir(parents=True, exist_ok=True)
+    tasks = []
+    remaining, shard = args.games, 0
+    while remaining > 0:
+        n = min(args.shard_games, remaining)
+        tasks.append((int(args.seed) * 100003 + shard, n, args.simulations, args.leaf_batch,
+                      args.alphabeta_share, tuple(args.depths)))
+        remaining -= n
+        shard += 1
+    started = time.monotonic()
+    totals = Counter(); kinds = Counter(); histogram = Counter(); positions = 0
+    provenance = {'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
+                  'alphabeta_share': args.alphabeta_share, 'depths': list(args.depths),
+                  'seed': args.seed, 'native_build': native_build_info()}
+    ctx = mp.get_context('spawn')
+    with ctx.Pool(min(args.workers, len(tasks)), initializer=_worker_init) as pool:
+        for index, rows in enumerate(pool.imap(_generate_task, tasks)):
+            summary = write_shard(output / f'shard-{index:04d}.pt', rows, provenance)
+            positions += summary['positions']; kinds.update(summary['kinds'])
+            histogram.update(summary['ply_histogram']); totals['games'] += summary['games']
+            elapsed = time.monotonic() - started
+            print(f'shard {index + 1}/{len(tasks)}: {summary["positions"]} positions, '
+                  f'{positions} total, {positions / elapsed:.0f} positions/s', flush=True)
+    elapsed = time.monotonic() - started
+    manifest = {'games': int(totals['games']), 'positions': positions, 'kinds': dict(kinds),
+                'ply_histogram': dict(histogram), 'workers': args.workers,
+                'elapsed_seconds': round(elapsed, 2),
+                'positions_per_second': positions / elapsed if elapsed else None,
+                'created': time.strftime('%Y-%m-%dT%H:%M:%S'), **provenance}
+    (output / 'manifest.json').write_text(json.dumps(manifest, indent=2))
+    print(json.dumps(manifest), flush=True)
+    return manifest

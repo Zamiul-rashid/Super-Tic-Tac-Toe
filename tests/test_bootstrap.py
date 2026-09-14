@@ -64,3 +64,31 @@ class GenerationTests(unittest.TestCase):
             data = load_shards(tmp)
             self.assertEqual(data['x'].shape[0], rows['x'].shape[0])
             self.assertEqual(data['ply'].dtype, torch.int16)
+
+
+class GenerateDatasetCommandTests(unittest.TestCase):
+    def test_writes_shards_and_a_manifest(self):
+        import json, subprocess, sys
+        if not is_cpp_available():
+            self.fail('native extension required')
+        with tempfile.TemporaryDirectory() as tmp:
+            cmd = [sys.executable, '-m', 'sttt.ai', 'generate-dataset', '--output', tmp, '--games', '6',
+                   '--workers', '2', '--simulations', '8', '--leaf-batch', '4', '--shard-games', '3',
+                   '--alphabeta-share', '0.5', '--depths', '2', '--seed', '9']
+            subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=600)
+            shards = sorted(Path(tmp).glob('shard-*.pt'))
+            manifest = json.loads(Path(tmp, 'manifest.json').read_text())
+        self.assertEqual(len(shards), 2)
+        self.assertEqual(manifest['games'], 6)
+        self.assertGreater(manifest['positions'], 40)
+        self.assertEqual(sum(manifest['ply_histogram'].values()), manifest['positions'])
+        self.assertGreater(manifest['positions_per_second'], 0)
+        self.assertIn('native_build', manifest)
+
+    def test_refuses_more_than_ten_workers(self):
+        import subprocess, sys
+        with tempfile.TemporaryDirectory() as tmp:
+            proc = subprocess.run([sys.executable, '-m', 'sttt.ai', 'generate-dataset', '--output', tmp,
+                                   '--games', '1', '--workers', '11'], capture_output=True, text=True)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn('workers', proc.stderr)
