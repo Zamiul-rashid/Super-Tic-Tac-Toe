@@ -88,6 +88,19 @@ class UNetModuleTests(unittest.TestCase):
         logits = model.policy(feats).flatten(1)[:, CELL_TO_GRID]
         self.assertEqual(int(logits.argmax()), 40)
 
+        # The (4, 4) probe above is a fixed point: CELL_TO_GRID is a full
+        # involution (CELL_TO_GRID == GRID_TO_CELL), and grid (4, 4) maps to
+        # itself under it, so that assertion alone passes identically whether
+        # `[:, CELL_TO_GRID]` reindexes or is deleted outright -- it cannot
+        # detect a scrambled policy. Pin the mapping's own contract at a
+        # non-fixed-point index, then probe with it: grid (0, 3) is flat index
+        # 3, and only cell-order index 9 (board 1, cell 0) maps there, so this
+        # assertion fails (reads back as 3) unless the reindex actually runs.
+        self.assertEqual(int(CELL_TO_GRID[9]), 3)
+        feats2 = torch.zeros(1, 64, 9, 9); feats2[0, 0, 0, 3] = 1.0
+        logits2 = model.policy(feats2).flatten(1)[:, CELL_TO_GRID]
+        self.assertEqual(int(logits2.argmax()), 9)
+
     def test_evaluate_many_works_and_masks_illegal_moves(self):
         torch.manual_seed(0)
         model = UNet().eval()
