@@ -52,3 +52,48 @@ class SharedLossTests(unittest.TestCase):
         source = inspect.getsource(ai._train_loop)
         self.assertNotIn('log_softmax', source)
         self.assertIn('policy_value_loss(', source)
+
+
+class QHeadLossTests(unittest.TestCase):
+    class WithQ(Network):
+        def __init__(self):
+            super().__init__()
+            self.qhead = torch.nn.Linear(256, 81)
+        def forward_all(self, x):
+            h = self.trunk(x)
+            return self.policy(h), self.value(h).tanh().squeeze(-1), self.qhead(h).tanh()
+
+    def test_models_without_q_output_ignore_q_targets(self):
+        torch.manual_seed(0)
+        model = Network()
+        x, pi, mask, z = _batch()
+        loss_plain, parts_plain = policy_value_loss(model, x, pi, mask, z)
+        loss_q, parts_q = policy_value_loss(model, x, pi, mask, z, q=torch.rand(6, 81), q_mask=mask)
+        self.assertIsNone(parts_q['q'])
+        self.assertTrue(torch.equal(loss_plain, loss_q))
+
+    def test_q_term_is_masked_mse_over_visited_actions_only(self):
+        torch.manual_seed(0)
+        model = self.WithQ()
+        x, pi, mask, z = _batch()
+        q = torch.rand(6, 81) * 2 - 1
+        q_mask = mask.clone(); q_mask[0] = False       # one row with no targets
+        loss, parts = policy_value_loss(model, x, pi, mask, z, q=q, q_mask=q_mask)
+        _, _, q_pred = model.forward_all(x)
+        ref = ((q_pred - q).square() * q_mask).sum() / q_mask.sum()
+        self.assertTrue(torch.allclose(parts['q'], ref))
+        self.assertTrue(torch.allclose(loss, parts['policy'] + parts['value'] + parts['q']))
+
+    def test_all_false_mask_contributes_nothing_and_no_nan(self):
+        torch.manual_seed(0)
+        model = self.WithQ()
+        x, pi, mask, z = _batch()
+        loss, parts = policy_value_loss(model, x, pi, mask, z, q=torch.zeros(6, 81),
+                                        q_mask=torch.zeros(6, 81, dtype=torch.bool))
+        self.assertIsNone(parts['q'])
+        self.assertTrue(torch.isfinite(loss))
+
+    def test_trainer_passes_q_targets_and_reports_q_loss(self):
+        source = inspect.getsource(ai._train_loop)
+        self.assertIn('q=q, q_mask=q_mask', source)
+        self.assertIn("'q_loss'", source)

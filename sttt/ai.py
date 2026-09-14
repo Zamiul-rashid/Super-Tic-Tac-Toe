@@ -405,7 +405,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         if schedule is not None:
             apply_lr(optimizer, schedule.current_lr)
         losses = []
-        policy_losses, value_losses, grad_norms = [], [], []
+        policy_losses, value_losses, q_losses, grad_norms = [], [], [], []
         optimizer_updates = 0
         skipped_updates = 0
         sampled_kinds, sampled_ages = Counter(), []
@@ -429,7 +429,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 x, pi, mask, q, q_mask = augment_batch(x, pi, mask, rng, q, q_mask)
             z = torch.tensor([row[3] for row in batch], device=device)
             optimizer.zero_grad(set_to_none=True)
-            loss, parts = policy_value_loss(model, x, pi, mask, z, use_fp16=use_fp16)
+            loss, parts = policy_value_loss(model, x, pi, mask, z, use_fp16=use_fp16, q=q, q_mask=q_mask)
             policy_loss, value_loss = parts['policy'], parts['value']
 
             # Never commit an iteration built on a nonfinite loss: the optimizer
@@ -464,6 +464,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             losses.append(loss.item())
             policy_losses.append(policy_loss.item())
             value_losses.append(value_loss.item())
+            if parts['q'] is not None:
+                q_losses.append(float(parts['q']))
             grad_norms.append(float(grad_norm))
         # CUDA kernels are asynchronous: without this the optimization stage
         # would appear instant and its cost would land in whatever synchronized
@@ -488,6 +490,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
               f'lr={lr:.3e} grad_norm={np.mean(grad_norms):.3f} '
               f'next_lr={next_lr:.3e} '
               f'updates={optimizer_updates} skipped={skipped_updates}'
+              + (f' q_loss={np.mean(q_losses):.4f}' if q_losses else '')
               + (f' scale={scaler.get_scale():.0f}' if use_fp16 else ''), flush=True)
 
         # M4: the checkpoint schema now carries everything a full resume needs.
@@ -513,6 +516,11 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                       'metrics': {'loss': float(np.mean(losses)),
                                   'policy_loss': float(np.mean(policy_losses)),
                                   'value_loss': float(np.mean(value_losses)),
+                                  # None for models without a Q head (or a batch with
+                                  # no visited-action targets) rather than omitted, so
+                                  # a later reader can distinguish "no Q head" from
+                                  # "key not written yet".
+                                  'q_loss': float(np.mean(q_losses)) if q_losses else None,
                                   'lr': float(lr),
                                   'next_lr': float(next_lr),
                                   'grad_norm': float(np.mean(grad_norms)),
@@ -533,6 +541,7 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                             keep=getattr(args, 'keep_checkpoints', 10))
         stage_timer.add('checkpoint_write', time.monotonic() - checkpoint_started)
         report = {'iteration': iteration, 'positions': len(replay), 'loss': float(np.mean(losses)),
+                  'q_loss': float(np.mean(q_losses)) if q_losses else None,
                   'seconds': round(time.monotonic() - started, 2), 'selfplay_seconds': selfplay_seconds,
                   'games': args.games, 'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
                   'search_config': asdict(search_config(args)), **inference_stats,
