@@ -110,6 +110,10 @@ def load_shards(dataset_dir):
 
 def _worker_init():
     # The box hangs at 32 x 100 %; workers are polite by construction.
+    # os.nice genuinely works here. The env var is belt-and-braces only: by the time this
+    # runs, the spawned child has already imported sttt.bootstrap (to unpickle this very
+    # function) and therefore numpy/BLAS, so setting OMP_NUM_THREADS here is too late to
+    # change BLAS threading -- the real cap is set in the parent before ctx.Pool() spawns.
     os.nice(10)
     os.environ.setdefault('OMP_NUM_THREADS', '1')
 
@@ -141,6 +145,14 @@ def generate_dataset(args):
     provenance = {'simulations': args.simulations, 'leaf_batch': args.leaf_batch,
                   'alphabeta_share': args.alphabeta_share, 'depths': list(args.depths),
                   'seed': args.seed, 'native_build': native_build_info()}
+    # A spawned child must import sttt.bootstrap to unpickle _worker_init/_generate_task,
+    # which imports numpy at module level (line 13) before _worker_init's body ever runs --
+    # so setting OMP_NUM_THREADS there is too late to change BLAS threading (measured:
+    # statistically indistinguishable from not setting it at all). Set it here instead, in
+    # the parent, immediately before the pool spawns: each child inherits this in its
+    # initial OS environment, ahead of any Python -- including the numpy import.
+    os.environ['OMP_NUM_THREADS'] = '1'
+    os.environ['MKL_NUM_THREADS'] = '1'
     ctx = mp.get_context('spawn')
     with ctx.Pool(min(args.workers, len(tasks)), initializer=_worker_init) as pool:
         for index, rows in enumerate(pool.imap(_generate_task, tasks)):
@@ -148,8 +160,9 @@ def generate_dataset(args):
             positions += summary['positions']; kinds.update(summary['kinds'])
             histogram.update(summary['ply_histogram']); totals['games'] += summary['games']
             elapsed = time.monotonic() - started
+            rate = positions / elapsed if elapsed else 0.0
             print(f'shard {index + 1}/{len(tasks)}: {summary["positions"]} positions, '
-                  f'{positions} total, {positions / elapsed:.0f} positions/s', flush=True)
+                  f'{positions} total, {rate:.0f} positions/s', flush=True)
     elapsed = time.monotonic() - started
     manifest = {'games': int(totals['games']), 'positions': positions, 'kinds': dict(kinds),
                 'ply_histogram': dict(histogram), 'workers': args.workers,

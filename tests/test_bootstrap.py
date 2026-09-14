@@ -1,11 +1,12 @@
-import tempfile, unittest
+import os, tempfile, unittest
 from collections import Counter
 from pathlib import Path
+from unittest import mock
 import numpy as np
 import torch
 from sttt.cpp_env import is_cpp_available
 from sttt.bootstrap import (generate_rows, load_shards, pack_arrays, sample_bootstrap_match,
-                            write_shard)
+                            write_shard, _worker_init)
 from sttt.ai import unpack_replay, replay_length
 from sttt.replay_sampling import row_ply
 
@@ -92,3 +93,22 @@ class GenerateDatasetCommandTests(unittest.TestCase):
                                    '--games', '1', '--workers', '11'], capture_output=True, text=True)
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn('workers', proc.stderr)
+
+
+class WorkerInitTests(unittest.TestCase):
+    def test_niceness_and_thread_cap_are_applied(self):
+        # A later refactor could silently drop os.nice(10) or the env-var cap and nothing
+        # would fail until the machine hangs at 32 x 100 %, so pin both side effects down.
+        # os.nice is not reversible downward by an unprivileged process (and could already
+        # be capped at 19 if the test runner itself was launched under `nice -n 19`), so we
+        # record the call instead of letting it actually renice this test process.
+        saved = os.environ.pop('OMP_NUM_THREADS', None)
+        try:
+            with mock.patch('sttt.bootstrap.os.nice') as nice_mock:
+                _worker_init()
+            nice_mock.assert_called_once_with(10)
+            self.assertEqual(os.environ.get('OMP_NUM_THREADS'), '1')
+        finally:
+            os.environ.pop('OMP_NUM_THREADS', None)
+            if saved is not None:
+                os.environ['OMP_NUM_THREADS'] = saved
