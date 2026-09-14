@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import torch
 from sttt.env import State
-from sttt.search import TreeSearch, SearchConfig, Node
+from sttt.search import TreeSearch, SearchConfig, Node, root_action_values
 from sttt.learning import Network, ResNet
 from sttt.bots import TacticalBot, AlphaBetaBot
 
@@ -185,6 +185,44 @@ class SearchTests(unittest.TestCase):
         tree.run(ToyState(((1,-1),(0,0))),32,batch_size=4)
         self.assertFalse(tree.use_proofs)
         self.assertIsNone(tree.root.solved)
+
+
+class RootActionValueTests(unittest.TestCase):
+    def test_mean_backed_up_value_from_root_perspective_and_visited_mask(self):
+        tree = TreeSearch(FakeEvaluator(estimate=0.3), np.random.default_rng(0),
+                          SearchConfig(proofs=False, reuse=False))
+        state = State()
+        tree.run(state, 64, batch_size=4)
+        q, visited = root_action_values(tree.root)
+        self.assertEqual(q.shape, (81,))
+        self.assertEqual(q.dtype, np.float32)
+        self.assertTrue(visited.any())
+        for action, child in tree.root.children.items():
+            if child.n:
+                self.assertTrue(visited[action])
+                self.assertAlmostEqual(float(q[action]), -child.total / child.n, places=6)
+            else:
+                self.assertFalse(visited[action])
+                self.assertEqual(float(q[action]), 0.0)
+        illegal = np.setdiff1d(np.arange(81), state.legal_actions())
+        self.assertFalse(visited[illegal].any())
+
+    def test_proven_children_report_their_proof_value_even_when_unvisited(self):
+        # Contract test on a hand-built root: proofs win over visit statistics,
+        # an unvisited unproven child is neither valued nor marked, and the
+        # sign is flipped into the root player's perspective.
+        root = Node(State())
+        proven_win = Node(State().play(0)); proven_win.solved = -1      # mover of that child loses
+        proven_loss = Node(State().play(1)); proven_loss.solved = 1
+        visited = Node(State().play(2)); visited.n, visited.total = 4, 1.0
+        untouched = Node(State().play(3))
+        root.children = {0: proven_win, 1: proven_loss, 2: visited, 3: untouched}
+        q, mask = root_action_values(root)
+        self.assertEqual(float(q[0]), 1.0); self.assertTrue(mask[0])
+        self.assertEqual(float(q[1]), -1.0); self.assertTrue(mask[1])
+        self.assertAlmostEqual(float(q[2]), -0.25, places=6); self.assertTrue(mask[2])
+        self.assertEqual(float(q[3]), 0.0); self.assertFalse(mask[3])
+        self.assertEqual(int(mask.sum()), 3)
 
 
 if __name__ == '__main__':

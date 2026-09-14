@@ -202,6 +202,20 @@ class TestCppMCTS(unittest.TestCase):
         if tree.root is not None:
             self.assertEqual(tree.root.in_flight, 0, f"in_flight was corrupted to {tree.root.in_flight}")
 
+    def test_root_action_values_match_python_tree(self):
+        from sttt.search import root_action_values
+        evaluator = DeterministicEvaluator(value=0.2)
+        cfg = SearchConfig(soft_pruning=False, proofs=False, reuse=False, c_puct=1.5)
+        s = State().play(40).play(38)
+        py_tree, cpp_tree = PyTreeSearch(evaluator, config=cfg), CppTreeSearch(evaluator, config=cfg)
+        py_tree.run(s, simulations=96, batch_size=8)
+        cpp_tree.run(s, simulations=96, batch_size=8)
+        py_q, py_v = root_action_values(py_tree.root)
+        cpp_q, cpp_v = root_action_values(cpp_tree.root)
+        self.assertTrue((py_v == cpp_v).all())
+        np.testing.assert_allclose(py_q, cpp_q, atol=1e-5)
+        self.assertEqual(cpp_tree.root.in_flight, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
