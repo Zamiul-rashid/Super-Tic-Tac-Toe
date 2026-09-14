@@ -103,5 +103,101 @@ class PopulationTests(unittest.TestCase):
                     pool.run(Network().eval(), [1], 2, SearchConfig(), 2, [])
 
 
+class SymmetryGroupTests(unittest.TestCase):
+    """augment_batch is only valid if SYMMETRIES is a faithful action of the
+    dihedral group on both the features and the action space."""
+
+    def test_eight_distinct_permutations_on_features_and_actions(self):
+        feature_maps = {tuple(inputs) for inputs, _ in SYMMETRIES}
+        action_maps = {tuple(cells) for _, cells in SYMMETRIES}
+        self.assertEqual(len(SYMMETRIES), 8)
+        self.assertEqual(len(feature_maps), 8)
+        self.assertEqual(len(action_maps), 8)
+        for inputs, cells in SYMMETRIES:
+            self.assertEqual(sorted(inputs.tolist()), list(range(289)))
+            self.assertEqual(sorted(cells.tolist()), list(range(81)))
+            self.assertEqual(int(inputs[279]), 279)  # "any board" one-hot slot is fixed
+
+    def test_action_maps_are_whole_board_dihedral_transforms(self):
+        # Applying the same 3x3 transform to the macro index and the micro
+        # index must equal applying it to the whole 9x9 grid; this is what makes
+        # the flat cell permutation usable by a conv net over the 9x9 board.
+        idx = np.arange(81)
+        b, c = idx // 9, idx % 9
+        grid_of_cell = ((b // 3) * 3 + c // 3) * 9 + ((b % 3) * 3 + c % 3)
+        cell_of_grid = np.argsort(grid_of_cell)
+        grid = np.arange(81).reshape(9, 9)
+        expected = set()
+        for mirror in (False, True):
+            base = np.fliplr(grid) if mirror else grid
+            for k in range(4):
+                expected.add(tuple(np.rot90(base, k).ravel().tolist()))
+        for _, cells in SYMMETRIES:
+            # grid position g holds cell cell_of_grid[g]; after the transform it
+            # holds cells[cell_of_grid[g]]; read it back in grid coordinates.
+            as_grid_perm = tuple(grid_of_cell[cells[cell_of_grid]].tolist())
+            self.assertIn(as_grid_perm, expected)
+
+    def test_transform_commutes_with_encode_and_legality_on_random_games(self):
+        rng = np.random.default_rng(2026)
+        checked = 0
+        for _ in range(60):
+            actions, state = [], State()
+            plies = int(rng.integers(1, 60))
+            for _ in range(plies):
+                if state.result is not None:
+                    break
+                a = int(rng.choice(state.legal_actions()))
+                actions.append(a)
+                state = state.play(a)
+            if state.result is not None:
+                continue
+            for inputs, cells in SYMMETRIES:
+                mirrored = State()
+                for a in actions:
+                    mirrored = mirrored.play(int(cells[a]))
+                expected = np.empty(289, dtype=np.float32)
+                expected[inputs] = encode(state)
+                np.testing.assert_array_equal(expected, encode(mirrored))
+                self.assertEqual(sorted(int(cells[a]) for a in state.legal_actions()),
+                                 sorted(mirrored.legal_actions()))
+                checked += 1
+        self.assertGreater(checked, 200)
+
+    def test_augment_batch_keeps_policy_mass_on_legal_moves_of_the_transformed_state(self):
+        rng = np.random.default_rng(7)
+        state = State()
+        # NOTE: the brief's literal sequence [40, 4, 36, 0, 8, 72, 80, 79] is
+        # illegal (after action 40 the forced board is 4, so action 4, which
+        # targets board 0, raises ValueError). Replaced with a verified legal
+        # 8-ply sequence that reaches an equivalent kind of position: forced
+        # into board 0 with several cells already filled, leaving 7 legal
+        # moves. See task-1.1-report.md for the verification.
+        for a in [40, 36, 4, 44, 72, 8, 79, 63]:
+            state = state.play(a)
+        legal = state.legal_actions()
+        pi = np.zeros(81, dtype=np.float32)
+        pi[legal] = rng.random(len(legal)).astype(np.float32)
+        pi /= pi.sum()
+        x = torch.tensor(np.stack([encode(state)] * 64))
+        pi_t = torch.tensor(np.stack([pi] * 64))
+        mask = torch.tensor(np.stack([np.isin(np.arange(81), legal)] * 64))
+        xx, pp, mm = augment_batch(x, pi_t, mask, rng)
+        self.assertTrue(torch.equal(pp > 0, mm))
+        self.assertTrue(torch.allclose(pp.sum(1), torch.ones(64)))
+        # every row is one of the eight exact transforms, never a mixture
+        # NOTE: the brief's literal expression `np.flatnonzero(cells[legal])`
+        # finds positions in `legal` whose transformed value is nonzero, not
+        # the transformed legal set itself; since only the identity symmetry
+        # maps action 0 to itself, that collapses to 2 buckets (whether
+        # action 0 survives) instead of the intended per-symmetry sets, and
+        # fails against the real (correct) `mm` rows. Using the transformed
+        # set directly (`cells[legal]`, sorted to match `torch.nonzero`'s
+        # ascending order) is what the docstring above actually describes.
+        originals = {tuple(sorted(cells[legal].tolist())) for _, cells in SYMMETRIES}
+        for row in mm:
+            self.assertIn(tuple(torch.nonzero(row).flatten().tolist()), originals)
+
+
 if __name__ == '__main__':
     unittest.main()
