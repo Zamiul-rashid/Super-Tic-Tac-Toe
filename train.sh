@@ -41,7 +41,7 @@ POP_CONFIG=${3:-configs/population/baseline.json}
 REPO=$(cd "$(dirname "$0")" && pwd)
 cd "$REPO"
 PY=${STTT_PY:-python}
-WORKERS=${WORKERS:-16}
+WORKERS=${WORKERS:-8}
 ITERATIONS=${ITERATIONS:-5000}
 LR_HORIZON=${LR_HORIZON:-$ITERATIONS}
 
@@ -96,7 +96,7 @@ echo "==========================================================================
   --save-every 50 \
   --keep-checkpoint-window 500 \
   --keep-checkpoints 10 \
-  --eval-every 100 \
+  --eval-every 300 \
   --eval-games 20 \
   --eval-simulations 512 \
   --augment-symmetry \
