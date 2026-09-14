@@ -237,44 +237,62 @@ def prune_snapshots(output, iteration, window=500, keep=10):
     return sorted(doomed)
 
 
-REPLAY_PACKED_FORMAT = 'packed-v1'
+REPLAY_PACKED_FORMAT = 'packed-v2'
+REPLAY_PACKED_FORMATS = ('packed-v1', 'packed-v2')
+
+
+def widen_row(row):
+    """Legacy (x, pi, mask, z) -> (x, pi, mask, z, q, q_mask) with no Q targets."""
+    if len(row) == 6:
+        return row
+    x, pi, mask, z = row
+    return (x, pi, mask, z, torch.zeros(81, dtype=torch.float32), torch.zeros(81, dtype=torch.bool))
 
 
 def pack_replay(replay):
-    """Stack the replay's (x, pi, mask, z) rows into four tensors for saving.
+    """Stack the replay's (x, pi, mask, z, q, q_mask) rows into tensors for saving.
 
     Pickling 200k positions as 600k tiny tensors cost ~10 s per checkpoint
-    write, a quarter of every iteration. Four contiguous tensors serialise at
-    copy speed. Only the on-disk form changes; the in-RAM deque of tuples that
-    the optimizer samples from is untouched.
+    write, a quarter of every iteration. Contiguous tensors serialise at copy
+    speed. Only the on-disk form changes; the in-RAM deque of tuples that the
+    optimizer samples from is untouched.
     """
-    rows = list(replay)
+    rows = [widen_row(r) for r in replay]
     if not rows:
         return {'format': REPLAY_PACKED_FORMAT, 'count': 0}
     return {'format': REPLAY_PACKED_FORMAT, 'count': len(rows),
             'x': torch.stack([r[0] for r in rows]),
             'pi': torch.stack([r[1] for r in rows]),
             'mask': torch.stack([r[2] for r in rows]),
-            'z': torch.tensor([r[3] for r in rows], dtype=torch.float64)}
+            'z': torch.tensor([r[3] for r in rows], dtype=torch.float64),
+            'q': torch.stack([r[4] for r in rows]),
+            'q_mask': torch.stack([r[5] for r in rows])}
 
 
 def unpack_replay(saved):
-    """Return a list of (x, pi, mask, z) rows from a packed or legacy replay."""
+    """Rows from packed-v1, packed-v2 or a legacy list; always 6-tuples."""
     if saved is None:
         return []
-    if isinstance(saved, dict) and saved.get('format') == REPLAY_PACKED_FORMAT:
-        if saved['count'] == 0:
+    if isinstance(saved, dict) and saved.get('format') in REPLAY_PACKED_FORMATS:
+        n = int(saved['count'])
+        if n == 0:
             return []
+        q = saved.get('q') if saved.get('format') == 'packed-v2' else None
+        q_mask = saved.get('q_mask') if saved.get('format') == 'packed-v2' else None
+        if q is None:
+            q = torch.zeros(n, 81, dtype=torch.float32)
+            q_mask = torch.zeros(n, 81, dtype=torch.bool)
         # clone() so a row does not keep the whole packed block alive after
         # the deque has evicted its neighbours.
-        return [(x.clone(), pi.clone(), mask.clone(), z) for x, pi, mask, z in
+        return [(x.clone(), pi.clone(), mask.clone(), z, qq.clone(), qm.clone())
+                for x, pi, mask, z, qq, qm in
                 zip(saved['x'].unbind(0), saved['pi'].unbind(0), saved['mask'].unbind(0),
-                    saved['z'].tolist())]
-    return list(saved)
+                    saved['z'].tolist(), q.unbind(0), q_mask.unbind(0))]
+    return [widen_row(r) for r in saved]
 
 
 def replay_length(saved):
-    if isinstance(saved, dict) and saved.get('format') == REPLAY_PACKED_FORMAT:
+    if isinstance(saved, dict) and saved.get('format') in REPLAY_PACKED_FORMATS:
         return int(saved['count'])
     return len(saved or [])
 
@@ -358,21 +376,23 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
         for game_idx, (trajectory, outcome, stats) in enumerate(results):
             origin = (iteration, stats['match']['kind'])
             if trajectory and use_cpp and _HAS_CPP and cpp_encode_batch is not None:
-                traj_states = [s for s, _ in trajectory]
+                traj_states = [s for s, *_ in trajectory]
                 encoded_batch = cpp_encode_batch(traj_states)
-                for i, (state, pi) in enumerate(trajectory):
+                for i, (state, pi, q, q_mask) in enumerate(trajectory):
                     mask = np.zeros(81, dtype=bool)
                     mask[state.legal_actions()] = True
                     replay.append((torch.from_numpy(encoded_batch[i].copy()), torch.from_numpy(pi),
-                                   torch.from_numpy(mask), float(outcome * state.turn)))
+                                   torch.from_numpy(mask), float(outcome * state.turn),
+                                   torch.from_numpy(q), torch.from_numpy(q_mask)))
                     replay_meta.append(origin)
                     replay_bins.append(ply_bin(row_ply(replay[-1][0])))
             else:
-                for state, pi in trajectory:
+                for state, pi, q, q_mask in trajectory:
                     mask = np.zeros(81, dtype=bool)
                     mask[state.legal_actions()] = True
                     replay.append((torch.from_numpy(encode(state)), torch.from_numpy(pi),
-                                   torch.from_numpy(mask), float(outcome * state.turn)))
+                                   torch.from_numpy(mask), float(outcome * state.turn),
+                                   torch.from_numpy(q), torch.from_numpy(q_mask)))
                     replay_meta.append(origin)
                     replay_bins.append(ply_bin(row_ply(replay[-1][0])))
             print(f'iteration {iteration}: game {game_idx+1}/{args.games}, {len(trajectory)} training positions, '
@@ -404,9 +424,9 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 origin_iteration, origin_kind = replay_meta[int(i)]
                 sampled_kinds[origin_kind] += 1
                 sampled_ages.append(iteration - origin_iteration)
-            x, pi, mask = [torch.stack([row[k] for row in batch]).to(device) for k in range(3)]
+            x, pi, mask, q, q_mask = [torch.stack([row[k] for row in batch]).to(device) for k in (0, 1, 2, 4, 5)]
             if getattr(args, 'augment_symmetry', False):
-                x, pi, mask = augment_batch(x, pi, mask, rng)
+                x, pi, mask, q, q_mask = augment_batch(x, pi, mask, rng, q, q_mask)
             z = torch.tensor([row[3] for row in batch], device=device)
             optimizer.zero_grad(set_to_none=True)
             loss, parts = policy_value_loss(model, x, pi, mask, z, use_fp16=use_fp16)

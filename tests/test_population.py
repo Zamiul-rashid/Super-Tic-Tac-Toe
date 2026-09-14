@@ -59,12 +59,13 @@ class PopulationTests(unittest.TestCase):
             trajectory, result, stats = play_game(model, 2, 91, SearchConfig(), 2,
                 MatchSpec(kind='style', learner_side=side, opening_moves=3))
             self.assertTrue(trajectory)
-            self.assertTrue(all(state.turn == side for state, _ in trajectory))
+            self.assertTrue(all(state.turn == side for state, *_ in trajectory))
             self.assertIn(result, (-1, 0, 1))
             self.assertGreater(stats['plies'], len(trajectory))
-            for state, pi in trajectory:
+            for state, pi, q, q_mask in trajectory:
                 self.assertAlmostEqual(float(pi.sum()), 1., places=5)
                 self.assertTrue(set(np.flatnonzero(pi)).issubset(state.legal_actions()))
+                self.assertTrue(set(np.flatnonzero(q_mask)).issubset(state.legal_actions()))
 
     def test_symmetry_respects_rules_and_forced_board(self):
         state = State()
@@ -197,6 +198,25 @@ class SymmetryGroupTests(unittest.TestCase):
         originals = {tuple(sorted(cells[legal].tolist())) for _, cells in SYMMETRIES}
         for row in mm:
             self.assertIn(tuple(torch.nonzero(row).flatten().tolist()), originals)
+
+    def test_augment_batch_permutes_extra_cell_tensors_with_the_policy(self):
+        rng = np.random.default_rng(11)
+        # NOTE: the brief's literal `State().play(40).play(4)` is illegal --
+        # after action 40 the forced board is 4 (actions 36-44), and action 4
+        # targets board 0. Replaced with `.play(38)` (board 4, cell 2), the
+        # same legal continuation used throughout tests/test_cpp_engine.py
+        # and tests/test_cpp_mcts.py. See task-4.2-report.md for the proof.
+        state = State().play(40).play(38)
+        legal = state.legal_actions()
+        x = torch.tensor(np.stack([encode(state)] * 32))
+        pi = torch.zeros(32, 81); pi[:, legal] = 1 / len(legal)
+        mask = pi > 0
+        q = torch.rand(32, 81) * mask
+        xx, pp, mm, qq, qm = augment_batch(x, pi, mask, rng, q, mask.clone())
+        self.assertTrue(torch.equal(qm, mm))                      # extra mask moved with the legal mask
+        self.assertTrue(torch.equal(qq != 0, mm))                 # q values sit exactly on legal cells
+        # the multiset of q values is preserved per row (a permutation, not a mixture)
+        self.assertTrue(torch.allclose(qq.sort(1).values, q.sort(1).values))
 
 
 if __name__ == '__main__':
