@@ -61,6 +61,25 @@ def encode_states(states, backend='auto'):
     return features, legal_masks(states)
 
 
+def policy_value_loss(model, x, pi, mask, z, *, use_fp16=False):
+    """AlphaZero objective for one batch: masked policy cross-entropy + value MSE.
+
+    The only implementation; the trainer and the offline pretrainer both call
+    it. `-1e4` under fp16 because `-inf`/`-1e9` overflow to NaN in half
+    precision; both saturate the softmax identically.
+    """
+    with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=use_fp16):
+        logits, value = model(x)
+        mask_val = -1e4 if use_fp16 else -1e9
+        logits = logits.masked_fill(~mask, mask_val)
+        log_p = logits.log_softmax(-1)
+        log_p = torch.where(mask, log_p, torch.zeros_like(log_p))
+        policy_loss = -(pi * log_p).sum(-1).mean()
+        value_loss = (value - z).square().mean()
+        loss = policy_loss + value_loss
+    return loss, {'policy': policy_loss, 'value': value_loss}
+
+
 class BasePolicyValue(nn.Module):
     @torch.inference_mode()
     def evaluate_many(self, states):

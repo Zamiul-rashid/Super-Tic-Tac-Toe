@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from .env import State
 from .training_schedule import LRSchedule, apply_lr, build_schedule
-from .learning import ResNet, create_model, encode, load_model
+from .learning import ResNet, create_model, encode, load_model, policy_value_loss
 from .opponent import Opponent, policies, NAMES
 from .search import TreeSearch, SearchConfig
 from .selfplay import SelfPlayPool
@@ -409,15 +409,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 x, pi, mask = augment_batch(x, pi, mask, rng)
             z = torch.tensor([row[3] for row in batch], device=device)
             optimizer.zero_grad(set_to_none=True)
-            with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=use_fp16):
-                logits, value = model(x)
-                mask_val = -1e4 if use_fp16 else -1e9
-                logits = logits.masked_fill(~mask, mask_val)
-                log_p = logits.log_softmax(-1)
-                log_p = torch.where(mask, log_p, torch.zeros_like(log_p))
-                policy_loss = -(pi * log_p).sum(-1).mean()
-                value_loss = (value - z).square().mean()
-                loss = policy_loss + value_loss
+            loss, parts = policy_value_loss(model, x, pi, mask, z, use_fp16=use_fp16)
+            policy_loss, value_loss = parts['policy'], parts['value']
 
             # Never commit an iteration built on a nonfinite loss: the optimizer
             # would poison every parameter and the run would continue reporting
