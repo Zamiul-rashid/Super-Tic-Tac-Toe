@@ -93,20 +93,51 @@ def write_shard(path, rows, provenance):
             'kinds': dict(Counter(rows['kind'])), 'ply_histogram': dict(histogram)}
 
 
-def load_shards(dataset_dir):
+def load_shards(dataset_dir, max_positions=None, seed=0):
     import torch
     paths = sorted(Path(dataset_dir).glob('shard-*.pt'))
     if not paths:
         raise FileNotFoundError(f'no shard-*.pt under {dataset_dir}')
+
+    if max_positions is None:
+        selected = None
+    else:
+        if max_positions < 1:
+            raise ValueError('max_positions must be positive when provided')
+        manifest_path = Path(dataset_dir) / 'manifest.json'
+        total = None
+        if manifest_path.is_file():
+            manifest = json.loads(manifest_path.read_text())
+            total = int(manifest.get('positions', 0)) or None
+        if total is None:
+            total = sum(int(torch.load(p, map_location='cpu', weights_only=False)['replay']['count'])
+                        for p in paths)
+        count = min(int(max_positions), total)
+        selected = np.sort(np.random.default_rng(seed).choice(total, count, replace=False))
+
     parts = {k: [] for k in ('x', 'pi', 'mask', 'z', 'q', 'q_mask', 'ply')}
+    offset = 0
     for p in paths:
         shard = torch.load(p, map_location='cpu', weights_only=False)
         if shard.get('format') != SHARD_FORMAT:
             raise ValueError(f'{p}: unexpected shard format {shard.get("format")!r}')
         r = shard['replay']
+        shard_count = int(r['count'])
+        if selected is None:
+            indices = None
+        else:
+            start = int(np.searchsorted(selected, offset, side='left'))
+            stop = int(np.searchsorted(selected, offset + shard_count, side='left'))
+            indices = selected[start:stop] - offset
+        if indices is not None and len(indices) == 0:
+            offset += shard_count
+            continue
+        index_tensor = None if indices is None else torch.as_tensor(indices, dtype=torch.long)
         for k in ('x', 'pi', 'mask', 'z', 'q', 'q_mask'):
-            parts[k].append(r[k])
-        parts['ply'].append(shard['ply'])
+            parts[k].append(r[k] if index_tensor is None else r[k][index_tensor].clone())
+        ply = shard['ply']
+        parts['ply'].append(ply if index_tensor is None else ply[index_tensor].clone())
+        offset += shard_count
     return {k: torch.cat(v) for k, v in parts.items()}
 
 
@@ -209,7 +240,7 @@ def pretrain(args):
     torch.manual_seed(args.seed)
     rng = np.random.default_rng(args.seed)
     device = resolve_device(args.device)
-    data = load_shards(args.dataset)
+    data = load_shards(args.dataset, max_positions=args.max_positions, seed=args.seed)
     manifest_path = Path(args.dataset) / 'manifest.json'
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
     n = data['x'].shape[0]
@@ -235,7 +266,7 @@ def pretrain(args):
     # lr 1e-3 saturate the value head's tanh and its gradient reaches exactly
     # zero by step 8 -- measured for BOTH resnet and unet, 5 of 7 unet runs and
     # 1 of 1 resnet run at lr 1e-3, and survival flipped on batch order alone.
-    # See handover/value-head-check.txt. Clamped so a tiny run still decays.
+    # See docs/history/value-head-check.txt. Clamped so a tiny run still decays.
     # Capped at a quarter of the run as well as by the flag: on a very short run
     # `total_steps - 1` would leave the whole schedule ramping and never decaying.
     warmup_steps = max(0, min(int(getattr(args, 'lr_warmup', 100)), total_steps // 4))
@@ -336,7 +367,7 @@ def pretrain(args):
                 f'checkpoint that would search blind. This is a learning-rate overshoot in the '
                 f'first optimizer steps, not an architecture fault: retry with a lower --lr '
                 f'(3e-4 and 1e-4 were both measured safe) or a longer --lr-warmup (currently '
-                f'{warmup_steps} steps). See handover/value-head-check.txt.')
+                f'{warmup_steps} steps). See docs/history/value-head-check.txt.')
         last = row
 
     # Warm replay: a random subset of the dataset in the trainer's row format.

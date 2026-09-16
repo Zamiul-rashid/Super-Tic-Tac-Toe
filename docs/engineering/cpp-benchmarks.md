@@ -121,7 +121,7 @@ Benchmark executed comparing Python reference `sttt.search.TreeSearch` against C
 > involved**, and they are not a neural self-play search rate. Rows in 2.6.1 use
 > a dummy Python evaluator and are a third distinct category. For end-to-end
 > pipeline measurement with real inference, use
-> `scripts/run_pipeline_benchmark.py`.
+> `scripts/benchmark_pipeline.py`.
 
 | Execution Configuration | Simulations / sec | 20,000-Sim Latency | Speedup vs Python |
 |-------------------------|------------------:|-------------------:|------------------:|

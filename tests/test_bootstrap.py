@@ -178,7 +178,7 @@ class PretrainCommandTests(unittest.TestCase):
 class ValueHeadHealthTests(unittest.TestCase):
     """The value head must not collapse under pretrain's DEFAULT flags.
 
-    History (handover/value-head-check.txt): pretrain shipped with --lr 1e-3,
+    History (docs/history/value-head-check.txt): pretrain shipped with --lr 1e-3,
     and AdamW's first steps drove the value head's pre-tanh activation from ~0
     to +1.6 in one step and -5.3 in two, where tanh' ~ 2e-4. Its gradient
     reached exactly zero by step 8 and never recovered, so the head emitted one

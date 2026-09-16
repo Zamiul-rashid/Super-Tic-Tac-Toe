@@ -151,13 +151,13 @@ clip 1.0, yet did not collapse. I did NOT diagnose why; the plausible difference
 are (a) the online loop's first iterations train on a tiny buffer (8 games) with
 batch = min(512, len(replay)), (b) different early z distributions, (c) 100 steps per
 iteration on near-identical data. This is stated as an open question, not a finding.
-Note: `train.sh` always resumes a checkpoint, so it never trains a fresh head; a
+Note: `scripts/train.sh` always resumes a checkpoint, so it never trains a fresh head; a
 fresh `--arch unet` online run at lr 1e-3 was NOT tested and may or may not collapse.
 
 
 6. THE DOCUMENTATION WRITTEN IN TASK 7.1 / THE FIX WAVE IS PARTLY WRONG
 -----------------------------------------------------------------------
-README.md, TRAINING_READINESS_PLAN.md section 7, and the stderr warning added to
+README.md, docs/history/training-readiness.md section 7, and the stderr warning added to
 `pretrain` all state the cause as: U-Net-specific, unnormalised macro stream, tanh
 saturated at initialisation, ResNet immune via LayerNorm. Sections 2-4 show each of
 those four assertions is false. The symptom description and the consequence for MCTS
@@ -270,7 +270,7 @@ A SECOND CLAIM FROM THE ORIGINAL SUMMARY IS ALSO REFUTED
 
 STILL OPEN (unchanged from the check above)
   - Why the online loop never killed run_v2's ResNet head at the same lr 1e-3.
-    The online trainer still has NO warm-up; train.sh always resumes a checkpoint
+    The online trainer still has NO warm-up; scripts/train.sh always resumes a checkpoint
     so it never trains a fresh head, but a fresh online run at lr 1e-3 is untested
     and may collapse the same way.
   - Whether a normalisation before the value head adds robustness on top of the

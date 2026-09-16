@@ -190,7 +190,7 @@ if __name__ == "__main__":
 class TestWarmup(unittest.TestCase):
     """Linear warm-up before the curve.
 
-    Reason it exists (handover/value-head-check.txt): starting AdamW at 1e-3 on
+    Reason it exists (docs/history/value-head-check.txt): starting AdamW at 1e-3 on
     a fresh network drove the value head's pre-tanh activation from ~0 to +1.6
     in one step and -5.3 in two, saturating tanh permanently. It killed both
     architectures, so the lever is the schedule, not the model.

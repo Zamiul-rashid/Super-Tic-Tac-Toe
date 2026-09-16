@@ -5,8 +5,12 @@ build
 STTT.egg-info
 .venv/
 runs/
+data/
+tournaments/
 profiles/
 .agent/
 .agents
 *.so
 scratch/
+build_cmake/
+cpp/bench_main

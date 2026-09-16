@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Training Readiness and Verification Runner.
 
-Implements M0 and M9 verification per TRAINING_READINESS_PLAN.md.
+Implements M0 and M9 verification per docs/history/training-readiness.md.
 Provides 8 verification stages:
   1. build: dynamic header resolution, extension build, provenance check, native test execution
   2. native: worker pool and native search integration
@@ -1321,7 +1321,7 @@ class ReadinessRunner:
     def run_stage_pilot(self) -> dict[str, Any]:
         """Stage 8: Representative Pilot Gate.
 
-        Runs the canonical launcher (train.sh) with the exact production
+        Runs the canonical launcher (scripts/train.sh) with the exact production
         configuration, resumed from a frozen copy of a full checkpoint, for
         warm-up + measured iterations on the target GPU. Computes the ETA from
         the measured iterations, requires GPU memory headroom and no CPU
@@ -1356,21 +1356,25 @@ class ReadinessRunner:
         total_mb = total_bytes / 1024**2
 
         sys.path.insert(0, str(self.repo_root / "scripts"))
-        from run_pipeline_benchmark import compute_eta, evaluation_overhead
+        from benchmark_pipeline import compute_eta, evaluation_overhead
         from sttt.evaluation import sha256_file
 
         run_dir = stage_dir / "run"
         iterations = self.pilot_warmup + self.pilot_iterations
-        env = {**os.environ, "STTT_PY": sys.executable, "WORKERS": str(self.pilot_workers),
-               "ITERATIONS": str(iterations), "LR_HORIZON": str(self.pilot_eta_iterations)}
-        cmd = ["bash", str(self.repo_root / "train.sh"), str(Path(self.pilot_checkpoint).resolve()),
-               str(run_dir), str(Path(self.pilot_population_config).resolve())]
+        env = {**os.environ, "STTT_PY": sys.executable}
+        cmd = ["bash", str(self.repo_root / "scripts" / "train.sh"),
+               "--checkpoint", str(Path(self.pilot_checkpoint).resolve()),
+               "--output", str(run_dir),
+               "--population-config", str(Path(self.pilot_population_config).resolve()),
+               "--workers", str(self.pilot_workers),
+               "--iterations", str(iterations),
+               "--lr-horizon", str(self.pilot_eta_iterations)]
         result["command"] = cmd
-        result["environment"] = {k: env[k] for k in ("STTT_PY", "WORKERS", "ITERATIONS", "LR_HORIZON")}
+        result["environment"] = {"STTT_PY": env["STTT_PY"]}
         print(f"[pilot] {' '.join(cmd)}  (WORKERS={self.pilot_workers} ITERATIONS={iterations})")
         res = subprocess.run(cmd, cwd=self.repo_root, env=env, capture_output=True, text=True)
         if res.returncode != 0:
-            return finish("failed", error=f"train.sh exited {res.returncode}:\n{res.stderr[-4000:]}\n{res.stdout[-4000:]}")
+            return finish("failed", error=f"scripts/train.sh exited {res.returncode}:\n{res.stderr[-4000:]}\n{res.stdout[-4000:]}")
 
         frozen = sorted((run_dir / "start-checkpoint").glob("*.pt"))
         result["start_checkpoint"] = {"source": str(self.pilot_checkpoint),

@@ -198,7 +198,7 @@ class TestPipelineBenchmarkAccounting(unittest.TestCase):
     """The end-to-end runner's arithmetic, without running a real pipeline."""
 
     def setUp(self):
-        import scripts.run_pipeline_benchmark as pipeline
+        import scripts.benchmark_pipeline as pipeline
         self.pipeline = pipeline
 
     def _arm(self, backend, median, min_s=None, max_s=None, iterations=20):
@@ -259,7 +259,7 @@ class TestReportedNumbersAreReproducible(unittest.TestCase):
         silently rewritten, so the figure may stay -- but every line carrying it
         must say it is historical, and a current (M8) measurement must exist.
         """
-        report = (REPO / "BENCHMARK_REPORT.md").read_text()
+        report = (REPO / "docs" / "engineering" / "cpp-benchmarks.md").read_text()
         for line in report.splitlines():
             if "45,454,545" in line:
                 self.assertIn("historical", line.lower(), line)

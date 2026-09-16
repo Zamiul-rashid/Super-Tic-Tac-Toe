@@ -401,7 +401,11 @@ class ExternalProcessBot(Bot):
         self.cmd = shlex.split(command) if isinstance(command, str) else list(command)
         if not self.cmd:
             raise ValueError("Command cannot be empty")
-        self.timeout = max(0.001, min(float(timeout), 5.0))
+        # External engines such as uttt.ai can legitimately need several
+        # seconds for a move when multiple training workers are active. Keep
+        # a finite safety cap, but do not turn the configured 30s budget into
+        # an accidental 5s budget.
+        self.timeout = max(0.001, min(float(timeout), 20.0))
         self.protocol = protocol
         self.fallback = fallback
         self.auto_restart = auto_restart
@@ -569,7 +573,8 @@ class ExternalProcessBot(Bot):
                 self._crashed_in_game = True
                 return self._fallback_move(state, rng, "stdout pipe unavailable")
 
-            deadline = time.monotonic() + self.timeout
+            started = time.monotonic()
+            deadline = started + self.timeout
             buf = ""
             line = None
             timed_out = False
@@ -597,9 +602,14 @@ class ExternalProcessBot(Bot):
                     break
 
             if line is None:
+                elapsed = time.monotonic() - started
+                pid = self.process.pid if self.process is not None else None
+                alive = self.process is not None and self.process.poll() is None
                 self.close()
                 self._crashed_in_game = True
                 reason = "timeout" if (timed_out or time.monotonic() >= deadline) else "process crash / EOF"
+                if reason == "timeout":
+                    reason = f"timeout after {elapsed:.3f}s (pid={pid}, alive={alive})"
                 return self._fallback_move(state, rng, reason)
 
             parts = line.strip().split()

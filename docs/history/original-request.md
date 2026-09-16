@@ -164,7 +164,7 @@ Current state:
 
 ## Follow-up — 2026-09-13T12:35:05Z
 
-Implement the Training Readiness and Improvement Plan specified in `TRAINING_READINESS_PLAN.md` to harden the Super Tic-Tac-Toe engine, native search boundary, resumable training state, learning rate schedules, and staged verification runner.
+Implement the Training Readiness and Improvement Plan specified in `docs/history/training-readiness.md` to harden the Super Tic-Tac-Toe engine, native search boundary, resumable training state, learning rate schedules, and staged verification runner.
 
 Working directory: /home/entropy/Code/Super-Tic-Tac-Toe
 Integrity mode: development

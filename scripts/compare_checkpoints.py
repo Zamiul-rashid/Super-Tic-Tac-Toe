@@ -1,4 +1,4 @@
-"""Controlled comparison between a candidate checkpoint and the big_run reference.
+"""Controlled comparison between any candidate and reference checkpoints.
 
 Phases:
 1. Head-to-head, candidate vs reference, on one shared opening corpus.
@@ -35,9 +35,6 @@ from sttt.evaluation import (
     write_ratings_csv,
 )
 from sttt.tournament import run_matchup, run_tournament
-
-REFERENCE_CHECKPOINT = "runs/big_run/best.pt"
-
 
 def _safe_close(bot):
     """Closing must never mask the error that triggered the unwind."""
@@ -79,7 +76,9 @@ def summarize_matchup(results, subject: str, bootstrap_seed: int) -> dict:
 
 def run_comparison(candidate_ckpt: str, output_dir: Path, h2h_games: int = 50,
                    round_robin_games: int = 20, simulations: int = 512,
-                   seed: int = 42, reference_ckpt: str = REFERENCE_CHECKPOINT) -> dict:
+                   seed: int = 42, reference_ckpt: str | None = None) -> dict:
+    if reference_ckpt is None:
+        raise ValueError("reference_ckpt is required")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     report_lines = []
@@ -116,7 +115,7 @@ def run_comparison(candidate_ckpt: str, output_dir: Path, h2h_games: int = 50,
 
     with ExitStack() as stack:
         log("=" * 90)
-        log("       SUPER TIC-TAC-TOE: CANDIDATE VS BIG_RUN REFERENCE")
+        log("       SUPER TIC-TAC-TOE: CHECKPOINT COMPARISON")
         log("=" * 90)
         log(f"Candidate: {candidate_name}  <- {candidate_ckpt}")
         log(f"Reference: {reference_name}  <- {reference_ckpt}")
@@ -225,10 +224,10 @@ def run_comparison(candidate_ckpt: str, output_dir: Path, h2h_games: int = 50,
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Controlled comparison against the big_run reference")
-    parser.add_argument("--checkpoint", default="runs/run_v2/best.pt", help="candidate checkpoint")
-    parser.add_argument("--reference", default=REFERENCE_CHECKPOINT, help="reference checkpoint")
-    parser.add_argument("--output", default="runs/tournaments/run_v2_vs_bigrun", help="output directory")
+    parser = argparse.ArgumentParser(description="Controlled comparison of two checkpoints")
+    parser.add_argument("--checkpoint", required=True, help="candidate checkpoint")
+    parser.add_argument("--reference", required=True, help="reference checkpoint")
+    parser.add_argument("--output", required=True, help="output directory")
     parser.add_argument("--h2h-games", type=int, default=50, help="TOTAL head-to-head games (2 per opening pair)")
     parser.add_argument("--round-robin-games", type=int, default=20, help="games per round-robin matchup")
     parser.add_argument("--simulations", type=int, default=512, help="search budget for both neural entrants")
@@ -237,17 +236,16 @@ def main(argv=None):
 
     ckpt_path = Path(args.checkpoint)
     if not ckpt_path.is_file():
-        alt = ckpt_path.parent / "latest.pt"
-        if alt.is_file():
-            print(f"{ckpt_path} not found; falling back to {alt}")
-            ckpt_path = alt
-        else:
-            print(f"Error: Neither {ckpt_path} nor {alt} found!")
-            sys.exit(1)
+        print(f"Error: candidate checkpoint not found: {ckpt_path}")
+        sys.exit(1)
+    reference_path = Path(args.reference)
+    if not reference_path.is_file():
+        print(f"Error: reference checkpoint not found: {reference_path}")
+        sys.exit(1)
 
     run_comparison(str(ckpt_path), Path(args.output), args.h2h_games,
                    args.round_robin_games, simulations=args.simulations,
-                   seed=args.seed, reference_ckpt=args.reference)
+                   seed=args.seed, reference_ckpt=str(reference_path))
 
 
 if __name__ == "__main__":

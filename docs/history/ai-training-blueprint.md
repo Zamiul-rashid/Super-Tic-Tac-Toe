@@ -3,9 +3,9 @@
 > interpreter is `/home/mt/miniconda3/envs/sttt/bin/python` and the repo is
 > `/home/mt/Zami/Super-Tic-Tac-Toe`. Corrections: the input width is 289
 > floats, not 172 (`sttt/learning.py: INPUTS`); 8-fold symmetry augmentation
-> already existed (`--augment-symmetry`, on in `train.sh`) and is proved in
+> already existed (`--augment-symmetry`, on in `scripts/train.sh`) and is proved in
 > `tests/test_population.py::SymmetryGroupTests`; `WORKERS` defaults to 8.
-> The implementation of §5–§6 Steps 1–3 is tracked in `handover/plan.md`.
+> The implementation of §5–§6 Steps 1–3 is tracked in `docs/history/implementation-plan.md`.
 
 # Super Tic-Tac-Toe: Project Handover & Superhuman AI Blueprint
 
@@ -16,7 +16,7 @@
 
 - Peak Tactical Model: `runs/run_v2/best.pt` (6.8 MB, iteration 1600 weights, 60% vs `big_run`, 92.5% vs AlphaBeta d3)
 - Full Resumable State: `runs/run_v2/latest.pt` (472 MB, iteration 2007, 200,000 saturated replay states, warm Adam optimizer, FP16 AMP scaler)
-- Canonical Production Launcher: `./train.sh`
+- Canonical Production Launcher: `scripts/train.sh`
 
 ---
 
@@ -55,7 +55,7 @@ Optimizer param_groups lr: [0.001]
 
 - **`run_v2` was NOT annealed.** It ran with a constant learning rate of $\eta = 1.0 \times 10^{-3}$ across all 2,007 iterations.
 - **Why `model-1600` beat `model-2000`:** Once the replay buffer reached capacity (200,000 states), continuing to update weights at $\eta = 10^{-3}$ caused **policy jitter / weight thrashing**. The optimizer was taking steps too large to settle into the fine-grained minima of the loss surface.
-- **The Solution:** Resuming from `runs/run_v2/latest.pt` with the newly integrated cosine annealing schedule ($10^{-3} \to 10^{-5}$) via `./train.sh` allows the model to stabilize and sharpen its policy without throwing away the 200,000-state replay buffer.
+- **The Solution:** Resuming from `runs/run_v2/latest.pt` with the newly integrated cosine annealing schedule ($10^{-3} \to 10^{-5}$) via `scripts/train.sh` allows the model to stabilize and sharpen its policy without throwing away the 200,000-state replay buffer.
 
 ---
 
@@ -213,7 +213,7 @@ tmux new-session -d -s train "
   WORKERS=8 \
   ITERATIONS=5000 \
   LR_HORIZON=5000 \
-  ./train.sh runs/run_v2/latest.pt runs/run_v3 configs/population/baseline.json
+  scripts/train.sh runs/run_v2/latest.pt runs/run_v3 configs/population/baseline.json
 "
 ```
 

@@ -1,10 +1,10 @@
-# Super-Tic-Tac-Toe: E2E Test Suite Readiness Certification (`TEST_READY.md`)
+# Super-Tic-Tac-Toe: E2E Test Suite Readiness Certification (`docs/history/test-readiness-2026-09-10.md`)
 
 > **Historical (2026-09-14 note).** Test counts and results in this document are
 > from the `testing` branch at the time of writing (122 tests). The suite is now
 > 533 tests; run it with `"$STTT_PY" -m unittest discover -s tests` where
 > `STTT_PY=/home/mt/miniconda3/envs/sttt/bin/python` (see
-> `TRAINING_READINESS_PLAN.md` §6). `test_f20_git_branch_isolation` passes only
+> `docs/history/training-readiness.md` §6). `test_f20_git_branch_isolation` passes only
 > on `main`, `testing` and `cpp` by construction.
 
 **Date**: 2026-09-10T19:33:00Z  

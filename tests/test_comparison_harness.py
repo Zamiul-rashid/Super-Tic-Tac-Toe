@@ -1,4 +1,4 @@
-"""M7 regression tests for scripts/run_v2_vs_bigrun_comparison.py.
+"""M7 regression tests for scripts/compare_checkpoints.py.
 
 Defects the plan named, and what reproduces each here:
 
@@ -27,7 +27,7 @@ from unittest import mock
 
 import torch
 
-import scripts.run_v2_vs_bigrun_comparison as comparison
+import scripts.compare_checkpoints as comparison
 from sttt.bots import create_bot
 from sttt.tournament import MatchResult, run_matchup
 
@@ -251,7 +251,8 @@ class TestScriptCliSmoke(unittest.TestCase):
             root = pathlib.Path(tmp)
             candidate = write_checkpoint(root / "best.pt", iteration=1)
             with mock.patch.object(comparison, "run_comparison") as ran:
-                comparison.main(["--checkpoint", str(candidate), "--output", str(root / "out"),
+                comparison.main(["--checkpoint", str(candidate),
+                                 "--reference", str(candidate), "--output", str(root / "out"),
                                  "--h2h-games", "4", "--round-robin-games", "4",
                                  "--simulations", "8", "--seed", "13"])
             ran.assert_called_once()

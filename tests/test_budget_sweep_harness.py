@@ -1,4 +1,4 @@
-"""M7 regression tests for scripts/run_thorough_tournament.py.
+"""M7 regression tests for scripts/evaluation_suite.py.
 
 The defect that motivates the whole module: the search-budget sweep seeded each
 budget with ``seed=100 + sims``, so 512 played openings from seed 612 and 2000
@@ -22,7 +22,7 @@ from unittest import mock
 
 import torch
 
-import scripts.run_thorough_tournament as thorough
+import scripts.evaluation_suite as thorough
 from sttt.bots import create_bot
 
 

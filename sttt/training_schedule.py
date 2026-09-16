@@ -69,7 +69,7 @@ class LRSchedule:
         """LR for the iteration that follows ``completed`` finished iterations."""
         k = max(int(completed), 0)
         # Linear warm-up, applied to BOTH kinds. Measured reason (see
-        # handover/value-head-check.txt): starting AdamW at 1e-3 on a fresh
+        # docs/history/value-head-check.txt): starting AdamW at 1e-3 on a fresh
         # network drives the value head's pre-tanh activation from ~0 to +1.6
         # in one step and to -5.3 in two, where tanh' ~ 2e-4 -- the head
         # saturates, its gradient reaches exactly 0, and it never recovers.

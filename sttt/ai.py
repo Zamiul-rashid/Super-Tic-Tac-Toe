@@ -24,6 +24,8 @@ from .tournament import run_tournament, run_simulation_sweep
 from .engine_registry import create_configured_engine, load_engine_registry
 from .bootstrap import generate_dataset, pretrain
 
+DEFAULT_TRAIN_WORKERS = 8
+
 try:
     from .cpp_env import encode_batch as cpp_encode_batch, is_cpp_available
     _HAS_CPP = is_cpp_available()
@@ -891,7 +893,8 @@ def main():
                          ('batch',128),('buffer',50000)]:
         t.add_argument('--'+name,type=positive,default=default)
     t.add_argument('--arch', choices=['resnet', 'mlp', 'unet'], default='resnet')
-    t.add_argument('--workers', type=positive, default=8)
+    t.add_argument('--workers', type=positive, default=DEFAULT_TRAIN_WORKERS,
+                   help=f'Self-play worker processes (default: {DEFAULT_TRAIN_WORKERS})')
     t.add_argument('--backend', choices=['auto', 'cpp', 'python'], default='auto',
                    help='Search backend: cpp uses C++ bitboard engine, python uses pure Python (default: auto)')
     t.add_argument('--fp16', action='store_true', help='Use automatic mixed precision (FP16) on CUDA')
@@ -941,7 +944,7 @@ def main():
     t.add_argument('--eval-opponent-nodes', type=positive, default=50000,
                    help='Node budget for that opponent. Must exceed the depth\'s typical node '
                         'count or the depth is nominal only: d3 ~1,453, d4 ~3,479, d5 ~20,514 '
-                        '(BENCHMARK_REPORT.md). The old 3,000 truncated anything above d3')
+                        '(docs/engineering/cpp-benchmarks.md). The old 3,000 truncated anything above d3')
     t.add_argument('--max-iterations', type=positive, default=None,
                    help='Stop training once total cumulative iterations reach N')
     p = commands.add_parser('play')
@@ -975,7 +978,8 @@ def main():
     gen = commands.add_parser('generate-dataset', help='Stage-1 bootstrap: network-free native search games')
     gen.add_argument('--output', required=True)
     gen.add_argument('--games', type=positive, default=20000)
-    gen.add_argument('--workers', type=positive, default=8)
+    gen.add_argument('--workers', type=positive, default=DEFAULT_TRAIN_WORKERS,
+                     help=f'Dataset generation worker processes (default: {DEFAULT_TRAIN_WORKERS})')
     gen.add_argument('--simulations', type=positive, default=512)
     gen.add_argument('--leaf-batch', type=positive, default=64)
     gen.add_argument('--shard-games', type=positive, default=500)
@@ -992,7 +996,7 @@ def main():
                      help='Peak learning rate after warm-up. Default 3e-4, NOT 1e-3: at 1e-3 '
                           "AdamW's first steps saturate the value head's tanh and its gradient "
                           'reaches zero permanently (measured for both resnet and unet; see '
-                          'handover/value-head-check.txt)')
+                          'docs/history/value-head-check.txt)')
     pre.add_argument('--lr-warmup', type=int, default=100,
                      help='Optimizer steps of linear warm-up before the cosine decay; clamped to '
                           'one less than the total step count. 0 disables it')
@@ -1000,6 +1004,9 @@ def main():
     pre.add_argument('--weight-decay', type=float, default=1e-4)
     pre.add_argument('--holdout', type=float, default=0.02)
     pre.add_argument('--replay-buffer', type=positive, default=200000)
+    pre.add_argument('--max-positions', type=positive, default=1000000,
+                     help='Maximum bootstrap positions loaded for pretraining; shards are streamed '
+                          'one at a time (default: 1000000)')
     pre.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     pre.add_argument('--fp16', action='store_true')
     pre.add_argument('--seed', type=int, default=0)

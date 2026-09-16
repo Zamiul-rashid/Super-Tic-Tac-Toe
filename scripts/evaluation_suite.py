@@ -289,8 +289,8 @@ def run_grand_championship(checkpoint: str, output_dir: Path, games_per_matchup:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Championship round-robin and search-budget sweep")
-    parser.add_argument("--checkpoint", default="runs/big_run/latest.pt")
-    parser.add_argument("--output", default="runs/tournaments/grand_championship")
+    parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--output", required=True)
     parser.add_argument("--budgets", type=int, nargs="+", default=DEFAULT_BUDGETS,
                         help="search budgets for the sweep; all share one opening corpus")
     parser.add_argument("--games", type=int, default=20, help="TOTAL games per budget (2 per pair)")

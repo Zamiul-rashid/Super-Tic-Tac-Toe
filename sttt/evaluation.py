@@ -4,7 +4,7 @@ Both comparison scripts previously carried their own copy of this logic and both
 copies were wrong in the same way. The specific defects this module exists to
 remove:
 
-* **Entrant names were hardcoded labels.** `run_thorough_tournament.py` called
+* **Entrant names were hardcoded labels.** `evaluation_suite.py` called
   `runs/big_run/latest.pt` "ckpt-iter6155" no matter which iteration was on disk,
   and the aggregate championship JSON kept no checkpoint hash, so no result in it
   can be replayed against a known file. `entrant_name()` derives the name from
@@ -230,7 +230,7 @@ def pair_bootstrap_difference(results_a: Sequence[Any], results_b: Sequence[Any]
     """Paired difference (B minus A) in the subject's score rate on a shared corpus.
 
     Both arms must have been played from the *same* openings, which is the
-    property `run_thorough_tournament.py` broke by seeding each search budget with
+    property `evaluation_suite.py` broke by seeding each search budget with
     `100 + simulations`. A mismatch is an error rather than a silently unpaired
     comparison.
 

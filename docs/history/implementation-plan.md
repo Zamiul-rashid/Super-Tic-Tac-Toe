@@ -2,13 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement the training-side blueprint from `handover/handover.md` §5–§6 — game-phase-stratified replay sampling, a dense action-value (Q) head, a hierarchical conv U-Net, and a two-stage C++-bootstrapped offline pretraining pipeline — so a fresh network starts online self-play with a strong prior instead of learning from scratch.
+**Goal:** Implement the training-side blueprint from `docs/history/ai-training-blueprint.md` §5–§6 — game-phase-stratified replay sampling, a dense action-value (Q) head, a hierarchical conv U-Net, and a two-stage C++-bootstrapped offline pretraining pipeline — so a fresh network starts online self-play with a strong prior instead of learning from scratch.
 
 **Architecture:** Every change is additive and behaviour-preserving by default: new CLI flags default to the current behaviour, new checkpoint fields load legacy checkpoints unchanged, and the U-Net consumes the existing 289-float canonical encoding (reshaping it into `(8, 9, 9)` planes inside `forward`) so the replay buffer, the native `encode_batch`, and `augment_batch` are untouched. The Q-head reads root child statistics that both the Python `Node` and the native `FastNode` already expose (`n`, `total`, `children`), so no C++ change is needed. Bootstrap generation reuses `selfplay._play_game` with a model-free `CppTreeSearch` (heuristic leaf evaluation) and `CppAlphaBetaBot` opponents, writing shards in the replay's packed format so `pretrain` and `train --resume` load them with the same code.
 
 **Tech Stack:** Python 3.14 (conda `sttt`), PyTorch 2.14 + CUDA, numpy, `unittest`, the `sttt_cpp` CPython extension built by `cpp/Makefile`.
 
-**Spec:** `handover/handover.md` §5 (architectural deconstruction of `uttt.ai`) and §6 Steps 1–3 (U-Net, C++ bootstrap, dense action-value loss). The vendored reference implementation the design is checked against is `engines/vendor/utttai/utttpy/selfplay/{policy_value_network,training,datatools}.py`. §6 Step 4 (distillation from `uttt.ai`) and initialising unvisited MCTS leaves with predicted Q are **out of scope** for this plan (see "Deferred" at the end).
+**Spec:** `docs/history/ai-training-blueprint.md` §5 (architectural deconstruction of `uttt.ai`) and §6 Steps 1–3 (U-Net, C++ bootstrap, dense action-value loss). The vendored reference implementation the design is checked against is `engines/vendor/utttai/utttpy/selfplay/{policy_value_network,training,datatools}.py`. §6 Step 4 (distillation from `uttt.ai`) and initialising unvisited MCTS leaves with predicted Q are **out of scope** for this plan (see "Deferred" at the end).
 
 ## Global Constraints
 
@@ -16,8 +16,8 @@
 - CPU: the machine hangs at 32×100 %. Prefix every long command with `nice -n 19` and `OMP_NUM_THREADS=2 MKL_NUM_THREADS=2`; never pass `-j` to `make`; cap generator workers at 10; check `uptime` before anything heavy.
 - Native extension: `cpp/*.so` is tracked and goes stale silently. Before any native test or benchmark: `make -C cpp clean && make -C cpp PYTHON=$PY`, then confirm `python -c "import sttt_cpp; print(sttt_cpp.SOURCE_REVISION)"` matches `git rev-parse --short HEAD`.
 - Tests: `unittest`, one class per behaviour, in `tests/test_<module>.py`. Run the targeted module while iterating: `nice -n 19 env OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 $PY -m unittest tests.test_x -v`. Run the full suite (`$PY -m unittest discover -s tests`, ~190 s, 1 pre-existing known failure: branch isolation) before every merge to `main`. A skipped native or GPU test does not satisfy a gate.
-- Repository rules (`TRAINING_READINESS_PLAN.md` §4): one coherent change per commit; regression test before fix; never weaken a test to pass; each part on its own worktree branched from current `main`; never write into `runs/run_v2/` or `runs/big_run/`; planning does not authorise starting a multi-day training run.
-- Defaults preserve current behaviour: `--replay-sampling uniform`, `--arch resnet`, legacy checkpoints load with zero Q targets. `./train.sh` is the only place new defaults are switched on.
+- Repository rules (`docs/history/training-readiness.md` §4): one coherent change per commit; regression test before fix; never weaken a test to pass; each part on its own worktree branched from current `main`; never write into `runs/run_v2/` or `runs/big_run/`; planning does not authorise starting a multi-day training run.
+- Defaults preserve current behaviour: `--replay-sampling uniform`, `--arch resnet`, legacy checkpoints load with zero Q targets. `scripts/train.sh` is the only place new defaults are switched on.
 - Commit trailer (per session attribution rule): end every commit message with `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`.
 - Encoding layout (from `sttt/learning.py:6-12`), used by every part — do not guess it:
   - `[0:81)` empty-cell plane, `[81:162)` current player's stones, `[162:243)` opponent's stones (cells are multiplied by `state.turn`, so plane 1 is always "mine");
@@ -43,7 +43,7 @@ Parts 1, 2 and 3 are independent and may run in parallel worktrees. Merge each p
 
 ## Part 1 — Prove the existing symmetry augmentation
 
-`--augment-symmetry` already exists (`sttt/ai.py:394`, `sttt/population.py:182-196`, `train.sh:98`) and is covered by one fixed-position test (`tests/test_population.py:69-90`). Rule §4.1: an existing requirement is proved with an acceptance test, not re-implemented. This part adds the missing property tests.
+`--augment-symmetry` already exists (`sttt/ai.py:394`, `sttt/population.py:182-196`, `scripts/train.sh:98`) and is covered by one fixed-position test (`tests/test_population.py:69-90`). Rule §4.1: an existing requirement is proved with an acceptance test, not re-implemented. This part adds the missing property tests.
 
 ### Task 1.1: Symmetry table is the dihedral group and commutes with `encode` on random games
 
@@ -481,7 +481,7 @@ composition and the fraction of each batch drawn from each bin.
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ```
 
-**Part 2 gate:** full suite green (minus the known failure); `metrics.jsonl` from Step 1 shows non-degenerate fractions. Merge to `main`. The `train.sh` switch happens in Part 7.
+**Part 2 gate:** full suite green (minus the known failure); `metrics.jsonl` from Step 1 shows non-degenerate fractions. Merge to `main`. The `scripts/train.sh` switch happens in Part 7.
 
 ---
 
@@ -2031,25 +2031,25 @@ git add sttt/bootstrap.py sttt/ai.py tests/test_bootstrap.py
 git commit -m "pretrain: supervised bootstrap fit emitting a warm, resumable checkpoint
 
 Stratified over ply bins, symmetry-augmented, cosine per step, held-out
-policy/value/Q losses per epoch; latest.pt resumes under train.sh with a
+policy/value/Q losses per epoch; latest.pt resumes under scripts/train.sh with a
 fresh cosine phase and a dataset-sampled replay buffer.
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ```
 
-**Part 6 gate:** full suite; a real small-scale run on CUDA — `generate-dataset --games 2000 --workers 8` (from the Task 6.2 probe rate), `pretrain --arch unet --epochs 3 --fp16 --device cuda`, then `./train.sh runs/bootstrap-smoke/latest.pt runs/bootstrap-smoke-online` with `ITERATIONS=3`. Record dataset size, positions/s, val losses per epoch, and `q_loss`/iteration seconds in the ledger. Then `python -m sttt.ai evaluate --checkpoint runs/bootstrap-smoke/model-0000.pt --opponent alphabeta --opponent-depth 3 --games 20` — the pretrained-only U-Net should not lose every game to depth-3 alpha-beta; record the score, whatever it is.
+**Part 6 gate:** full suite; a real small-scale run on CUDA — `generate-dataset --games 2000 --workers 8` (from the Task 6.2 probe rate), `pretrain --arch unet --epochs 3 --fp16 --device cuda`, then `scripts/train.sh runs/bootstrap-smoke/latest.pt runs/bootstrap-smoke-online` with `ITERATIONS=3`. Record dataset size, positions/s, val losses per epoch, and `q_loss`/iteration seconds in the ledger. Then `python -m sttt.ai evaluate --checkpoint runs/bootstrap-smoke/model-0000.pt --opponent alphabeta --opponent-depth 3 --games 20` — the pretrained-only U-Net should not lose every game to depth-3 alpha-beta; record the score, whatever it is.
 
 ---
 
 ## Part 7 — Launcher, docs, handover reconciliation, ledger
 
-### Task 7.1: `train.sh` — switch on stratified sampling, fix the workers comment, document new flows
+### Task 7.1: `scripts/train.sh` — switch on stratified sampling, fix the workers comment, document new flows
 
 **Files:**
-- Modify: `train.sh:23` (comment says default 16; code at `train.sh:44` says 8 — make the comment say 8), `train.sh:98` (add `--replay-sampling stratified` next to `--augment-symmetry`), header comment (document `ARCH`-independent resume: the launcher resumes any arch the checkpoint carries).
-- Modify: `README.md` (new commands under the training section), `handover/handover.md` (top banner), `TRAINING_READINESS_PLAN.md` §7 ledger.
+- Modify: `scripts/train.sh:23` (comment says default 16; code at `scripts/train.sh:44` says 8 — make the comment say 8), `scripts/train.sh:98` (add `--replay-sampling stratified` next to `--augment-symmetry`), header comment (document `ARCH`-independent resume: the launcher resumes any arch the checkpoint carries).
+- Modify: `README.md` (new commands under the training section), `docs/history/ai-training-blueprint.md` (top banner), `docs/history/training-readiness.md` §7 ledger.
 
-- [ ] **Step 1: Edit `train.sh`**
+- [ ] **Step 1: Edit `scripts/train.sh`**
 
 ```bash
 #   WORKERS     self-play worker processes (default 8; the CPU-load rule caps this box at 10)
@@ -2064,15 +2064,15 @@ Add to the header comment:
 # Bootstrapped start: generate a dataset and pretrain first, then resume here:
 #   nice -n 19 $PY -m sttt.ai generate-dataset --output data/bootstrap --games <N> --workers 8
 #   nice -n 19 $PY -m sttt.ai pretrain --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
-#   ./train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
+#   scripts/train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
 ```
 
 - [ ] **Step 2: Verify the launcher still parses and the trainer accepts the flag set**
 
-Run: `bash -n train.sh && $PY -m sttt.ai train --help | grep -E "replay-sampling|arch"`
+Run: `bash -n scripts/train.sh && $PY -m sttt.ai train --help | grep -E "replay-sampling|arch"`
 Expected: no syntax error; both flags listed with `unet` among arch choices.
 
-- [ ] **Step 3: Handover banner** — prepend to `handover/handover.md`:
+- [ ] **Step 3: Handover banner** — prepend to `docs/history/ai-training-blueprint.md`:
 
 ```markdown
 > **Status, 2026-09-14 (post-blueprint reconciliation).** Paths below are from
@@ -2080,9 +2080,9 @@ Expected: no syntax error; both flags listed with `unet` among arch choices.
 > interpreter is `/home/mt/miniconda3/envs/sttt/bin/python` and the repo is
 > `/home/mt/Zami/Super-Tic-Tac-Toe`. Corrections: the input width is 289
 > floats, not 172 (`sttt/learning.py: INPUTS`); 8-fold symmetry augmentation
-> already existed (`--augment-symmetry`, on in `train.sh`) and is proved in
+> already existed (`--augment-symmetry`, on in `scripts/train.sh`) and is proved in
 > `tests/test_population.py::SymmetryGroupTests`; `WORKERS` defaults to 8.
-> The implementation of §5–§6 Steps 1–3 is tracked in `handover/plan.md`.
+> The implementation of §5–§6 Steps 1–3 is tracked in `docs/history/implementation-plan.md`.
 ```
 
 - [ ] **Step 4: README** — add under the training commands:
@@ -2095,14 +2095,14 @@ Expected: no syntax error; both flags listed with `unet` among arch choices.
     # Stage 2: supervised fit; writes runs/bootstrap/latest.pt with a warm replay buffer
     nice -n 19 python -m sttt.ai pretrain --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
     # Online: the canonical launcher resumes the bootstrapped checkpoint
-    ./train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
+    scripts/train.sh runs/bootstrap/latest.pt runs/run_v4 configs/population/baseline.json
 
 Architectures: `--arch resnet` (1.8M MLP-ResNet, default), `--arch unet` (hierarchical conv
 U-Net with a dense action-value head). Replay sampling: `--replay-sampling stratified`
-balances each batch across nine-ply game phases (`train.sh` enables it).
+balances each batch across nine-ply game phases (`scripts/train.sh` enables it).
 ```
 
-- [ ] **Step 5: Ledger** — append to `TRAINING_READINESS_PLAN.md` §7 a section `### Blueprint evidence (2026-09-14)` with one row per part: commit hash, test command and result, and the measured numbers from each gate (Part 5 U-Net iteration seconds vs resnet; Part 6 positions/s, dataset size, val losses, evaluate score). Numbers come from the runs; do not write forecasts.
+- [ ] **Step 5: Ledger** — append to `docs/history/training-readiness.md` §7 a section `### Blueprint evidence (2026-09-14)` with one row per part: commit hash, test command and result, and the measured numbers from each gate (Part 5 U-Net iteration seconds vs resnet; Part 6 positions/s, dataset size, val losses, evaluate score). Numbers come from the runs; do not write forecasts.
 
 - [ ] **Step 6: Full suite, commit, merge**
 
@@ -2110,7 +2110,7 @@ Run: `nice -n 19 env OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 $PY -m unittest discove
 Expected: only the one pre-existing known failure (branch isolation).
 
 ```bash
-git add train.sh README.md handover/handover.md TRAINING_READINESS_PLAN.md
+git add scripts/train.sh README.md docs/history/ai-training-blueprint.md docs/history/training-readiness.md
 git commit -m "Docs and launcher for the blueprint: stratified sampling on, bootstrap runbook, handover banner
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
@@ -2121,7 +2121,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ## Deferred (explicitly not in this plan)
 
 - **Q-initialised MCTS leaves** (spec §5.2, second half): initialising unvisited children with the network's predicted Q instead of 0 changes `_select` in both `sttt/search.py` and `cpp/src/mcts.cpp`, and the differential Python/C++ tests. It is the step that turns the Q-head into search strength; do it as its own plan once Part 5's Q predictions have a measurable held-out error from Part 6.
-- **Distillation from `uttt.ai`** (spec §6 Step 4): needs a teacher-policy data path (`TRAINING_READINESS_PLAN.md` §3 notes opponent turns are excluded from learner trajectories today).
+- **Distillation from `uttt.ai`** (spec §6 Step 4): needs a teacher-policy data path (`docs/history/training-readiness.md` §3 notes opponent turns are excluded from learner trajectories today).
 - **Readiness runner stage** for bootstrap (`scripts/check_training_ready.py`): add a `bootstrap` stage running Task 6.3's smoke once the commands have settled.
 
 ## Self-review notes
