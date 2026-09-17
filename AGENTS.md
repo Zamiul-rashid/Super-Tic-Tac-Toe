@@ -22,6 +22,7 @@ This file applies to the entire repository. Follow direct user instructions firs
 | `scripts/` | Reusable operational entry points for training, evaluation, readiness checks, and benchmarks. |
 | `tests/` | Automated Python tests. Add regression coverage here for behavioral changes. |
 | `docs/` | Current documentation, grouped by topic. Start with `docs/README.md`. |
+| `docs/report/` | Research manuscript, source evidence snapshot, figures, and image-generation provenance. Rebuild measured figures with `scripts/report_figures.py`; distinguish archived results from new experiments. |
 | `docs/history/` | Historical plans and records. These are context, not current operating instructions. |
 | `engines/` | External engine integrations or engine assets. |
 | `runs/`, `data/` | Generated runtime output and datasets. Treat these as artifacts, not source code. |

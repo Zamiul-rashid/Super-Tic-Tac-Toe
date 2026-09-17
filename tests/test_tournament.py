@@ -51,6 +51,16 @@ class TestPairedOpeningAndSeatAlternation(unittest.TestCase):
         self.assertEqual(s1.boards, s2.boards)
         self.assertEqual(s1.turn, s2.turn)
 
+    def test_game_observer_does_not_change_results(self):
+        observed = []
+        args = dict(games=4, opening_plies=2, seed=178)
+        reference = run_matchup(StyleBot(style="random", name="A"),
+                                StyleBot(style="center", name="B"), **args)
+        result = run_matchup(StyleBot(style="random", name="A"),
+                             StyleBot(style="center", name="B"), on_game=observed.append, **args)
+        self.assertEqual(result, reference)
+        self.assertEqual(observed, result)
+
     def test_paired_opening_different_pairs_differ(self):
         """Different pair indices produce distinct opening sequences."""
         _, m0 = paired_opening(seed=42, pair=0, plies=2)

@@ -204,5 +204,49 @@ class TestCliSmoke(unittest.TestCase):
             self.assertEqual(sweep.call_args.kwargs["budgets"], [512, 1024])
 
 
+class TestChampionshipConfiguration(unittest.TestCase):
+    def test_custom_pool_records_every_game_and_exact_specs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            checkpoint = write_checkpoint(root / "latest.pt", 4501)
+            out = root / "out"
+            with mock.patch.object(thorough, "create_bot", side_effect=cheap_bot_factory):
+                result = thorough.run_grand_championship(
+                    str(checkpoint), out, games_per_matchup=4,
+                    opponents=["random", "center"], seed=917)
+            self.assertEqual(len(result["participants"]), 3)
+            self.assertEqual(result["total_games"], 12)
+            rows = [json.loads(s) for s in (out / "games.partial.jsonl").read_text().splitlines()]
+            self.assertEqual([r["sequence"] for r in rows], list(range(1, 13)))
+            progress = json.loads((out / "progress.json").read_text())
+            self.assertEqual(progress["status"], "completed")
+            self.assertEqual(progress["completed_games"], 12)
+            manifest = json.loads((out / "manifest.json").read_text())
+            self.assertEqual(manifest["config"]["opponent_specs"], ["random", "center"])
+            self.assertIn("sttt/tournament.py", manifest["source_sha256"])
+
+    def test_failed_match_preserves_completed_game(self):
+        import sttt.tournament as tournament
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            checkpoint = write_checkpoint(root / "latest.pt", 4501)
+            out = root / "out"
+            with mock.patch.object(thorough, "create_bot", side_effect=cheap_bot_factory), \
+                 mock.patch.object(tournament, "_play_single_game",
+                                   side_effect=[(1, 40), RuntimeError("engine failed")]):
+                with self.assertRaisesRegex(RuntimeError, "engine failed"):
+                    thorough.run_grand_championship(
+                        str(checkpoint), out, games_per_matchup=4, opponents=["random"])
+            manifest = json.loads((out / "manifest.json").read_text())
+            self.assertEqual(manifest["status"], "failed")
+            self.assertEqual(manifest["completed_games"], 1)
+            self.assertEqual(len((out / "games.partial.jsonl").read_text().splitlines()), 1)
+
+    def test_duplicate_specs_are_rejected_before_checkpoint_load(self):
+        with self.assertRaisesRegex(ValueError, "duplicates"):
+            thorough.run_grand_championship("absent.pt", pathlib.Path("unused"),
+                                            opponents=["random", "random"])
+
+
 if __name__ == "__main__":
     unittest.main()

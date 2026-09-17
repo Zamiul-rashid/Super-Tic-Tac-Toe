@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="684pt" height="274.968pt" viewBox="0 0 684 274.968" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-17T08:43:23.861856</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 274.968 
+L 684 274.968 
+L 684 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 20.034 114.7536 
+L 150.606 114.7536 
+Q 154.512 114.7536 154.512 110.8728 
+L 154.512 80.9352 
+Q 154.512 77.0544 150.606 77.0544 
+L 20.034 77.0544 
+Q 16.128 77.0544 16.128 80.9352 
+L 16.128 110.8728 
+Q 16.128 114.7536 20.034 114.7536 
+z
+" clip-path="url(#p200ad942c8)" style="fill: #e8edf4; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 20.034 170.1936 
+L 150.606 170.1936 
+Q 154.512 170.1936 154.512 166.3128 
+L 154.512 136.3752 
+Q 154.512 132.4944 150.606 132.4944 
+L 20.034 132.4944 
+Q 16.128 132.4944 16.128 136.3752 
+L 16.128 166.3128 
+Q 16.128 170.1936 20.034 170.1936 
+z
+" clip-path="url(#p200ad942c8)" style="fill: #e8edf4; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 20.034 225.6336 
+L 150.606 225.6336 
+Q 154.512 225.6336 154.512 221.7528 
+L 154.512 191.8152 
+Q 154.512 187.9344 150.606 187.9344 
+L 20.034 187.9344 
+Q 16.128 187.9344 16.128 191.8152 
+L 16.128 221.7528 
+Q 16.128 225.6336 20.034 225.6336 
+z
+" clip-path="url(#p200ad942c8)" style="fill: #e8edf4; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 240.444 178.5096 
+L 376.596 178.5096 
+Q 380.502 178.5096 380.502 174.6288 
+L 380.502 125.2872 
+Q 380.502 121.4064 376.596 121.4064 
+L 240.444 121.4064 
+Q 236.538 121.4064 236.538 125.2872 
+L 236.538 174.6288 
+Q 236.538 178.5096 240.444 178.5096 
+z
+" clip-path="url(#p200ad942c8)" style="fill: #e3eadf; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 455.274 178.5096 
+L 647.226 178.5096 
+Q 651.132 178.5096 651.132 174.6288 
+L 651.132 125.2872 
+Q 651.132 121.4064 647.226 121.4064 
+L 455.274 121.4064 
+Q 451.368 121.4064 451.368 125.2872 
+L 451.368 174.6288 
+Q 451.368 178.5096 455.274 178.5096 
+z
+" clip-path="url(#p200ad942c8)" style="fill: #f1e2dc; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start" x="15.57" y="34.469812" transform="rotate(-0 15.57 34.469812)">CPU search workers and the inference owner</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="85.32" y="98.502047" transform="rotate(-0 85.32 98.502047)">Worker 1 · native PUCT</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 157.644173 97.667838 
+Q 195.524931 123.623953 233.405689 149.580067 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 159.813385 101.578659 
+L 157.644173 97.667838 
+L 162.074357 98.278961 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 231.236478 145.669247 
+L 233.405689 149.580067 
+L 228.975506 148.968944 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="85.32" y="153.942047" transform="rotate(-0 85.32 153.942047)">Worker 2 · native PUCT</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 158.188068 151.344 
+Q 195.525638 151.344 232.863209 151.344 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 162.188068 153.344 
+L 158.188068 151.344 
+L 162.188068 149.344 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 228.863209 149.344 
+L 232.863209 151.344 
+L 228.863209 153.344 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="85.32" y="209.382047" transform="rotate(-0 85.32 209.382047)">Worker N · native PUCT</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 157.644173 205.020162 
+Q 195.524931 179.064047 233.405689 153.107933 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 162.074357 204.409039 
+L 157.644173 205.020162 
+L 159.813385 201.109341 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 228.975506 153.719056 
+L 233.405689 153.107933 
+L 231.236478 157.018753 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(247.173906 146.55468)">Inference request queue</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(258.152031 158.557414)">Batch across games</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(506.871875 146.55468)">One model owner</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(493.457812 158.557414)">CPU or CUDA inference</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 383.056628 137.484 
+Q 415.93463 137.484 447.694598 137.484 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 443.694598 135.484 
+L 447.694598 137.484 
+L 443.694598 139.484 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: middle" x="415.935" y="131.94" transform="rotate(-0 415.935 131.94)">states</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 448.813372 162.432 
+Q 415.93537 162.432 384.175402 162.432 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 388.175402 164.432 
+L 384.175402 162.432 
+L 388.175402 160.432 
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: middle" x="414.54" y="192.924" transform="rotate(-0 414.54 192.924)">policy, value</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: middle" x="208.08" y="223.416" transform="rotate(-0 208.08 223.416)">requests / replies</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="342" y="248.364" transform="rotate(-0 342 248.364)">Generate all games → assemble replay → optimize → save checkpoint → next iteration</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="342" y="59.868" transform="rotate(-0 342 59.868)">Workers are spawned; model weights remain fixed during each game-generation phase.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p200ad942c8">
+   <rect x="7.2" y="7.2" width="669.6" height="260.568"/>
+  </clipPath>
+ </defs>
+</svg>

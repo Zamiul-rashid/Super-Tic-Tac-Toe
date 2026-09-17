@@ -1,0 +1,21 @@
+{
+  "cutoff_iteration": 4193,
+  "population": "configs/population/baseline.json",
+  "pretraining": "runs/unet-bootstrap-100k/pretrain_metrics.jsonl",
+  "training": [
+    "runs/unet-pipeline/metrics.jsonl",
+    "runs/unet-pipeline-resume-20260916/metrics.jsonl"
+  ],
+  "experiments": [
+    {
+      "label": "Iteration 1806",
+      "championship": "runs/unet-pipeline/championship-iter1806/championship",
+      "sweep": "runs/unet-pipeline/alphabeta-d10-iter1806/budget_sweep"
+    },
+    {
+      "label": "Iteration 4193",
+      "championship": "runs/unet-pipeline-resume-20260916/championship-full-iter4193/championship",
+      "sweep": "runs/unet-pipeline-resume-20260916/championship-full-iter4193/budget_sweep"
+    }
+  ]
+}

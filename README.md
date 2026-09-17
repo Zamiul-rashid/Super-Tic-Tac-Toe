@@ -80,6 +80,7 @@ configuration, and evaluation guidance.
 
 ## Documentation
 
+- [Research report: methodology, literature, and measured results](docs/report/README.md)
 - [Documentation index](docs/README.md)
 - [Training and evaluation](docs/training.md)
 - [Testing](docs/testing.md)

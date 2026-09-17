@@ -24,7 +24,10 @@ reached.
 """
 import argparse
 import csv
+from dataclasses import asdict
+import importlib.metadata
 import json
+import platform
 import sys
 import time
 from contextlib import ExitStack
@@ -46,10 +49,19 @@ from sttt.evaluation import (
     pair_bootstrap_score,
     write_games_csv,
     write_ratings_csv,
+    sha256_file,
 )
 from sttt.tournament import run_matchup, run_tournament
 
 DEFAULT_BUDGETS = [512, 1024, 2000]
+DEFAULT_CHAMPIONSHIP_OPPONENTS = {
+    "cpp-alphabeta-d6": "cpp-alphabeta:6:50000000",
+    "cpp-alphabeta-d4": "cpp-alphabeta:4:50000000",
+    "tactical": "tactical",
+    "threat-block": "threat-block",
+    "openspiel-mcts": "openspiel-mcts:100",
+    "utttai-128": "utttai:128",
+}
 
 
 def _safe_close(bot):
@@ -186,8 +198,13 @@ def run_budget_sweep(checkpoint: str, output_dir: Path, budgets=None, games: int
 def run_grand_championship(checkpoint: str, output_dir: Path, games_per_matchup: int = 20,
                            simulations: int = 512, seed: int = 42, backend: str = "auto",
                            device: str = "cpu", leaf_batch: int = 16,
-                           anchor: str = "cpp-alphabeta-d4") -> dict:
-    """Round-robin across a fixed opponent pool, anchored for cross-run comparison."""
+                           anchor: str = "cpp-alphabeta-d4",
+                           opponents: list[str] | None = None) -> dict:
+    """Round-robin across an explicit opponent pool with durable game progress."""
+    from sttt.tournament import _validate_sample_size
+    games_per_matchup = _validate_sample_size(games_per_matchup)
+    if opponents is not None and (not opponents or len(opponents) != len(set(opponents))):
+        raise ValueError("Championship opponents must be a nonempty list without duplicates")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     frozen, _ = freeze_checkpoint(checkpoint, output_dir / "evaluation-inputs" / "candidate")
@@ -199,7 +216,9 @@ def run_grand_championship(checkpoint: str, output_dir: Path, games_per_matchup:
         config={"games_per_matchup": games_per_matchup, "simulations": simulations,
                 "opening_plies": 2, "backend": backend, "device": device,
                 "leaf_batch": leaf_batch, "anchor": anchor,
-                "checkpoint_source": str(checkpoint)},
+                "checkpoint_source": str(checkpoint),
+                "opponent_specs": opponents if opponents is not None else DEFAULT_CHAMPIONSHIP_OPPONENTS,
+                "equal_time_comparison": False},
         seeds={"openings": seed},
     )
     manifest_path = output_dir / "manifest.json"
@@ -214,15 +233,43 @@ def run_grand_championship(checkpoint: str, output_dir: Path, games_per_matchup:
             candidate_name: open_bot(stack, str(frozen), simulations=simulations,
                                      leaf_batch=leaf_batch, device=device,
                                      backend=backend, name=candidate_name),
-            "cpp-alphabeta-d6": open_bot(stack, "cpp-alphabeta:6", name="cpp-alphabeta-d6"),
-            "cpp-alphabeta-d4": open_bot(stack, "cpp-alphabeta:4", name="cpp-alphabeta-d4"),
-            "tactical": open_bot(stack, "tactical", name="tactical"),
-            "threat-block": open_bot(stack, "threat-block", name="threat-block"),
-            "openspiel-mcts": open_bot(stack, "openspiel", name="openspiel-mcts"),
-            "utttai-128": open_bot(stack, "utttai", name="utttai-128"),
         }
+        roster_specs = {candidate_name: str(frozen)}
+        entries = ([(None, spec) for spec in opponents] if opponents is not None
+                   else list(DEFAULT_CHAMPIONSHIP_OPPONENTS.items()))
+        for display_name, spec in entries:
+            kwargs = {"name": display_name} if display_name else {}
+            bot = open_bot(stack, spec, **kwargs)
+            if bot.name in bots:
+                raise ValueError(f"Duplicate entrant name: {bot.name}")
+            bots[bot.name] = bot
+            roster_specs[bot.name] = spec
         for name, bot in bots.items():
             print(f"  - {name}: {type(bot).__name__}")
+
+        import torch
+        manifest["config"]["resolved_entrants"] = {
+            name: {"spec": roster_specs[name], "type": type(bot).__name__,
+                   **{key: getattr(bot, key) for key in (
+                       "depth", "node_budget", "simulations", "leaf_batch", "device",
+                       "backend_info", "uct_c", "seed", "command", "protocol", "timeout")
+                      if hasattr(bot, key)}}
+            for name, bot in bots.items()
+        }
+        manifest["environment"]["torch_threads"] = torch.get_num_threads()
+        manifest["environment"]["platform"] = platform.platform()
+        manifest["environment"]["machine"] = platform.machine()
+        manifest["environment"]["packages"] = {}
+        for package in ("numpy", "open-spiel", "onnxruntime"):
+            try:
+                manifest["environment"]["packages"][package] = importlib.metadata.version(package)
+            except importlib.metadata.PackageNotFoundError:
+                manifest["environment"]["packages"][package] = None
+        manifest["source_sha256"] = {
+            str(path.relative_to(_REPO_ROOT)): sha256_file(path)
+            for path in [Path(__file__).resolve(), *sorted((_REPO_ROOT / "sttt").glob("*.py"))]
+        }
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
         total_matchups = len(bots) * (len(bots) - 1) // 2
         total_games = total_matchups * games_per_matchup
@@ -230,9 +277,31 @@ def run_grand_championship(checkpoint: str, output_dir: Path, games_per_matchup:
               f"{total_games} games ({total_games // 2} mirrored pairs)...")
 
         started = time.time()
-        tourn = run_tournament(bots=bots, games_per_matchup=games_per_matchup,
-                               opening_plies=2, seed=seed,
-                               anchor_player=anchor if anchor in bots else None)
+        completed = 0
+        progress_path = output_dir / "progress.json"
+        with (output_dir / "games.partial.jsonl").open("w", encoding="utf-8") as journal:
+            def record_game(result):
+                nonlocal completed
+                completed += 1
+                journal.write(json.dumps({"sequence": completed, **asdict(result)}) + "\n")
+                journal.flush()
+                progress = {"status": "running", "completed_games": completed,
+                            "total_games": total_games, "elapsed_seconds": round(time.time()-started, 2),
+                            "last_game": asdict(result)}
+                temporary = progress_path.with_suffix(".tmp")
+                temporary.write_text(json.dumps(progress, indent=2) + "\n", encoding="utf-8")
+                temporary.replace(progress_path)
+            try:
+                tourn = run_tournament(bots=bots, games_per_matchup=games_per_matchup,
+                                       opening_plies=2, seed=seed,
+                                       anchor_player=anchor if anchor in bots else None,
+                                       on_game=record_game)
+            except BaseException as exc:
+                manifest["status"] = "failed"
+                manifest["error"] = f"{type(exc).__name__}: {exc}"
+                manifest["completed_games"] = completed
+                manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+                raise
         elapsed = time.time() - started
         print(f"\nCompleted {len(tourn['results'])} games in {elapsed:.1f}s")
         print("\n" + tourn["scoreboard"])
@@ -282,6 +351,10 @@ def run_grand_championship(checkpoint: str, output_dir: Path, games_per_matchup:
         manifest["status"] = "completed"
         manifest["summary"] = {k: v for k, v in summary.items() if k != "matrix"}
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        progress_path.write_text(json.dumps({"status": "completed", "completed_games": len(tourn['results']),
+                                              "total_games": total_games,
+                                              "elapsed_seconds": round(elapsed, 2)}, indent=2) + "\n",
+                                 encoding="utf-8")
 
     print(f"Artifacts saved to {output_dir}/")
     return summary
@@ -296,6 +369,8 @@ def main(argv=None):
     parser.add_argument("--games", type=int, default=20, help="TOTAL games per budget (2 per pair)")
     parser.add_argument("--championship-games", type=int, default=20,
                         help="TOTAL games per round-robin matchup")
+    parser.add_argument("--championship-opponents", nargs="+", default=None,
+                        help="explicit bot specs replacing the default championship opponents")
     parser.add_argument("--simulations", type=int, default=512,
                         help="search budget for the championship entrant")
     parser.add_argument("--seed", type=int, default=4242, help="opening corpus seed")
@@ -319,7 +394,7 @@ def main(argv=None):
                                games_per_matchup=args.championship_games,
                                simulations=args.simulations, seed=args.seed,
                                backend=args.backend, device=args.device,
-                               leaf_batch=args.leaf_batch)
+                               leaf_batch=args.leaf_batch, opponents=args.championship_opponents)
     if not args.skip_sweep:
         run_budget_sweep(str(checkpoint), output / "budget_sweep", budgets=args.budgets,
                          games=args.games, seed=args.seed,

@@ -10,7 +10,7 @@ import json
 import logging
 import math
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -180,6 +180,7 @@ def run_matchup(
     seed: int = 42,
     name_a: str | None = None,
     name_b: str | None = None,
+    on_game: Callable[[MatchResult], None] | None = None,
 ) -> list[MatchResult]:
     """Execute a paired-inversion matchup between two bots.
 
@@ -197,6 +198,7 @@ def run_matchup(
         seed: Random seed for opening positions and game randomness.
         name_a: Optional custom display name for bot_a.
         name_b: Optional custom display name for bot_b.
+        on_game: Optional observer called after each completed game (no RNG access).
 
     Returns:
         List of MatchResult objects for all played games.
@@ -235,6 +237,9 @@ def run_matchup(
             )
         )
 
+        if on_game is not None:
+            on_game(results[-1])
+
         # Game 2k+1: B is X, A is O (identical opening state S_k and symmetric pair RNG)
         gid_odd = 2 * k + 1
         rng_odd = np.random.default_rng(np.random.SeedSequence([seed, k, 9871]))
@@ -251,6 +256,8 @@ def run_matchup(
                 moves=moves_odd,
             )
         )
+        if on_game is not None:
+            on_game(results[-1])
         if (k + 1) % 10 == 0 or (k + 1) == num_pairs:
             print(f"[{p_a} vs {p_b}] Completed {2*(k+1)}/{validated_games} games...", flush=True)
 
@@ -620,6 +627,7 @@ def run_tournament(
     opening_plies: int | str = 2,
     seed: int = 42,
     anchor_player: str | None = None,
+    on_game: Callable[[MatchResult], None] | None = None,
 ) -> dict[str, Any]:
     """Run a full round-robin tournament across all provided bots.
 
@@ -629,6 +637,7 @@ def run_tournament(
         opening_plies: Plies played before bot moves (0..4 or 'random').
         seed: Base random seed.
         anchor_player: Optional participant name to anchor at 1500 Elo.
+        on_game: Optional observer forwarded to each matchup for durable progress.
 
     Returns:
         Dictionary containing results, participants, elo_ratings, glicko_ratings,
@@ -665,6 +674,7 @@ def run_tournament(
                 seed=match_seed,
                 name_a=p_a,
                 name_b=p_b,
+                on_game=on_game,
             )
             all_results.extend(m_results)
 

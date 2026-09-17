@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="684pt" height="225.072pt" viewBox="0 0 684 225.072" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-17T08:43:24.087047</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 225.072 
+L 684 225.072 
+L 684 -0 
+L 0 -0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 20.034 145.2456 
+L 133.866 145.2456 
+Q 137.772 145.2456 137.772 141.3648 
+L 137.772 100.3392 
+Q 137.772 96.4584 133.866 96.4584 
+L 20.034 96.4584 
+Q 16.128 96.4584 16.128 100.3392 
+L 16.128 141.3648 
+Q 16.128 145.2456 20.034 145.2456 
+z
+" clip-path="url(#p008ac073da)" style="fill: #e8edf4; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 176.274 145.2456 
+L 290.106 145.2456 
+Q 294.012 145.2456 294.012 141.3648 
+L 294.012 100.3392 
+Q 294.012 96.4584 290.106 96.4584 
+L 176.274 96.4584 
+Q 172.368 96.4584 172.368 100.3392 
+L 172.368 141.3648 
+Q 172.368 145.2456 176.274 145.2456 
+z
+" clip-path="url(#p008ac073da)" style="fill: #e3eadf; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 343.674 109.2096 
+L 479.826 109.2096 
+Q 483.732 109.2096 483.732 105.3288 
+L 483.732 75.3912 
+Q 483.732 71.5104 479.826 71.5104 
+L 343.674 71.5104 
+Q 339.768 71.5104 339.768 75.3912 
+L 339.768 105.3288 
+Q 339.768 109.2096 343.674 109.2096 
+z
+" clip-path="url(#p008ac073da)" style="fill: #e8edf4; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 343.674 172.9656 
+L 479.826 172.9656 
+Q 483.732 172.9656 483.732 169.0848 
+L 483.732 139.1472 
+Q 483.732 135.2664 479.826 135.2664 
+L 343.674 135.2664 
+Q 339.768 135.2664 339.768 139.1472 
+L 339.768 169.0848 
+Q 339.768 172.9656 343.674 172.9656 
+z
+" clip-path="url(#p008ac073da)" style="fill: #e8edf4; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 533.394 153.5616 
+L 655.596 153.5616 
+Q 659.502 153.5616 659.502 149.6808 
+L 659.502 92.0232 
+Q 659.502 88.1424 655.596 88.1424 
+L 533.394 88.1424 
+Q 529.488 88.1424 529.488 92.0232 
+L 529.488 149.6808 
+Q 529.488 153.5616 533.394 153.5616 
+z
+" clip-path="url(#p008ac073da)" style="fill: #f1e2dc; stroke: #555555; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans'; text-anchor: start" x="15.57" y="34.469812" transform="rotate(-0 15.57 34.469812)">Paired evaluation protocol</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(31.659375 117.44868)">Freeze checkpoint</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(28.051563 129.451414)">SHA-256 + settings</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(188.037656 117.44868)">Generate opening</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(196.723594 129.451414)">Seed + pair ID</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="411.75" y="92.957656" transform="rotate(-0 411.75 92.957656)">Game 1: A = X, B = O</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="411.75" y="156.713656" transform="rotate(-0 411.75 156.713656)">Game 2: B = X, A = O</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(554.575469 111.447703)">Mean pair score</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(543.510625 123.450437)">Bootstrap over pairs</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'" transform="translate(573.190313 135.452391)">W / D / L</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 140.328501 120.852 
+Q 155.06816 120.852 168.689786 120.852 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 164.689786 118.852 
+L 168.689786 120.852 
+L 164.689786 122.852 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 296.223838 119.722322 
+Q 316.891776 105.604787 336.636499 92.117867 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 332.205429 92.722528 
+L 336.636499 92.117867 
+L 334.461585 96.02552 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 485.943838 91.489678 
+Q 506.611776 105.607213 526.356499 119.094133 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 524.181585 115.18648 
+L 526.356499 119.094133 
+L 521.925429 118.489472 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 296.174795 122.047831 
+Q 316.889953 137.483965 336.708605 152.252058 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 334.696199 148.258285 
+L 336.708605 152.252058 
+L 332.306143 151.465719 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 485.894795 152.920169 
+Q 506.609953 137.484035 526.428605 122.715942 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+    <path d="M 522.026143 123.502281 
+L 526.428605 122.715942 
+L 524.416199 126.709715 
+" style="fill: none; stroke: #333333; stroke-linecap: round"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: middle" x="342" y="204.012" transform="rotate(-0 342 204.012)">Each pair reuses one board position. Swapping sides does not mean rotating the board.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p008ac073da">
+   <rect x="7.2" y="7.2" width="669.6" height="210.672"/>
+  </clipPath>
+ </defs>
+</svg>

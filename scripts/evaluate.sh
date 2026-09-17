@@ -20,6 +20,7 @@ Common options:
   --simulations N               Default: 512
   --games N                     Games per sweep budget; default: 20
   --championship-games N        Games per matchup; default: 20
+  --championship-opponents "SPECS"  Space-separated bot specs; replaces default pool
   --budgets "512 1024 2000"     Default: 512 1024 2000
   --opponent-depth N            Default: 10
   --opponent-nodes N            Default: 50000000
@@ -48,6 +49,7 @@ OUTPUT=""
 SIMULATIONS=512
 GAMES=20
 CHAMPIONSHIP_GAMES=20
+CHAMPIONSHIP_OPPONENTS=()
 BUDGETS=(512 1024 2000)
 OPPONENT_DEPTH=10
 OPPONENT_NODES=50000000
@@ -69,6 +71,7 @@ while [[ $# -gt 0 ]]; do
     --simulations) SIMULATIONS=${2:?missing value for --simulations}; shift 2 ;;
     --games) GAMES=${2:?missing value for --games}; shift 2 ;;
     --championship-games) CHAMPIONSHIP_GAMES=${2:?missing value for --championship-games}; shift 2 ;;
+    --championship-opponents) read -r -a CHAMPIONSHIP_OPPONENTS <<< "${2:?missing value for --championship-opponents}"; shift 2 ;;
     --budgets) read -r -a BUDGETS <<< "${2:?missing value for --budgets}"; shift 2 ;;
     --opponent-depth) OPPONENT_DEPTH=${2:?missing value for --opponent-depth}; shift 2 ;;
     --opponent-nodes) OPPONENT_NODES=${2:?missing value for --opponent-nodes}; shift 2 ;;
@@ -111,6 +114,9 @@ case "$MODE" in
     )
     if [[ $MODE == championship ]]; then COMMAND+=(--skip-sweep); fi
     if [[ $MODE == sweep ]]; then COMMAND+=(--skip-championship); fi
+    if [[ ${#CHAMPIONSHIP_OPPONENTS[@]} -gt 0 ]]; then
+      COMMAND+=(--championship-opponents "${CHAMPIONSHIP_OPPONENTS[@]}")
+    fi
     ;;
   compare)
     [[ -n "$REFERENCE" ]] || { echo "--reference is required in compare mode" >&2; exit 2; }
