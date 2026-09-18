@@ -48,6 +48,16 @@ def root_action_values(root):
     return q, visited
 
 
+def root_value(root):
+    """Value of a finished search's root from its player-to-move view: the
+    proof value when solved, else the mean backed-up value. Works for `Node`
+    and the native `FastNode`."""
+    solved = getattr(root, 'solved', None)
+    if solved is not None:
+        return float(solved)
+    return float(root.total) / root.n if root.n else 0.
+
+
 class TreeSearch:
     def __init__(self, model, rng=None, config=None, opponent=None, agent_side=None):
         self.model = model

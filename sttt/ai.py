@@ -23,6 +23,7 @@ from .reports import new_report, write_report, write_tournament_report
 from .tournament import run_tournament, run_simulation_sweep
 from .engine_registry import create_configured_engine, load_engine_registry
 from .bootstrap import generate_dataset, pretrain
+from .reanalysis import reanalyse_cmd
 
 DEFAULT_TRAIN_WORKERS = 8
 
@@ -414,6 +415,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                   f'opponent={stats["match"]["kind"]}', flush=True)
 
         stage_timer.add('replay_preparation', time.monotonic() - replay_started)
+        reanalysis_report = _review_iteration(args, iteration, seeds, results, model, pool, use_cpp,
+                                              replay, replay_meta, replay_bins, stage_timer)
 
         model.train()
         optimization_started = time.monotonic()
@@ -604,6 +607,8 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
             'iteration_seconds': elapsed,
         }
         report['stage_seconds'] = stage_timer.report(elapsed)
+        if reanalysis_report is not None:
+            report['reanalysis'] = reanalysis_report
         with (output / 'metrics.jsonl').open('a') as file:
             file.write(json.dumps(report) + '\n')
         print(json.dumps(report), flush=True)
@@ -625,6 +630,49 @@ def _train_loop(args, model, saved, arch, optimizer, replay, output, rng, device
                 file.write(json.dumps({'iteration': iteration,
                                        'evaluation_overhead_seconds':
                                            time.monotonic() - evaluation_started}) + '\n')
+
+def _review_iteration(args, iteration, seeds, results, model, pool, use_cpp,
+                      replay, replay_meta, replay_bins, stage_timer):
+    """Opt-in game records and loss-review reanalysis for one iteration.
+
+    Returns the metrics entry, or None when both are off (the default), in which
+    case nothing here runs and no RNG is touched.
+    """
+    records_dir = getattr(args, 'save_game_records', None)
+    if not records_dir and not getattr(args, 'reanalyse', False):
+        return None
+    from .reanalysis import (game_record, game_report, reanalysis_rows, select_tasks,
+                             summarize, write_jsonl)
+    records = [game_record(iteration, i, seeds[i], *result) for i, result in enumerate(results)]
+    if records_dir:
+        write_jsonl(Path(records_dir) / f'games-{iteration:04d}.jsonl', records)
+    if not getattr(args, 'reanalyse', False):
+        return None
+    started = time.monotonic()
+    new_positions = sum(len(r[0]) for r in results)
+    budget = int(args.reanalyse_fraction * new_positions)
+    # Own stream, so enabling review never shifts the self-play/sampling RNG.
+    rng = np.random.default_rng(np.random.SeedSequence([int(args.seed), int(iteration), 5501]))
+    tasks = select_tasks(records, args.reanalyse_outcomes, args.reanalyse_sides, budget, rng,
+                         args.reanalyse_margin)
+    simulations = args.reanalyse_simulations or 4 * args.simulations
+    reviews, inference = pool.reanalyse(model, tasks, simulations, search_config(args),
+                                        args.leaf_batch, use_cpp=use_cpp)
+    rows = reanalysis_rows(tasks, reviews, args.value_target, args.value_lambda)
+    for row in rows:
+        replay.append(row)
+        replay_meta.append((iteration, 'reanalysis'))
+        replay_bins.append(ply_bin(row_ply(row[0])))
+    if records_dir:
+        write_jsonl(Path(records_dir) / f'reanalysis-{iteration:04d}.jsonl',
+                    [game_report(t, r) for t, r in zip(tasks, reviews)])
+    seconds = time.monotonic() - started
+    stage_timer.add('reanalysis', seconds)
+    return {**summarize(reviews), 'games': len(tasks), 'budget': budget,
+            'new_positions': new_positions, 'rows_added': len(rows), 'simulations': simulations,
+            'value_target': args.value_target, 'seconds': round(seconds, 3),
+            'inference_positions': inference.get('inference_positions', 0)}
+
 
 def play(args):
     model,_ = load_model(args.checkpoint)
@@ -947,6 +995,30 @@ def main():
                         '(docs/engineering/cpp-benchmarks.md). The old 3,000 truncated anything above d3')
     t.add_argument('--max-iterations', type=positive, default=None,
                    help='Stop training once total cumulative iterations reach N')
+    from .reanalysis import OUTCOMES, SIDES, VALUE_TARGETS
+    t.add_argument('--save-game-records', metavar='DIR', default=None,
+                   help='Write every game (actions, movers, learner root search) to '
+                        'DIR/games-NNNN.jsonl per iteration; off by default')
+    t.add_argument('--reanalyse', action='store_true',
+                   help='Loss review: re-search sampled decision points (both sides) of selected '
+                        'games with a stronger budget and add refreshed targets to replay')
+    t.add_argument('--reanalyse-simulations', type=positive, default=None,
+                   help='Reanalysis search budget (default: 4 x --simulations)')
+    t.add_argument('--reanalyse-fraction', type=float, default=.25,
+                   help='Cap on reanalysed rows per iteration as a fraction of new self-play '
+                        'positions (default 0.25)')
+    t.add_argument('--reanalyse-outcomes', nargs='+', choices=OUTCOMES, default=['loss'],
+                   help='Learner outcomes whose games are reviewed (default: loss; decisive '
+                        'self-play games count as losses)')
+    t.add_argument('--reanalyse-sides', nargs='+', choices=SIDES, default=list(SIDES),
+                   help='Whose decision points are reviewed (default: both)')
+    t.add_argument('--reanalyse-margin', type=float, default=.3,
+                   help='Q gap to the best alternative that flags a suspected mistake')
+    t.add_argument('--value-target', choices=VALUE_TARGETS, default='outcome',
+                   help='Value target of reanalysed rows: outcome (game result), search '
+                        '(reanalysis root value) or mix; normal rows always use the outcome')
+    t.add_argument('--value-lambda', type=float, default=.5,
+                   help='mix: lambda * outcome + (1 - lambda) * search (default 0.5)')
     p = commands.add_parser('play')
     p.add_argument('--profile',default='profiles/player.json')
     p.add_argument('--side',choices=['X','O'],default='X')
@@ -1010,11 +1082,22 @@ def main():
     pre.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     pre.add_argument('--fp16', action='store_true')
     pre.add_argument('--seed', type=int, default=0)
+    rea = commands.add_parser('reanalyse', help='Offline loss review of saved game records')
+    rea.add_argument('--records', required=True,
+                     help='games-*.jsonl file or a directory of them (--save-game-records output)')
+    rea.add_argument('--checkpoint', required=True)
+    rea.add_argument('--simulations', type=positive, default=2048)
+    rea.add_argument('--output', required=True, help='JSON report path')
+    rea.add_argument('--outcomes', nargs='+', choices=OUTCOMES, default=['loss'])
+    rea.add_argument('--sides', nargs='+', choices=SIDES, default=list(SIDES))
+    rea.add_argument('--margin', type=float, default=.3)
+    rea.add_argument('--backend', choices=['auto', 'cpp', 'python'], default='auto')
+    rea.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='cpu')
     for sub in (p,e):
         sub.add_argument('--device', choices=['auto','cpu','cuda'], default='cpu')
         sub.add_argument('--checkpoint',required=True)
         sub.add_argument('--simulations',type=positive,default=128)
-    for sub in (t,p,e):
+    for sub in (t,p,e,rea):
         sub.add_argument('--seed',type=int,default=0)
         sub.add_argument('--leaf-batch', type=positive, default=16,
                          help='Pending leaf positions per tree before an inference request')
@@ -1038,6 +1121,11 @@ def main():
         parser.error('--alphabeta-share must be between 0 and 1')
     if args.command == 'pretrain' and not 0. <= args.holdout < 1.:
         parser.error('--holdout must be at least 0 and less than 1')
+    if args.command == 'train':
+        if not 0. <= args.reanalyse_fraction <= 1. or not 0. <= args.value_lambda <= 1.:
+            parser.error('--reanalyse-fraction and --value-lambda must be between 0 and 1')
+        if args.value_target != 'outcome' and not args.reanalyse:
+            parser.error('--value-target search/mix needs --reanalyse')
     try:
         if args.command == 'evaluate':
             for seed in args.seeds or [args.seed]:
@@ -1047,7 +1135,8 @@ def main():
                         return  # Ctrl+C ends the whole sweep, not just one budget.
         else:
             {'train': train, 'play': play, 'evaluate': evaluate, 'tournament': tournament_cmd,
-             'generate-dataset': generate_dataset, 'pretrain': pretrain}[args.command](args)
+             'generate-dataset': generate_dataset, 'pretrain': pretrain,
+             'reanalyse': reanalyse_cmd}[args.command](args)
     except (KeyboardInterrupt,EOFError):
         print('\nStopped. Completed training iterations and observed human moves are saved.')
 

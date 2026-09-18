@@ -15,6 +15,7 @@ This file applies to the entire repository. Follow direct user instructions firs
 | `sttt/learning.py`, `sttt/unet.py` | Model, training, and loss-related code. |
 | `sttt/selfplay.py` | Self-play generation and worker-pool orchestration. |
 | `sttt/population.py`, `sttt/opponent.py` | Population definitions and opponent selection. |
+| `sttt/reanalysis.py` | Opt-in game records, loss review and reanalysis targets (`docs/training.md`). |
 | `sttt/evaluation.py`, `sttt/tournament.py`, `sttt/reports.py` | Match evaluation, championships, and result reporting. |
 | `sttt/bootstrap.py` | Runtime/bootstrap helpers. |
 | `cpp/` | Native engine source, build files, and native benchmarks/tests. |

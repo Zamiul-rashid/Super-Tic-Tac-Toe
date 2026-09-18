@@ -27,6 +27,11 @@ scripts/train.sh runs/source/latest.pt runs/continuation
 Use `--dry-run` to validate and print the resolved command. Arguments after `--`
 are forwarded to `sttt.ai train` for uncommon settings.
 
+Opt-in game records and loss-review reanalysis are forwarded the same way, for
+example `-- --save-game-records runs/continuation/records --reanalyse`. Review
+saved records offline with `python -m sttt.ai reanalyse`. See the
+[training guide](../docs/training.md#game-records-and-loss-review-opt-in).
+
 ## Evaluate
 
 ```bash

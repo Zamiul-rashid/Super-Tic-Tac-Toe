@@ -226,6 +226,30 @@ def generate_dataset(args):
 VALUE_COLLAPSE_STD = 0.02
 
 
+def game_ids(ply):
+    """Game index of each row, from row order and ply.
+
+    generate_rows writes each game's rows consecutively with strictly rising
+    ply; no game can end before ply 17 and the next one starts within 5 plies
+    (<= 4 opening moves), so a new game begins wherever ply fails to rise.
+    Subsampling can only merge neighbouring games into one group, never split
+    a game, so a split on these ids cannot leak a game into both sides.
+    """
+    ply = np.asarray(ply)
+    starts = np.ones(len(ply), dtype=np.int64)
+    starts[1:] = ply[1:] <= ply[:-1]
+    return np.cumsum(starts) - 1
+
+
+def split_by_game(ply, fraction, rng):
+    """(val_idx, train_idx): whole games held out, about `fraction` of the rows."""
+    games = game_ids(ply)
+    count = int(games[-1]) + 1 if len(games) else 0
+    held = rng.permutation(count)[:int(round(count * fraction))]
+    in_val = np.isin(games, held)
+    return np.flatnonzero(in_val), np.flatnonzero(~in_val)
+
+
 def pretrain(args):
     # Stage 2: torch and its friends are imported HERE, not at module level --
     # sttt.bootstrap must stay importable (and torch-free) for spawned
@@ -244,9 +268,10 @@ def pretrain(args):
     manifest_path = Path(args.dataset) / 'manifest.json'
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
     n = data['x'].shape[0]
-    order = rng.permutation(n)
-    holdout = int(round(n * args.holdout))
-    val_idx, train_idx = order[:holdout], order[holdout:]
+    # Split by complete game: a position split put neighbouring positions of
+    # one game on both sides, so validation measured memorisation of the game.
+    val_idx, train_idx = split_by_game(data['ply'].numpy(), args.holdout, rng)
+    holdout = len(val_idx)
     if len(train_idx) < args.batch:
         raise ValueError(f'{len(train_idx)} training rows is fewer than one batch of {args.batch}')
     bins = np.fromiter((ply_bin(int(p)) for p in data['ply'][train_idx].tolist()), dtype=np.int8,
@@ -387,7 +412,8 @@ def pretrain(args):
                   'precision': 'fp16' if use_fp16 else 'fp32', 'training_config': vars(args),
                   'search_config': None, 'backend_info': None, 'population_games': 0,
                   'metrics': last, 'pretrain': {'dataset': str(args.dataset), 'manifest': manifest,
-                                                 'epochs': args.epochs, 'positions': n, 'holdout': holdout}}
+                                                 'epochs': args.epochs, 'positions': n, 'holdout': holdout,
+                                                 'holdout_split': 'game'}}
     torch.save(checkpoint, output / 'latest.tmp')
     (output / 'latest.tmp').replace(output / 'latest.pt')
     print(f'wrote {output / "latest.pt"} ({arch}, {len(rows)} warm replay rows)', flush=True)

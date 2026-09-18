@@ -32,7 +32,8 @@ Common options:
   --dry-run                     Validate and print the command without running it
   -h, --help                    Show this help
 
-Arguments after -- are forwarded to `python -m sttt.ai train`. The source
+Arguments after -- are forwarded to `python -m sttt.ai train`, e.g. the
+opt-in `--save-game-records DIR --reanalyse` loss review. The source
 checkpoint is frozen into OUTPUT before use.
 EOF
 }

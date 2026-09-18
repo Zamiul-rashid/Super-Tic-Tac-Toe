@@ -12,7 +12,7 @@ from dataclasses import asdict
 import os
 import numpy as np
 from .env import State
-from .search import TreeSearch, root_action_values
+from .search import TreeSearch, root_action_values, root_value
 from .population import MatchSpec, make_opponent
 
 try:
@@ -71,11 +71,15 @@ def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cp
     started = time.monotonic()
     state = CppFastState() if (use_cpp and CppFastState is not None) else State()
     trajectory = []
+    # Full game record for loss review. Kept beside the trajectory (whose
+    # 4-tuples several consumers unpack) and computed without touching any RNG.
+    actions, movers, root_values = [], [], []
     opponent_rng = np.random.default_rng(np.random.SeedSequence([int(seed), 731]))
     for _ in range(match.opening_moves):
         if state.result is not None:
             break
         action = int(opponent_rng.choice(state.legal_actions()))
+        actions.append(action); movers.append('opening')
         state = state.play(action)
         if opponent is not None:
             opponent.advance(action)
@@ -89,6 +93,7 @@ def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cp
                 opponent.advance(action)
             else:
                 action = opponent.choose(state, opponent_rng)
+            actions.append(action); movers.append('opponent')
             tree.advance(action)
             state = state.play(action)
             ply += 1
@@ -99,9 +104,11 @@ def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cp
                            else totals[key] + tree.stats[key])
         q, q_mask = root_action_values(tree.root)
         trajectory.append((state, pi, q, q_mask))
+        root_values.append(root_value(tree.root))
         # Normalize in float64 to avoid categorical sampler tolerance differences.
         p = pi.astype(float); p /= p.sum()
         action = int(rng.choice(81, p=p)) if ply < 8 else int(pi.argmax())
+        actions.append(action); movers.append('learner')
         tree.advance(action)
         if opponent is not None:
             opponent.advance(action)
@@ -110,6 +117,7 @@ def _play_game(tree, rng, simulations, seed, leaf_batch, match, opponent, use_cp
     totals['match'] = asdict(match)
     totals['plies'] = ply
     totals['seconds'] = time.monotonic() - started   # M6: wall time by family
+    totals['record'] = {'actions': actions, 'movers': movers, 'root_values': root_values}
     return trajectory, state.result, totals
 
 
@@ -138,15 +146,21 @@ def _worker(connection):
                     'pid': os.getpid(),
                 }))
                 continue
-            _, index, simulations, seed, config, leaf_batch, match, use_cpp = message
             try:
-                trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch, match, use_cpp=use_cpp)
+                if message[0] == 'reanalyse':
+                    from .reanalysis import review_game
+                    _, index, task, simulations, config, leaf_batch, use_cpp = message
+                    payload = (review_game(evaluator, task, simulations, config, leaf_batch,
+                                           use_cpp=use_cpp),)
+                else:
+                    _, index, simulations, seed, config, leaf_batch, match, use_cpp = message
+                    payload = play_game(evaluator, simulations, seed, config, leaf_batch, match, use_cpp=use_cpp)
             except Exception:
                 # Per-game failure (e.g. an external engine timeout): report it
                 # and stay alive so the pool can retry this one game.
                 connection.send(('game_error', index, traceback.format_exc()))
                 continue
-            connection.send(('game', index, trajectory, outcome, stats))
+            connection.send(('game', index, *payload))
     except (EOFError, BrokenPipeError):
         pass
     except BaseException:
@@ -240,6 +254,27 @@ class SelfPlayPool:
             raise ValueError('At least one game is required')
         if matches is not None and len(matches) != len(seeds):
             raise ValueError('One match specification is required per seed')
+
+        def message(index, attempt):
+            match = matches[index] if matches is not None else None
+            # A retry gets a derived seed so it is not a replay of the failure.
+            seed = int(seeds[index]) + 7919 * attempt
+            return ('start', index, simulations, seed, config, leaf_batch, match, use_cpp)
+        return self._execute(model, len(seeds), message, use_cpp)
+
+    def reanalyse(self, model, tasks, simulations, config, leaf_batch, use_cpp=False):
+        """Loss-review searches (sttt.reanalysis.review_game), one task per game,
+        through the same workers and batched inference as self-play."""
+        if not tasks:
+            return [], {}
+        results, metrics = self._execute(
+            model, len(tasks),
+            lambda index, attempt: ('reanalyse', index, tasks[index], simulations, config,
+                                    leaf_batch, use_cpp),
+            use_cpp)
+        return [r[0] for r in results], metrics
+
+    def _execute(self, model, count, make_message, use_cpp):
         model.eval()
         # Verified once per pool; workers are long-lived across iterations.
         if getattr(self, 'worker_capabilities', None) is None:
@@ -253,14 +288,11 @@ class SelfPlayPool:
             nonlocal next_game
             if retry:
                 index = retry.pop()
-            elif next_game < len(seeds):
+            elif next_game < count:
                 index, next_game = next_game, next_game + 1
             else:
                 return
-            match = matches[index] if matches is not None else None
-            # A retry gets a derived seed so it is not a replay of the failure.
-            seed = int(seeds[index]) + 7919 * attempts.get(index, 0)
-            connection.send(('start', index, simulations, seed, config, leaf_batch, match, use_cpp))
+            connection.send(make_message(index, attempts.get(index, 0)))
             active.add(connection)
 
         for connection in self.connections:
@@ -293,8 +325,7 @@ class SelfPlayPool:
                         dispatch(connection)
                         continue
                     if message[0] == 'game':
-                        _, index, trajectory, outcome, stats = message
-                        results[index] = (trajectory, outcome, stats)
+                        results[message[1]] = tuple(message[2:])
                         active.remove(connection)
                         dispatch(connection)
                     elif message[0] == 'infer':
@@ -323,4 +354,4 @@ class SelfPlayPool:
                     connection.send(('prediction', outputs[start:start+len(batch)]))
                     start += len(batch)
         metrics['mean_inference_batch'] = metrics['inference_positions'] / max(1, metrics['inference_batches'])
-        return [results[i] for i in range(len(seeds))], metrics
+        return [results[i] for i in range(count)], metrics

@@ -56,7 +56,8 @@ scripts/train.sh \
   --output runs/main
 ```
 
-Pretraining defaults to a guarded warm-up schedule. The historical failure
+Pretraining holds out complete games (`--holdout` is a fraction of games), so
+no game has positions in both training and validation. Pretraining defaults to a guarded warm-up schedule. The historical failure
 analysis is preserved in [history/value-head-check.txt](history/value-head-check.txt).
 
 ## Population curriculum
@@ -85,6 +86,52 @@ including history slots that fall back to self-play when no snapshot is present.
 Training records learner targets in opponent games and both sides in self-play,
 so game quotas are not replay-position quotas. `best.pt` is manually selected;
 periodic AlphaBeta evaluation does not promote it automatically.
+
+## Game records and loss review (opt-in)
+
+Both are off by default; a run without these flags trains exactly as before.
+Pass them to `sttt.ai train`, or after `--` to `scripts/train.sh`.
+
+| Flag | Default | Effect |
+| --- | --- | --- |
+| `--save-game-records DIR` | off | Writes `DIR/games-NNNN.jsonl` per iteration: every action, its mover (`opening`/`learner`/`opponent`), the match spec, result, and the learner's root search per move (visit policy, root Q, root value). |
+| `--reanalyse` | off | Re-searches sampled decision points of selected games, both sides, from the same parent position with the current network and adds refreshed rows to replay. |
+| `--reanalyse-simulations N` | 4 x `--simulations` | Reanalysis budget. |
+| `--reanalyse-fraction F` | 0.25 | Cap: at most `F` x new self-play positions are added per iteration, sampled uniformly from eligible decision points. |
+| `--reanalyse-outcomes` | `loss` | Learner outcomes reviewed (`loss draw win`). Decisive self-play games count as losses. |
+| `--reanalyse-sides` | `learner opponent` | Whose decisions are reviewed. |
+| `--reanalyse-margin M` | 0.3 | Q gap that flags a suspected mistake. |
+| `--value-target` | `outcome` | Value target of reanalysed rows: `outcome` (game result), `search` (reanalysis root value) or `mix`. Normal rows always use the outcome. |
+| `--value-lambda L` | 0.5 | `mix` = L x outcome + (1 - L) x search. |
+
+Reanalysed rows carry the stronger search's visit policy, root Q targets and mask,
+and the selected value target, all from the parent's player to move. Opponent
+positions get the search policy, never a one-hot of the move played. Normal
+positions from every game stay in replay, so training never sees only losses.
+Reanalysis runs through the self-play worker pool with batched inference. Its
+cost and findings are in `metrics.jsonl` under `reanalysis` and
+`stage_seconds.stages.reanalysis`. Replay rows are tagged `reanalysis` in
+`replay_sample_kind_fractions`. With `--save-game-records`, per-game findings are also
+written to `DIR/reanalysis-NNNN.jsonl`.
+
+A position is a **suspected mistake** when the most-visited alternative's Q
+beats the played move's Q by more than the margin. It is **proven** only when
+both Q values are exact proof values from the search. When the search proves the
+root without visiting the played move, the played move gets its own search from
+the child position.
+
+Offline review of saved records (any JSONL with at least `actions`; `movers`,
+`opening_moves`, `result`, `learner_outcome` and `id` are optional, so
+championship games can be reviewed once they store move sequences):
+
+```bash
+python -m sttt.ai reanalyse --records runs/main/records \
+  --checkpoint runs/main/latest.pt --simulations 2048 \
+  --output runs/main/loss-review.json --outcomes loss draw
+```
+
+The report lists, per game, each suspected mistake with ply, mover, played
+move, best alternative, both Q values, the Q gap and whether it is proven.
 
 ## Evaluation launcher
 
