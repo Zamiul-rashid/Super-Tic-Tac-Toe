@@ -333,3 +333,28 @@ class GameSplitTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class StrongOpponentPriorityTests(unittest.TestCase):
+    def _record(self, i, kind, outcome, **match):
+        return {'id': str(i), 'match': {'kind': kind, 'learner_side': 1, **match},
+                'learner_outcome': outcome, 'result': -1, 'actions': [40, 36, 4, 44],
+                'movers': ['learner', 'opponent', 'learner', 'opponent']}
+
+    def test_consistent_winners_are_strong(self):
+        from sttt.reanalysis import strong_opponents, update_opponent_scores
+        scores = {}
+        records = ([self._record(i, 'utttai', 'loss', simulations=128) for i in range(3)]
+                   + [self._record(9, 'alphabeta', 'win', depth=4), self._record(10, 'self', 'loss')])
+        update_opponent_scores(scores, records)
+        self.assertEqual(strong_opponents(scores), {'utttai-s128'})
+        self.assertNotIn('self', scores)
+
+    def test_losses_to_strong_opponents_fill_the_budget_first(self):
+        from sttt.reanalysis import select_tasks
+        records = [self._record(0, 'utttai', 'loss', simulations=128),
+                   self._record(1, 'alphabeta', 'loss', depth=4)]
+        tasks = select_tasks(records, budget=4, rng=np.random.default_rng(1), priority={'utttai-s128'})
+        self.assertEqual([t['id'] for t in tasks], ['0'])
+        tasks = select_tasks(records, budget=6, rng=np.random.default_rng(1), priority={'utttai-s128'})
+        self.assertEqual(sorted(len(t['plies']) for t in tasks), [2, 4])

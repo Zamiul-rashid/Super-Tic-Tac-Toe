@@ -87,7 +87,7 @@ Training records learner targets in opponent games and both sides in self-play,
 so game quotas are not replay-position quotas. `best.pt` is manually selected;
 periodic AlphaBeta evaluation does not promote it automatically.
 
-## Game records and loss review (opt-in)
+## Game records and loss review (on by default)
 
 Both are off by default; a run without these flags trains exactly as before.
 Pass them to `sttt.ai train`, or after `--` to `scripts/train.sh`.
@@ -95,7 +95,8 @@ Pass them to `sttt.ai train`, or after `--` to `scripts/train.sh`.
 | Flag | Default | Effect |
 | --- | --- | --- |
 | `--save-game-records DIR` | off | Writes `DIR/games-NNNN.jsonl` per iteration: every action, its mover (`opening`/`learner`/`opponent`), the match spec, result, and the learner's root search per move (visit policy, root Q, root value). |
-| `--reanalyse` | off | Re-searches sampled decision points of selected games, both sides, from the same parent position with the current network and adds refreshed rows to replay. |
+| `--reanalyse` / `--no-reanalyse` | on | Re-searches sampled decision points of selected games, both sides, from the same parent position with the current network and adds refreshed rows to replay. |
+| `--reanalyse-strong-threshold T` | 0.5 | An opponent is "strong" while our running score against it (win 1, draw 0.5, loss 0; moving average per opponent and strength setting) is below `T`. Losses to strong opponents fill the reanalysis budget first; `metrics.jsonl` logs `strong_opponents` and `opponent_scores`. Scores are rebuilt after a resume. |
 | `--reanalyse-simulations N` | 4 x `--simulations` | Reanalysis budget. |
 | `--reanalyse-fraction F` | 0.25 | Cap: at most `F` x new self-play positions are added per iteration, sampled uniformly from eligible decision points. |
 | `--reanalyse-outcomes` | `loss` | Learner outcomes reviewed (`loss draw win`). Decisive self-play games count as losses. |

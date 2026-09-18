@@ -642,8 +642,11 @@ def _review_iteration(args, iteration, seeds, results, model, pool, use_cpp,
     if not records_dir and not getattr(args, 'reanalyse', False):
         return None
     from .reanalysis import (game_record, game_report, reanalysis_rows, select_tasks,
-                             summarize, write_jsonl)
+                             strong_opponents, summarize, update_opponent_scores, write_jsonl)
     records = [game_record(iteration, i, seeds[i], *result) for i, result in enumerate(results)]
+    # ponytail: in-memory per-run scores, rebuilt after a resume; persist in the checkpoint if that matters.
+    scores = update_opponent_scores(args.__dict__.setdefault('_opponent_scores', {}), records)
+    strong = strong_opponents(scores, getattr(args, 'reanalyse_strong_threshold', .5))
     if records_dir:
         write_jsonl(Path(records_dir) / f'games-{iteration:04d}.jsonl', records)
     if not getattr(args, 'reanalyse', False):
@@ -654,7 +657,7 @@ def _review_iteration(args, iteration, seeds, results, model, pool, use_cpp,
     # Own stream, so enabling review never shifts the self-play/sampling RNG.
     rng = np.random.default_rng(np.random.SeedSequence([int(args.seed), int(iteration), 5501]))
     tasks = select_tasks(records, args.reanalyse_outcomes, args.reanalyse_sides, budget, rng,
-                         args.reanalyse_margin)
+                         args.reanalyse_margin, priority=strong)
     simulations = args.reanalyse_simulations or 4 * args.simulations
     reviews, inference = pool.reanalyse(model, tasks, simulations, search_config(args),
                                         args.leaf_batch, use_cpp=use_cpp)
@@ -671,6 +674,8 @@ def _review_iteration(args, iteration, seeds, results, model, pool, use_cpp,
     return {**summarize(reviews), 'games': len(tasks), 'budget': budget,
             'new_positions': new_positions, 'rows_added': len(rows), 'simulations': simulations,
             'value_target': args.value_target, 'seconds': round(seconds, 3),
+            'strong_opponents': sorted(strong),
+            'opponent_scores': {k: round(v, 3) for k, v in sorted(scores.items())},
             'inference_positions': inference.get('inference_positions', 0)}
 
 
@@ -999,9 +1004,13 @@ def main():
     t.add_argument('--save-game-records', metavar='DIR', default=None,
                    help='Write every game (actions, movers, learner root search) to '
                         'DIR/games-NNNN.jsonl per iteration; off by default')
-    t.add_argument('--reanalyse', action='store_true',
-                   help='Loss review: re-search sampled decision points (both sides) of selected '
-                        'games with a stronger budget and add refreshed targets to replay')
+    t.add_argument('--reanalyse', action=argparse.BooleanOptionalAction, default=True,
+                   help='Loss review (default on): re-search sampled decision points (both sides) '
+                        'of lost games with a stronger budget and add refreshed targets to replay; '
+                        'losses to opponents that beat us consistently are reviewed first')
+    t.add_argument('--reanalyse-strong-threshold', type=float, default=.5,
+                   help='An opponent counts as strong while our running score against it is '
+                        'below this (default 0.5)')
     t.add_argument('--reanalyse-simulations', type=positive, default=None,
                    help='Reanalysis search budget (default: 4 x --simulations)')
     t.add_argument('--reanalyse-fraction', type=float, default=.25,

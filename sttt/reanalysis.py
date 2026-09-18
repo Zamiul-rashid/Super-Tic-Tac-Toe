@@ -144,26 +144,60 @@ def review_game(evaluator, task, simulations, config, leaf_batch=1, use_cpp=Fals
     return reviews
 
 
-def select_tasks(records, outcomes=('loss',), sides=SIDES, budget=None, rng=None, margin=.3):
+def opponent_key(match):
+    """Opponent identity at its strength setting, e.g. 'utttai-s128', 'alphabeta-d8'."""
+    kind = match.get('kind', 'self')
+    if kind == 'alphabeta':
+        return f"alphabeta-d{match.get('depth')}"
+    if kind in ('utttai', 'openspiel', 'history', 'best'):
+        return f"{kind}-s{match.get('simulations')}"
+    return kind
+
+
+def update_opponent_scores(scores, records, alpha=.1):
+    """Running learner score per opponent (win 1, draw .5, loss 0); self-play skipped."""
+    for record in records:
+        match = record.get('match') or {}
+        if match.get('kind', 'self') == 'self':
+            continue
+        score = {'win': 1., 'draw': .5, 'loss': 0.}[record['learner_outcome']]
+        key = opponent_key(match)
+        scores[key] = score if key not in scores else (1 - alpha) * scores[key] + alpha * score
+    return scores
+
+
+def strong_opponents(scores, threshold=.5):
+    """Opponents that beat us consistently: running learner score below `threshold`."""
+    return {key for key, score in scores.items() if score < threshold}
+
+
+def select_tasks(records, outcomes=('loss',), sides=SIDES, budget=None, rng=None, margin=.3,
+                 priority=None):
     """Decision points to review, grouped per game.
 
     Opening plies are random, not decisions, and are skipped. Records without
     `learner_outcome` / `movers` (e.g. external games) are always eligible and
     every ply after their optional `opening_moves` is reviewed. With `budget`,
-    a uniform sample of that many plies.
+    a uniform sample of that many plies. With `priority` (a set of opponent
+    keys), plies from games against those opponents fill the budget first.
     """
-    candidates = []
+    candidates, first = [], []
     for g, record in enumerate(records):
         if 'learner_outcome' in record and record['learner_outcome'] not in outcomes:
             continue
         opening = int(record.get('opening_moves', 0))
         movers = record.get('movers') or (['opening'] * opening
                                           + ['unknown'] * (len(record['actions']) - opening))
-        candidates += [(g, ply) for ply, mover in enumerate(movers)
-                       if mover != 'opening' and (mover == 'unknown' or mover in sides)]
-    if budget is not None and len(candidates) > budget:
+        plies = [(g, ply) for ply, mover in enumerate(movers)
+                 if mover != 'opening' and (mover == 'unknown' or mover in sides)]
+        preferred = priority and opponent_key(record.get('match') or {}) in priority
+        (first if preferred else candidates).extend(plies)
+    if budget is not None and len(first) + len(candidates) > budget:
         rng = rng if rng is not None else np.random.default_rng(0)
-        candidates = [candidates[i] for i in sorted(rng.choice(len(candidates), budget, replace=False))]
+        pick = lambda pool, n: [pool[i] for i in sorted(rng.choice(len(pool), n, replace=False))]
+        first = pick(first, min(budget, len(first)))
+        candidates = pick(candidates, budget - len(first))
+    candidates = sorted(first + candidates)
     tasks = {}
     for g, ply in candidates:
         if g not in tasks:

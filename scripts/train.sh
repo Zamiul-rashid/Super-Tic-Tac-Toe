@@ -33,7 +33,7 @@ Common options:
   -h, --help                    Show this help
 
 Arguments after -- are forwarded to `python -m sttt.ai train`, e.g. the
-opt-in `--save-game-records DIR --reanalyse` loss review. The source
+opt-in `--save-game-records DIR`, or `--no-reanalyse` to turn off the default loss review. The source
 checkpoint is frozen into OUTPUT before use.
 EOF
 }
