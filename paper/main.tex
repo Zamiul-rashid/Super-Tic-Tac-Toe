@@ -265,41 +265,11 @@ deviation drops below 0.02 fixed it.
 
 Pure self-play can produce a player that is strong against itself and
 brittle against anything else, so each training game's opponent is drawn
-from a quota-controlled population (Table~\ref{tab:population}). Quotas
+from a quota-controlled population (Section~\ref{sec:opponents}). Quotas
 are per 100 games and carry across iterations; the cursor is checkpointed.
 In self-play both sides' positions are stored; in opponent games only the
 learner's---the opponent shapes what the learner sees, but its moves are
 never used as policy labels.
-
-\begin{table}[t]
-  \centering\footnotesize
-  \caption{Training opponents, games per 100 (\code{configs/population/baseline.json}).}
-  \label{tab:population}
-  \begin{tabular}{@{}lrl@{}}
-    \toprule
-    Family & Quota & Budget \\
-    \midrule
-    Self-play & 30 & learner search, both sides \\
-    \utttai\ & 25 & 64 / 128 / 256 simulations \\
-    AlphaBeta & 25 & depth 4--8; 100k--500k nodes \\
-    Historical checkpoints & 10 & 128 / 256 / 512 simulations \\
-    Best checkpoint & 5 & 128 / 256 / 512 simulations \\
-    Tactical / threat bots & 3 & depth 2 \\
-    OpenSpiel MCTS & 1 & 128--1024 rollouts / decision \\
-    Behavioural styles & 1 & fixed policies plus noise \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-Two external engines sit in the population. \textbf{\utttai}
-\cite{waczynski2021utttai} is a published AlphaZero-like engine with a
-deployed ONNX network, trained upstream for about ten weeks; we vendor its
-Python reference at a pinned revision and run its own search (fresh root
-each move) in a persistent subprocess. \textbf{OpenSpiel}
-\cite{lanctot2019openspiel} supplies DeepMind's official environment with
-rollout MCTS; its budget is per decision because it splits a free move into
-a board choice and a cell choice. A failing engine fails the game rather
-than being silently replaced.
 
 \subsection{Training loop}
 
@@ -339,6 +309,145 @@ proven), and cost about 6~s per iteration.
   health signal: opponents and replay contents change over time.}
   \label{fig:training}
 \end{figure*}
+
+% ---------------------------------------------------------------------
+\section{Training Opponents}
+\label{sec:opponents}
+
+The population is what the learner actually plays against, so it deserves
+its own description. It is built on one assumption: an agent that only ever
+meets its own current policy learns the answers to its own questions.
+Table~\ref{tab:population} gives the quotas, and the Elo column is what each
+opponent was worth in the iteration-6000 pool, anchored at AlphaBeta d4
+$=1500$. The pool spans roughly 1100 Elo, which is the point---a curriculum
+made only of strong opponents teaches nothing about punishing weak play, and
+one made only of weak opponents never exposes a real mistake.
+
+\begin{table}[t]
+  \centering\footnotesize
+  \caption{The training population: games per 100 scheduled games
+  (\code{configs/population/baseline.json}), the knob that sets each
+  family's strength, and its pool Elo in the iteration-6000 championship
+  (anchor AlphaBeta d4 $=1500$; $^\S$from the eight-entrant iteration-4530
+  pool; ``--'' means it was never a championship entrant).}
+  \label{tab:population}
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{@{}lrlr@{}}
+    \toprule
+    Family & Quota & Strength knob & Elo \\
+    \midrule
+    Self-play & 30 & learner budget, both sides & --- \\
+    \utttai\ & 25 & 64 / 128 / 256 simulations & 2325 \\
+    AlphaBeta & 25 & depth 4--8; 100k--500k nodes & 1500--1960$^\S$ \\
+    Past checkpoints & 10 & 128 / 256 / 512 simulations & --- \\
+    Best checkpoint & 5 & 128 / 256 / 512 simulations & --- \\
+    Tactical & 2 & depth 2; 6k--16k nodes & 1310 \\
+    OpenSpiel MCTS & 1 & 128--1024 rollouts / decision & 1207 \\
+    Threat-block & 1 & 12k nodes; threat ranking & 1181 \\
+    Behavioural styles & 1 & fixed policy + noise & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{AlphaBeta, and what depth buys}
+The workhorse is a classical negamax searcher with alpha--beta pruning
+\cite{knuth1975alphabeta}, at a quarter of all training games and the only
+opponent whose strength can be dialled continuously. Before searching it
+screens exactly: if a move wins the game outright it is played, and any move
+that lets the opponent win on the reply is discarded. It then iteratively
+deepens from 1 to its depth limit, and only a \emph{completed} depth is
+allowed to replace the previous decision, so exhausting the node budget
+degrades the move rather than corrupting it. Leaves are scored by a
+zero-sum heuristic that counts lines at both scales---macro lines weighted
+$(0,3,16,100)$ for one, two and three boards owned, plus five points per
+board owned, plus micro lines inside every still-open board weighted
+$(0,0.15,1,4)$---squashed through $0.95\tanh(\cdot/30)$ so no heuristic
+estimate can ever be mistaken for a proved win.
+
+Two knobs set its strength, and they are not interchangeable. The
+\emph{depth} limit sets how far it looks; the \emph{node budget} caps the
+work and silently truncates the depth when it binds. Table~\ref{tab:depth}
+shows what depth costs and what it is worth. Cost is brutal and remarkably
+regular: on this machine each additional two plies multiplies the time per
+move by roughly 17 (measured ratios 16.2, 17.6, 17.4 and 17.8), so depth 10
+costs about 5{,}500 times more per move than depth 4. The return is far
+gentler---about 220 Elo for the first two plies and another 240 for the
+next four. This is precisely why a neural agent is worth building: our
+network at 512 simulations beats the depth-10 searcher, which spends
+0.28~s per move exploring tens of millions of nodes, because a learned
+prior concentrates a few hundred simulations on the moves that matter.
+In training we use depths 4--8 with node caps of 100k--500k, which keeps
+each opponent move in the sub-millisecond range so that game generation
+stays dominated by the learner's own search rather than by its sparring
+partner.
+
+\begin{table}[t]
+  \centering\footnotesize
+  \caption{AlphaBeta cost against strength. Time is the mean over 83
+  positions from six games on this machine (native engine, 50M-node cap,
+  single thread); Elo is pool-relative as in Table~\ref{tab:population}.
+  $^\S$iteration-4530 pool. $^\P$depth 2 at a 10k-node cap is the
+  \code{tactical} bot.}
+  \label{tab:depth}
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{@{}rrrr@{}}
+    \toprule
+    Depth & Mean ms/move & Median ms/move & Pool Elo \\
+    \midrule
+    2 & 0.003 & 0.003 & 1310$^\P$ \\
+    4 & 0.051 & 0.042 & 1500 \\
+    6 & 0.90 & 0.56 & 1719 \\
+    8 & 15.7 & 9.07 & --- \\
+    10 & 280.3 & 123.1 & 1960$^\S$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Shallow tactical bots}
+\code{tactical} is the same searcher pinned to depth 2, and
+\code{threat-block} replaces the heuristic with an explicit threat count: it
+discards any move allowing an immediate loss, then ranks what remains by the
+heuristic plus 0.5 per macro line it brings to two-of-three, minus 0.75 per
+immediate win it concedes, plus a small bonus for winning the local board,
+breaking ties at random. At roughly 1200--1300 Elo these two are weak, but
+they are weak in a specific way: they punish an unblocked line immediately.
+They cost microseconds, so they are nearly free to schedule.
+
+\paragraph{Behavioural styles}
+The style bots follow fixed policies---prefer the centre, prefer corners,
+grab the local win, grab the global win---sampled stochastically. They are
+the weakest entries and are deliberately irrational. Their purpose is
+coverage: they steer games into positions a competent opponent would never
+allow, so the network sees states that self-play alone never visits.
+
+\paragraph{Past selves}
+Ten per cent of games are against saved snapshots of the network and five
+per cent against the best checkpoint, all at 128--512 simulations. This is
+the standard guard against cycling, where a policy drifts into beating only
+its immediate predecessor. When no snapshot exists yet the slot falls back
+to self-play, and the metrics record the substitution rather than hiding it.
+
+\paragraph{External engines}
+\utttai\ \cite{waczynski2021utttai} is a published AlphaZero-like engine
+with a deployed ONNX network, trained upstream for about ten weeks. At 2325
+Elo it is the strongest member of the pool and takes a quarter of all
+training games; it is both the sparring partner and, in evaluation, the
+opponent we are measured against---a dual role we return to in
+Section~\ref{sec:discussion}. \textbf{OpenSpiel} \cite{lanctot2019openspiel}
+contributes DeepMind's official environment with rollout MCTS, an algorithm
+family with no learned prior at all; its budget is per decision because it
+splits a free move into a board choice and a cell choice. Both run as
+external processes, and a failing engine fails the game rather than being
+silently replaced by a weaker substitute.
+
+\paragraph{Noise}
+Every opponent family carries a move-noise probability $\varepsilon$: with
+that probability the opponent plays a uniformly random legal move instead of
+its own choice. The setting is deliberately graded by how deterministic the
+opponent otherwise is---0--2\% for \utttai\ and AlphaBeta, 3\% for
+checkpoints and OpenSpiel, 8\% for \code{threat-block} and 12\% for the
+tactical and style bots. Without it, a deterministic searcher replays the
+same game from the same opening every time it is scheduled.
 
 % ---------------------------------------------------------------------
 \section{Engineering}
