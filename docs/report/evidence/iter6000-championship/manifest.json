@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "kind": "grand-championship",
-  "run_id": "5e8cde72b1bd4272926b718383590ff5",
-  "created_at": "2026-09-18T14:49:22.683571+00:00",
+  "run_id": "ae37de632c394190bcf2f8b34bb26485",
+  "created_at": "2026-09-18T16:11:16.698986+00:00",
   "status": "completed",
   "checkpoints": {
     "candidate": {
-      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/grand-championship-6000/championship/evaluation-inputs/candidate/model-6000.pt",
+      "path": "/home/mt/Super-Tic-Tac-Toe/runs/championship-6000-d10/championship/evaluation-inputs/candidate/model-6000.pt",
       "sha256": "e943b3ba6b5e2bd843e0a2552b59decfc1bfc36a174a370d893b00781f2e97a7",
       "sha8": "e943b3ba",
       "iteration": 6000,
@@ -22,18 +22,19 @@
     "leaf_batch": 16,
     "anchor": "cpp-alphabeta-d4",
     "checkpoint_source": "runs/unet-pipeline-phase3c-reanalyse/model-6000.pt",
-    "opponent_specs": {
-      "cpp-alphabeta-d6": "cpp-alphabeta:6:50000000",
-      "cpp-alphabeta-d4": "cpp-alphabeta:4:50000000",
-      "tactical": "tactical",
-      "threat-block": "threat-block",
-      "openspiel-mcts": "openspiel-mcts:100",
-      "utttai-128": "utttai:128"
-    },
+    "opponent_specs": [
+      "cpp-alphabeta:10:50000000",
+      "cpp-alphabeta:6:50000000",
+      "cpp-alphabeta:4:50000000",
+      "tactical",
+      "threat-block",
+      "openspiel-mcts:100",
+      "utttai:128"
+    ],
     "equal_time_comparison": false,
     "resolved_entrants": {
       "ckpt-iter6000-e943b3ba-s512": {
-        "spec": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/grand-championship-6000/championship/evaluation-inputs/candidate/model-6000.pt",
+        "spec": "/home/mt/Super-Tic-Tac-Toe/runs/championship-6000-d10/championship/evaluation-inputs/candidate/model-6000.pt",
         "type": "CheckpointBot",
         "simulations": 512,
         "leaf_batch": 16,
@@ -41,10 +42,16 @@
         "backend_info": {
           "requested": "cpp",
           "actual": "cpp",
-          "version": "20260918084249_63a72ea",
+          "version": "20260918154128_d36d34b",
           "fallback_reason": null,
           "cpp_available": true
         }
+      },
+      "cpp-alphabeta-d10": {
+        "spec": "cpp-alphabeta:10:50000000",
+        "type": "CppAlphaBetaBot",
+        "depth": 10,
+        "node_budget": 50000000
       },
       "cpp-alphabeta-d6": {
         "spec": "cpp-alphabeta:6:50000000",
@@ -69,7 +76,7 @@
         "type": "ThreatBlockBot",
         "node_budget": 12000
       },
-      "openspiel-mcts": {
+      "openspiel-mcts-100": {
         "spec": "openspiel-mcts:100",
         "type": "OpenSpielBot",
         "simulations": 100,
@@ -92,7 +99,7 @@
     "--checkpoint",
     "runs/unet-pipeline-phase3c-reanalyse/model-6000.pt",
     "--output",
-    "runs/grand-championship-6000",
+    "runs/championship-6000-d10",
     "--championship-games",
     "20",
     "--simulations",
@@ -115,23 +122,31 @@
     "16",
     "--seed",
     "4242",
-    "--skip-sweep"
+    "--skip-sweep",
+    "--championship-opponents",
+    "cpp-alphabeta:10:50000000",
+    "cpp-alphabeta:6:50000000",
+    "cpp-alphabeta:4:50000000",
+    "tactical",
+    "threat-block",
+    "openspiel-mcts:100",
+    "utttai:128"
   ],
   "environment": {
-    "python": "3.14.6",
-    "executable": "/home/mt/miniconda3/envs/sttt/bin/python",
-    "torch": "2.14.0+cu130",
+    "python": "3.12.3",
+    "executable": "/usr/bin/python3",
+    "torch": "2.13.0+cu130",
     "cuda_available": true,
     "cuda_version": "13.0",
     "native": {
       "available": true,
-      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+      "path": "/home/mt/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-312-x86_64-linux-gnu.so",
       "version": "0.9.0",
-      "build_id": "20260918084249_63a72ea",
-      "source_revision": "63a72ea"
+      "build_id": "20260918154128_d36d34b",
+      "source_revision": "d36d34b"
     },
-    "torch_threads": 1,
-    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+    "torch_threads": 6,
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
     "machine": "x86_64",
     "packages": {
       "numpy": "2.5.3",
@@ -169,96 +184,107 @@
   "summary": {
     "participants": [
       "ckpt-iter6000-e943b3ba-s512",
+      "cpp-alphabeta-d10",
       "cpp-alphabeta-d6",
       "cpp-alphabeta-d4",
       "tactical",
       "threat-block",
-      "openspiel-mcts",
+      "openspiel-mcts-100",
       "utttai-128"
     ],
     "games_per_matchup": 20,
-    "total_games": 420,
-    "elapsed_seconds": 893.26,
+    "total_games": 560,
+    "elapsed_seconds": 1916.87,
     "side_stats": {
-      "x_wins": 186,
-      "o_wins": 188,
-      "draws": 46,
-      "total_games": 420,
-      "x_win_rate": 0.44285714285714284,
-      "o_win_rate": 0.44761904761904764,
-      "draw_rate": 0.10952380952380952
+      "x_wins": 260,
+      "o_wins": 247,
+      "draws": 53,
+      "total_games": 560,
+      "x_win_rate": 0.4642857142857143,
+      "o_win_rate": 0.44107142857142856,
+      "draw_rate": 0.09464285714285714
     },
     "anchor": "cpp-alphabeta-d4",
     "ratings": {
       "ckpt-iter6000-e943b3ba-s512": {
-        "elo": 2341.85,
-        "elo_ci95": 169.43,
-        "glicko2": 1920.7,
-        "glicko2_rd": 46.98,
-        "wins": 103,
-        "draws": 13,
-        "losses": 4,
-        "games": 120
+        "elo": 2318.43,
+        "elo_ci95": 127.97,
+        "glicko2": 1894.39,
+        "glicko2_rd": 43.55,
+        "wins": 117,
+        "draws": 14,
+        "losses": 9,
+        "games": 140
+      },
+      "cpp-alphabeta-d10": {
+        "elo": 2085.15,
+        "elo_ci95": 112.67,
+        "glicko2": 1755.63,
+        "glicko2_rd": 43.55,
+        "wins": 98,
+        "draws": 14,
+        "losses": 28,
+        "games": 140
       },
       "cpp-alphabeta-d6": {
-        "elo": 1719.43,
-        "elo_ci95": 105.15,
-        "glicko2": 1601.99,
-        "glicko2_rd": 46.98,
-        "wins": 68,
-        "draws": 8,
-        "losses": 44,
-        "games": 120
+        "elo": 1692.07,
+        "elo_ci95": 95.34,
+        "glicko2": 1525.56,
+        "glicko2_rd": 43.55,
+        "wins": 67,
+        "draws": 13,
+        "losses": 60,
+        "games": 140
       },
       "cpp-alphabeta-d4": {
         "elo": 1500.0,
-        "elo_ci95": 97.71,
-        "glicko2": 1440.51,
-        "glicko2_rd": 46.98,
-        "wins": 44,
-        "draws": 18,
-        "losses": 58,
-        "games": 120
+        "elo_ci95": 93.91,
+        "glicko2": 1394.1,
+        "glicko2_rd": 43.55,
+        "wins": 49,
+        "draws": 13,
+        "losses": 78,
+        "games": 140
       },
       "tactical": {
-        "elo": 1310.01,
-        "elo_ci95": 99.44,
-        "glicko2": 1274.78,
-        "glicko2_rd": 46.98,
-        "wins": 27,
-        "draws": 13,
-        "losses": 80,
-        "games": 120
+        "elo": 1310.06,
+        "elo_ci95": 98.14,
+        "glicko2": 1251.68,
+        "glicko2_rd": 43.55,
+        "wins": 29,
+        "draws": 14,
+        "losses": 97,
+        "games": 140
       },
       "threat-block": {
-        "elo": 1181.42,
-        "elo_ci95": 105.8,
-        "glicko2": 1164.29,
-        "glicko2_rd": 46.98,
-        "wins": 12,
-        "draws": 17,
-        "losses": 91,
-        "games": 120
+        "elo": 1036.93,
+        "elo_ci95": 120.26,
+        "glicko2": 1069.09,
+        "glicko2_rd": 43.55,
+        "wins": 3,
+        "draws": 16,
+        "losses": 121,
+        "games": 140
       },
-      "openspiel-mcts": {
-        "elo": 1207.25,
-        "elo_ci95": 104.1,
-        "glicko2": 1185.54,
-        "glicko2_rd": 46.98,
-        "wins": 18,
-        "draws": 10,
-        "losses": 92,
-        "games": 120
+      "openspiel-mcts-100": {
+        "elo": 1245.91,
+        "elo_ci95": 101.21,
+        "glicko2": 1204.21,
+        "glicko2_rd": 43.55,
+        "wins": 24,
+        "draws": 11,
+        "losses": 105,
+        "games": 140
       },
       "utttai-128": {
-        "elo": 2324.99,
-        "elo_ci95": 167.86,
-        "glicko2": 1912.2,
-        "glicko2_rd": 46.98,
-        "wins": 102,
-        "draws": 13,
-        "losses": 5,
-        "games": 120
+        "elo": 2337.89,
+        "elo_ci95": 129.68,
+        "glicko2": 1905.35,
+        "glicko2_rd": 43.55,
+        "wins": 120,
+        "draws": 11,
+        "losses": 9,
+        "games": 140
       }
     }
   }

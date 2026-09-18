@@ -246,23 +246,33 @@
       "key": "iter6000",
       "candidate": "ckpt-iter6000-e943b3ba-s512",
       "matchups": {
+        "cpp-alphabeta-d10": {
+          "wins": 11,
+          "draws": 5,
+          "losses": 4,
+          "score": 0.675,
+          "pair_bootstrap_ci95": [
+            0.525,
+            0.825
+          ]
+        },
         "cpp-alphabeta-d6": {
-          "wins": 19,
-          "draws": 0,
-          "losses": 1,
+          "wins": 18,
+          "draws": 2,
+          "losses": 0,
           "score": 0.95,
           "pair_bootstrap_ci95": [
-            0.85,
+            0.875,
             1.0
           ]
         },
         "cpp-alphabeta-d4": {
-          "wins": 19,
-          "draws": 1,
+          "wins": 20,
+          "draws": 0,
           "losses": 0,
-          "score": 0.975,
+          "score": 1.0,
           "pair_bootstrap_ci95": [
-            0.925,
+            1.0,
             1.0
           ]
         },
@@ -286,7 +296,7 @@
             1.0
           ]
         },
-        "openspiel-mcts": {
+        "openspiel-mcts-100": {
           "wins": 20,
           "draws": 0,
           "losses": 0,
@@ -297,13 +307,13 @@
           ]
         },
         "utttai-128": {
-          "wins": 5,
-          "draws": 12,
-          "losses": 3,
-          "score": 0.55,
+          "wins": 8,
+          "draws": 7,
+          "losses": 5,
+          "score": 0.575,
           "pair_bootstrap_ci95": [
-            0.425,
-            0.7
+            0.375,
+            0.775
           ]
         }
       }

@@ -48,10 +48,12 @@ classical alpha--beta search and two external engines, and a C++ bitboard
 engine keeps the whole loop fast enough for a single workstation. We
 explain the game, the method, the implementation, and the measured results.
 The agent beats every classical baseline we built, including a depth-10
-alpha--beta searcher with a 50-million-node cap (78.5\% over 72 games), and
-the latest checkpoint (iteration 6000) finishes
-first in a seven-engine round robin, ahead of the strongest public engine we
-integrated, \utttai, with a 5--12--3 head-to-head record (55\%).
+alpha--beta searcher with a 50-million-node cap (78.5\% over 72 games). In
+an eight-engine round robin the latest checkpoint (iteration 6000) wins its
+head-to-head against the strongest public engine we integrated, \utttai\
+(8--7--5, 57.5\%), while placing second on aggregate score because \utttai\
+handles the depth-10 searcher better than we do---a reminder that pool rank
+depends on pool composition.
 \end{abstract}
 
 % ---------------------------------------------------------------------
@@ -319,7 +321,7 @@ its own description. It is built on one assumption: an agent that only ever
 meets its own current policy learns the answers to its own questions.
 Table~\ref{tab:population} gives the quotas, and the Elo column is what each
 opponent was worth in the iteration-6000 pool, anchored at AlphaBeta d4
-$=1500$. The pool spans roughly 1100 Elo, which is the point---a curriculum
+$=1500$. The pool spans roughly 1300 Elo, which is the point---a curriculum
 made only of strong opponents teaches nothing about punishing weak play, and
 one made only of weak opponents never exposes a real mistake.
 
@@ -327,9 +329,9 @@ one made only of weak opponents never exposes a real mistake.
   \centering\footnotesize
   \caption{The training population: games per 100 scheduled games
   (\code{configs/population/baseline.json}), the knob that sets each
-  family's strength, and its pool Elo in the iteration-6000 championship
-  (anchor AlphaBeta d4 $=1500$; $^\S$from the eight-entrant iteration-4530
-  pool; ``--'' means it was never a championship entrant).}
+  family's strength, and its pool Elo in the eight-entrant iteration-6000
+  championship (anchor AlphaBeta d4 $=1500$; ``--'' means it was never a
+  championship entrant).}
   \label{tab:population}
   \setlength{\tabcolsep}{3pt}
   \begin{tabular}{@{}lrlr@{}}
@@ -337,13 +339,13 @@ one made only of weak opponents never exposes a real mistake.
     Family & Quota & Strength knob & Elo \\
     \midrule
     Self-play & 30 & learner budget, both sides & --- \\
-    \utttai\ & 25 & 64 / 128 / 256 simulations & 2325 \\
-    AlphaBeta & 25 & depth 4--8; 100k--500k nodes & 1500--1960$^\S$ \\
+    \utttai\ & 25 & 64 / 128 / 256 simulations & 2338 \\
+    AlphaBeta & 25 & depth 4--8; 100k--500k nodes & 1500--2085 \\
     Past checkpoints & 10 & 128 / 256 / 512 simulations & --- \\
     Best checkpoint & 5 & 128 / 256 / 512 simulations & --- \\
     Tactical & 2 & depth 2; 6k--16k nodes & 1310 \\
-    OpenSpiel MCTS & 1 & 128--1024 rollouts / decision & 1207 \\
-    Threat-block & 1 & 12k nodes; threat ranking & 1181 \\
+    OpenSpiel MCTS & 1 & 128--1024 rollouts / decision & 1246 \\
+    Threat-block & 1 & 12k nodes; threat ranking & 1037 \\
     Behavioural styles & 1 & fixed policy + noise & --- \\
     \bottomrule
   \end{tabular}
@@ -371,7 +373,7 @@ shows what depth costs and what it is worth. Cost is brutal and remarkably
 regular: on this machine each additional two plies multiplies the time per
 move by roughly 17 (measured ratios 16.2, 17.6, 17.4 and 17.8), so depth 10
 costs about 5{,}500 times more per move than depth 4. The return is far
-gentler---about 220 Elo for the first two plies and another 240 for the
+gentler---about 190 Elo for the first two plies and another 390 for the
 next four. This is precisely why a neural agent is worth building: our
 network at 512 simulations beats the depth-10 searcher, which spends
 0.28~s per move exploring tens of millions of nodes, because a learned
@@ -386,8 +388,7 @@ partner.
   \caption{AlphaBeta cost against strength. Time is the mean over 83
   positions from six games on this machine (native engine, 50M-node cap,
   single thread); Elo is pool-relative as in Table~\ref{tab:population}.
-  $^\S$iteration-4530 pool. $^\P$depth 2 at a 10k-node cap is the
-  \code{tactical} bot.}
+  $^\P$depth 2 at a 10k-node cap is the \code{tactical} bot.}
   \label{tab:depth}
   \setlength{\tabcolsep}{5pt}
   \begin{tabular}{@{}rrrr@{}}
@@ -396,9 +397,9 @@ partner.
     \midrule
     2 & 0.003 & 0.003 & 1310$^\P$ \\
     4 & 0.051 & 0.042 & 1500 \\
-    6 & 0.90 & 0.56 & 1719 \\
+    6 & 0.90 & 0.56 & 1692 \\
     8 & 15.7 & 9.07 & --- \\
-    10 & 280.3 & 123.1 & 1960$^\S$ \\
+    10 & 280.3 & 123.1 & 2085 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -429,7 +430,7 @@ to self-play, and the metrics record the substitution rather than hiding it.
 
 \paragraph{External engines}
 \utttai\ \cite{waczynski2021utttai} is a published AlphaZero-like engine
-with a deployed ONNX network, trained upstream for about ten weeks. At 2325
+with a deployed ONNX network, trained upstream for about ten weeks. At 2338
 Elo it is the strongest member of the pool and takes a quarter of all
 training games; it is both the sparring partner and, in evaluation, the
 opponent we are measured against---a dual role we return to in
@@ -506,9 +507,8 @@ settings, library versions and the native build id, plus per-game rows.
   opponent). Score counts a draw as half a win; brackets are 95\%
   opening-pair bootstrap intervals. Iterations 4193 and 4530 predate the
   batched-search fix; 6000 was trained and evaluated after it.
-  $^\ddagger$AlphaBeta d10 was a championship entrant at iteration 4530 and
-  a separate 72-game match set at iteration 6000, on a different opening
-  corpus.}
+  $^\ddagger$A separate 72-game match set against depth-10 at iteration 6000
+  scored 78.5\% [70.1, 86.8].}
   \label{tab:results}
   \begin{tabular}{@{}lrlrlrl@{}}
     \toprule
@@ -516,16 +516,16 @@ settings, library versions and the native build id, plus per-game rows.
     \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
     Opponent & W--D--L & Score (\%) & W--D--L & Score (\%) & W--D--L & Score (\%) \\
     \midrule
-    AlphaBeta d10$^\ddagger$ & --- & --- & 46--11--15 & 71.5 [63.9, 79.2] & 48--17--7 & 78.5 [70.1, 86.8] \\
-    AlphaBeta d6 & 19--0--1 & 95.0 [85, 100] & 63--5--4 & 91.0 [85.4, 95.8] & 19--0--1 & 95.0 [85, 100] \\
-    AlphaBeta d4 & 18--2--0 & 95.0 [87.5, 100] & 70--1--1 & 97.9 [94.4, 100] & 19--1--0 & 97.5 [92.5, 100] \\
+    AlphaBeta d10$^\ddagger$ & --- & --- & 46--11--15 & 71.5 [63.9, 79.2] & 11--5--4 & 67.5 [52.5, 82.5] \\
+    AlphaBeta d6 & 19--0--1 & 95.0 [85, 100] & 63--5--4 & 91.0 [85.4, 95.8] & 18--2--0 & 95.0 [87.5, 100] \\
+    AlphaBeta d4 & 18--2--0 & 95.0 [87.5, 100] & 70--1--1 & 97.9 [94.4, 100] & 20--0--0 & 100 \\
     Tactical & 19--0--1 & 95.0 [85, 100] & 71--1--0 & 99.3 [97.9, 100] & 20--0--0 & 100 \\
     Threat-block & 20--0--0 & 100 & 72--0--0 & 100 & 20--0--0 & 100 \\
     OpenSpiel MCTS & 20--0--0 & 100 & 72--0--0 & 100 & 20--0--0 & 100 \\
-    \utttai\ (128) & 1--12--7 & 35.0 [25, 45] & 9--41--22 & 41.0 [35.4, 46.5] & 5--12--3 & 55.0 [42.5, 70] \\
+    \utttai\ (128) & 1--12--7 & 35.0 [25, 45] & 9--41--22 & 41.0 [35.4, 46.5] & 8--7--5 & 57.5 [37.5, 77.5] \\
     \midrule
-    All games & 97--14--9 & 86.7 & 403--59--42 & 85.8 & 103--13--4 & 91.2 \\
-    Pool rank (Elo) & \multicolumn{2}{l}{2nd (2138)} & \multicolumn{2}{l}{2nd (2201)} & \multicolumn{2}{l}{1st (2342)} \\
+    All games & 97--14--9 & 86.7 & 403--59--42 & 85.8 & 117--14--9 & 88.6 \\
+    Pool rank (Elo) & \multicolumn{2}{l}{2nd (2138)} & \multicolumn{2}{l}{2nd (2201)} & \multicolumn{2}{l}{2nd (2318)} \\
     \bottomrule
   \end{tabular}
 \end{table*}
@@ -538,9 +538,12 @@ settings, library versions and the native build id, plus per-game rows.
   \begin{minipage}[c]{0.60\textwidth}\centering
     \includegraphics[width=\linewidth]{championship-ratings-iter6000.png}
   \end{minipage}
-  \caption{Iteration-6000 championship. Left: round-robin score matrix
-  (row player's score against column player). Right: pool-local
-  Bayesian-Elo ratings with 95\% CIs, anchored at AlphaBeta d4 $=1500$.}
+  \caption{Iteration-6000 championship, eight entrants, 560 games. Left:
+  round-robin score matrix (row player's score against column player); the
+  top-left and bottom-right corners show that we beat \utttai\ head-to-head
+  (57.5\%) while losing ground to depth-10 (67.5\% against its 85\%).
+  Right: pool-local Bayesian-Elo ratings with 95\% CIs, anchored at
+  AlphaBeta d4 $=1500$; the top two intervals overlap almost entirely.}
   \label{fig:champ6000}
 \end{figure*}
 
@@ -570,21 +573,31 @@ local baseline and scores 35\% against \utttai\ (1--12--7). At iteration
 4530 the roster grew to eight entrants with 72 games per matchup (2{,}016
 games); the agent finishes second by score (85.8\%, Elo 2201) behind
 \utttai\ (91.3\%, Elo 2303) and ahead of depth-10 alpha--beta (71.2\%,
-Elo 1960), scoring 41.0\% against \utttai\ (9--41--22). At iteration 6000,
-trained with the fixed search and reanalysis, the agent finishes
-\emph{first} in a seven-entrant, 420-game round robin (Fig.~\ref{fig:champ6000}):
-91.2\% score and Elo 2342 against \utttai's 90.4\% and 2325, with a
-5--12--3 head-to-head record (55\%, CI 42.5--70\%). Every other entrant
-lost all 20 games to both. The \utttai\ matchup is only ten opening pairs
-and its interval includes 50\%: the two engines are now close, not
-separated. Against a depth-10 alpha--beta with a $5\times10^{7}$-node cap, iteration
-6000 scores 78.5\% over 72 games (48--17--7, CI 70.1--86.8\%), against
-71.5\% for iteration 4530 over the same number of games and 67.5\% and
-65\% for iterations 1806 and 4193 over 20-game sets. The two 72-game
-intervals overlap and use different opening corpora, so this is a
-consistent trend, not a measured improvement. A 20-game check of the 4530
-checkpoint at 2{,}000 simulations against \utttai\ scored 40\%, far too
-small a sample to say anything about search budget.
+Elo 1960), scoring 41.0\% against \utttai\ (9--41--22).
+
+Iteration 6000, trained with the fixed search and reanalysis, was evaluated
+in an eight-entrant, 560-game round robin (Fig.~\ref{fig:champ6000}). Two
+things happen at once, and they point in opposite directions. The agent
+\emph{wins} its head-to-head against \utttai\ for the first time, 8--7--5
+(57.5\%, CI 37.5--77.5\%), and beats every other entrant. Yet it places
+second on aggregate score, 88.6\% and Elo 2318 against \utttai's 89.6\% and
+2338, because the two differ on one matchup: \utttai\ scores 85\% against
+the depth-10 searcher where we score 67.5\%. Aggregate pool rank is
+therefore a statement about the pool, not about the two engines---swap
+depth-10 out and the order reverses, which is exactly what the earlier
+seven-entrant version of this championship did. The head-to-head is the
+meaningful comparison and we now win it, but over ten opening pairs its
+interval spans 37.5--77.5\%, so the honest reading remains that the two
+engines are close.
+
+Against a depth-10 alpha--beta with a $5\times10^{7}$-node cap, iteration
+6000 scores 78.5\% over a separate 72-game match set (48--17--7, CI
+70.1--86.8\%) and 67.5\% over the 20 games inside the championship
+(11--5--4, CI 52.5--82.5\%); the intervals overlap, and the larger set is
+the better estimate. Iteration 4530 scored 71.5\% over 72 games and
+iterations 1806 and 4193 scored 67.5\% and 65\% over 20-game sets. A
+20-game check of the 4530 checkpoint at 2{,}000 simulations against \utttai\
+scored 40\%, far too small a sample to say anything about search budget.
 
 \paragraph{Search audit.}
 Because the gap to \utttai\ was stable, we audited the search with stub
@@ -610,16 +623,20 @@ than a sequential search would give.
 
 The pipeline works: an agent trained on one GPU beats a 50-million-node
 depth-10 alpha--beta searcher 78.5\% of the time, every shallower baseline
-above 90\%, and now holds its own against \utttai. The move from the flat
+above 90\%, and now wins its head-to-head against \utttai. The move from the flat
 MLP to \net\ coincided with the first checkpoints that draw rather than
 lose against \utttai\ (in the flat-MLP era \utttai\ went 137--2--1 against
 the whole field), and the head-to-head score has climbed 27.5\% $\to$ 35\%
-$\to$ 41\% $\to$ 55\% across iterations 1806, 4193, 4530 and 6000.
+$\to$ 41\% $\to$ 57.5\% across iterations 1806, 4193, 4530 and 6000,
+crossing 50\% at the last step.
 
 What closed the gap between 4530 and 6000 cannot be attributed: the
 search fix, reanalysis, 1{,}470 more iterations and the decaying learning
 rate all changed together, and the 6000 head-to-head is ten opening pairs.
-The remaining differences from \utttai\ are also open: its network is
+The one place we are clearly behind is the depth-10 searcher, against which
+\utttai\ scores 85\% and we score 67.5\%: a deep exhaustive opponent
+separates the two priors more sharply than the two engines separate each
+other. The remaining differences from \utttai\ are also open: its network is
 about three times larger and was trained on roughly 8~million searched
 positions per stage; our policy targets at leaf batch 64 are flattened by
 virtual loss; and we regress the value to the game outcome where \utttai\
