@@ -23,6 +23,7 @@ solved-game oracle, and its depth cap alone does not prove that depth was
 reached.
 """
 import argparse
+import atexit
 import csv
 from dataclasses import asdict
 from itertools import combinations
@@ -258,10 +259,59 @@ def _render_budget_comparison_markdown(summary: dict) -> str:
     return "\n".join(lines)
 
 
+def _open_budget_bots(stack, frozen, budgets, opponent, leaf_batch, device, backend):
+    opp_kwargs = {"fallback": "raise"} if _is_external_spec(opponent) else {}
+    opponent_bot = open_bot(stack, opponent, **opp_kwargs)
+    candidate_bots = {budget: open_bot(stack, frozen, simulations=budget, leaf_batch=leaf_batch,
+                                       device=device, backend=backend,
+                                       name=entrant_name(Path(frozen), budget))
+                      for budget in budgets}
+    return opponent_bot, candidate_bots
+
+
+_WORKER_BOTS = None
+
+
+def _budget_worker_init(bot_args):
+    # One model + one opponent engine per worker process, reused for every pair.
+    global _WORKER_BOTS
+    stack = ExitStack()
+    atexit.register(stack.close)
+    _WORKER_BOTS = _open_budget_bots(stack, *bot_args)
+
+
+def _budget_worker_pair(index, entry, seed, save_moves):
+    opponent_bot, candidate_bots = _WORKER_BOTS
+    return run_matched_budget_comparison(candidate_bots=candidate_bots, opponent=opponent_bot,
+                                         openings=[entry], seed=seed, save_moves=save_moves,
+                                         index_offset=index)
+
+
+def _parallel_budget_comparison(bot_args, corpus, seed, save_moves, workers, on_game):
+    """Opening pairs spread over worker processes. Per-game RNG depends only on
+    (seed, pair, budget), so results match the sequential run game for game."""
+    import multiprocessing as mp
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    raw = {budget: [] for budget in bot_args[1]}
+    with ProcessPoolExecutor(workers, mp_context=mp.get_context("spawn"),
+                             initializer=_budget_worker_init, initargs=(bot_args,)) as pool:
+        futures = [pool.submit(_budget_worker_pair, i, entry, seed, save_moves)
+                   for i, entry in enumerate(corpus)]
+        for future in as_completed(futures):
+            for budget, results in future.result().items():
+                for result in results:
+                    raw[budget].append(result)
+                    on_game(budget, result)
+    for results in raw.values():
+        results.sort(key=lambda r: r.game_id)
+    return raw
+
+
 def run_budget_comparison(checkpoint: str, output_dir: Path, budgets=None, opponent: str = None,
                           pairs: int = 50, opening_plies: int = 2, seed: int = 4242,
                           openings_file: str | Path | None = None, save_moves: bool = True,
-                          backend: str = "auto", device: str = "cpu", leaf_batch: int = 16) -> dict:
+                          backend: str = "auto", device: str = "cpu", leaf_batch: int = 16,
+                          workers: int = 1) -> dict:
     """One checkpoint at several search budgets against one fixed opponent, on a
     pre-generated opening corpus SAVED to disk and shared identically by every
     budget, with the play order rotated per opening pair.
@@ -298,7 +348,7 @@ def run_budget_comparison(checkpoint: str, output_dir: Path, budgets=None, oppon
         checkpoints={"candidate": frozen},
         config={"budgets": budgets, "pairs": len(corpus), "opening_plies": opening_plies,
                 "opponent": opponent, "openings_file": str(openings_path), "backend": backend,
-                "device": device, "leaf_batch": leaf_batch, "save_moves": save_moves,
+                "device": device, "leaf_batch": leaf_batch, "save_moves": save_moves, "workers": workers,
                 "checkpoint_source": str(checkpoint), "budget_order": "rotated per opening pair",
                 "equal_time_comparison": False},
         seeds={"openings": seed, "game_rng": seed, "bootstrap": seed + 1},
@@ -319,17 +369,13 @@ def run_budget_comparison(checkpoint: str, output_dir: Path, budgets=None, oppon
     progress_path = output_dir / "progress.json"
     entrant_names: dict[int, str] = {}
 
-    with ExitStack() as stack:
-        opp_kwargs = {"fallback": "raise"} if _is_external_spec(opponent) else {}
-        opponent_bot = open_bot(stack, opponent, **opp_kwargs)
+    for budget in budgets:
+        entrant_names[budget] = entrant_name(frozen, budget)
+    bot_args = (str(frozen), budgets, opponent, leaf_batch, device, backend)
 
-        candidate_bots = {}
-        for budget in budgets:
-            name = entrant_name(frozen, budget)
-            entrant_names[budget] = name
-            candidate_bots[budget] = open_bot(stack, str(frozen), simulations=budget,
-                                              leaf_batch=leaf_batch, device=device,
-                                              backend=backend, name=name)
+    with ExitStack() as stack:
+        if workers <= 1:
+            opponent_bot, candidate_bots = _open_budget_bots(stack, *bot_args)
 
         with (output_dir / "games.partial.jsonl").open("w", encoding="utf-8") as journal:
             def record_game(budget, result):
@@ -341,9 +387,13 @@ def run_budget_comparison(checkpoint: str, output_dir: Path, budgets=None, oppon
                                     total_games=total_games, started=started,
                                     last_game={"budget": budget, **asdict(result)})
             try:
-                raw_results = run_matched_budget_comparison(
-                    candidate_bots=candidate_bots, opponent=opponent_bot, openings=corpus,
-                    seed=seed, save_moves=save_moves, on_game=record_game)
+                if workers <= 1:
+                    raw_results = run_matched_budget_comparison(
+                        candidate_bots=candidate_bots, opponent=opponent_bot, openings=corpus,
+                        seed=seed, save_moves=save_moves, on_game=record_game)
+                else:
+                    raw_results = _parallel_budget_comparison(
+                        bot_args, corpus, seed, save_moves, workers, record_game)
             except BaseException as exc:
                 manifest["status"] = "failed"
                 manifest["error"] = f"{type(exc).__name__}: {exc}"
@@ -629,6 +679,9 @@ def main(argv=None):
                         help="--budget-compare: record full move sequences and per-move "
                              "latency (default on)")
     parser.add_argument("--no-save-moves", dest="save_moves", action="store_false")
+    parser.add_argument("--workers", type=int, default=1,
+                        help="Budget comparison: parallel game processes, one model + opponent "
+                             "engine each (default 1)")
     args = parser.parse_args(argv)
 
     checkpoint = Path(args.checkpoint)
@@ -642,7 +695,8 @@ def main(argv=None):
                               opponent=args.opponent, pairs=args.pairs,
                               opening_plies=args.opening_plies, seed=args.seed,
                               openings_file=args.openings_file, save_moves=args.save_moves,
-                              backend=args.backend, device=args.device, leaf_batch=args.leaf_batch)
+                              backend=args.backend, device=args.device, leaf_batch=args.leaf_batch,
+                              workers=args.workers)
         return
     if not args.skip_championship:
         run_grand_championship(str(checkpoint), output / "championship",

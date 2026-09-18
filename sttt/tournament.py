@@ -326,6 +326,7 @@ def run_matched_budget_comparison(
     seed: int = 42,
     save_moves: bool = True,
     on_game: Callable[[Any, MatchResult], None] | None = None,
+    index_offset: int = 0,
 ) -> Dict[Any, List[MatchResult]]:
     """Play every candidate arm against one fixed opponent from an identical,
     pre-generated opening corpus, both colour assignments per opening.
@@ -357,7 +358,9 @@ def run_matched_budget_comparison(
         init_state = State()
         for move in opening_moves:
             init_state = init_state.play(int(move))
-        order = keys[idx % n:] + keys[:idx % n]
+        # `index_offset`: a parallel worker playing one slice keeps the global rotation.
+        turn = (idx + index_offset) % n
+        order = keys[turn:] + keys[:turn]
 
         for key in order:
             candidate = candidate_bots[key]

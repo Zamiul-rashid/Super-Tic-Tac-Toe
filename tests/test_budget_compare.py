@@ -259,6 +259,23 @@ class TestBudgetComparisonHarness(unittest.TestCase):
                                                    opponent="tactical", pairs=3, seed=13, **kwargs)
         return out, summary
 
+    def test_parallel_workers_reproduce_the_sequential_games(self):
+        # Real (tiny) checkpoint bots: spawned workers can't see mock patches.
+        from sttt.learning import Network
+        torch.manual_seed(0)
+        self.ckpt = self.root / "real" / "latest.pt"
+        self.ckpt.parent.mkdir(parents=True)
+        torch.save({"model": Network().state_dict(), "iteration": 1, "arch": "mlp"}, self.ckpt)
+        runs = {}
+        for workers in (1, 2):
+            out = self.root / f"out-w{workers}"
+            suite.run_budget_comparison(str(self.ckpt), out, budgets=[2, 4], opponent="tactical",
+                                        pairs=2, seed=13, backend="python", workers=workers)
+            runs[workers] = [{k: v for k, v in r.items() if k != "move_latencies"}
+                             for r in load_records(out / "games-budget-compare.jsonl")]
+        self.assertEqual(len(runs[1]), 2 * 2 * 2)
+        self.assertEqual(runs[1], runs[2])
+
     def test_opponent_is_required(self):
         with self.assertRaises(ValueError):
             suite.run_budget_comparison(str(self.ckpt), self.root / "out", budgets=[4, 8], opponent=None)

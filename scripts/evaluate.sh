@@ -38,6 +38,7 @@ Compare-mode options:
 
 Budget-compare-mode options:
   --opponent SPEC                bot spec, e.g. utttai:128 (required)
+  --workers N                    Parallel game processes; default: 1
   --pairs N                      opening pairs, both colours each; default: 50
   --opening-plies N              random opening plies per pair; default: 2
   --openings-file PATH           save/reuse the opening corpus; default: OUTPUT/openings.json
@@ -98,6 +99,7 @@ while [[ $# -gt 0 ]]; do
     --pairs) PAIRS=${2:?missing value for --pairs}; shift 2 ;;
     --opening-plies) OPENING_PLIES=${2:?missing value for --opening-plies}; shift 2 ;;
     --openings-file) OPENINGS_FILE=${2:?missing value for --openings-file}; shift 2 ;;
+    --workers) WORKERS=${2:?missing value for --workers}; shift 2 ;;
     --save-moves) SAVE_MOVES=1; shift ;;
     --no-save-moves) SAVE_MOVES=0; shift ;;
     --force) FORCE=1; shift ;;
@@ -168,6 +170,7 @@ case "$MODE" in
       --leaf-batch "$LEAF_BATCH"
     )
     if [[ -n "$OPENINGS_FILE" ]]; then COMMAND+=(--openings-file "$OPENINGS_FILE"); fi
+    if [[ -n "${WORKERS:-}" ]]; then COMMAND+=(--workers "$WORKERS"); fi
     if [[ $SAVE_MOVES -eq 0 ]]; then COMMAND+=(--no-save-moves); fi
     ;;
   *) echo "invalid --mode: $MODE" >&2; usage >&2; exit 2 ;;
