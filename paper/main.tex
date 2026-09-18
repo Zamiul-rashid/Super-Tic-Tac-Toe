@@ -532,21 +532,18 @@ settings, library versions and the native build id, plus per-game rows.
   \end{tabular}
 \end{table*}
 
+
 \begin{figure*}[!t]
   \centering
-  \begin{minipage}[c]{0.37\textwidth}\centering
-    \includegraphics[width=\linewidth]{championship-matrix-iter6000.png}
-  \end{minipage}\hfill
-  \begin{minipage}[c]{0.60\textwidth}\centering
-    \includegraphics[width=\linewidth]{championship-ratings-iter6000.png}
-  \end{minipage}
-  \caption{Iteration-6000 championship, eight entrants, 560 games. Left:
-  round-robin score matrix (row player's score against column player); the
-  top-left and bottom-right corners show that we beat \utttai\ head-to-head
-  (57.5\%) while losing ground to depth-10 (67.5\% against its 85\%).
-  Right: pool-local Bayesian-Elo ratings with 95\% CIs, anchored at
-  AlphaBeta d4 $=1500$; the top two intervals overlap almost entirely.}
-  \label{fig:champ6000}
+  \includegraphics[width=0.74\textwidth]{ratings-comparison-iter6000-budget.png}
+  \caption{Iteration 6000 rated in the same eight-entrant, 560-game pool at
+  two search budgets, anchored at AlphaBeta d4 $=1500$. Every opponent lands
+  within a few Elo of its own rating in the other championship, so the pool
+  itself has not moved; the agent alone does, by about 155 Elo, which is what
+  makes the two separate fits comparable. At 512 simulations it sits just
+  behind \utttai\ despite winning their head-to-head; at 2{,}000 it leads
+  outright. Ratings are pool-local, not universal.}
+  \label{fig:elo}
 \end{figure*}
 
 \section{Evaluation and Results}
@@ -578,7 +575,7 @@ games); the agent finishes second by score (85.8\%, Elo 2201) behind
 Elo 1960), scoring 41.0\% against \utttai\ (9--41--22).
 
 Iteration 6000, trained with the fixed search and reanalysis, was evaluated
-in an eight-entrant, 560-game round robin (Fig.~\ref{fig:champ6000}). Two
+in an eight-entrant, 560-game round robin (Fig.~\ref{fig:elo}). Two
 things happen at once, and they point in opposite directions. The agent
 \emph{wins} its head-to-head against \utttai\ for the first time, 8--7--5
 (57.5\%, CI 37.5--77.5\%), and beats every other entrant. Yet it places
@@ -601,15 +598,7 @@ iterations 1806 and 4193 scored 67.5\% and 65\% over 20-game sets. A
 20-game check of the 4530 checkpoint at 2{,}000 simulations against \utttai\
 scored 40\%, far too small a sample to say anything about search budget.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{ratings-comparison-iter6000-budget.png}
-  \caption{Iteration 6000 rated in the same eight-entrant pool at two search
-  budgets. Every opponent's rating is essentially unchanged between the two
-  championships, which is what makes the two fits comparable; the agent alone
-  moves, by about 155 Elo.}
-  \label{fig:budget}
-\end{figure}
+
 
 \begin{table}[t]
   \centering\footnotesize
@@ -641,12 +630,12 @@ scored 40\%, far too small a sample to say anything about search budget.
 \paragraph{What search budget buys}
 The one knob we can turn at inference time is the simulation count, so we
 reran the same championship with the candidate at 2{,}000 simulations
-instead of 512 (Table~\ref{tab:budget}, Fig.~\ref{fig:budget}). Quadrupling the budget is worth
+instead of 512 (Table~\ref{tab:budget}, Fig.~\ref{fig:elo}). Quadrupling the budget is worth
 about 155 Elo, and it improves every matchup that was not already saturated:
 against depth-10 the score rises from 67.5\% to 90.0\%, and against \utttai\
 from 57.5\% to 70.0\%. It is enough to take first place in the pool outright,
 2473 against \utttai's 2344. The two ratings come from separate fits rather
-than one pool containing both budgets, but Fig.~\ref{fig:budget} shows why
+than one pool containing both budgets, but Fig.~\ref{fig:elo} shows why
 they are nonetheless comparable: every opponent lands within a few Elo of
 its own rating in the other championship, so the pools themselves have not
 moved---only the agent has. The caveat is the obvious one: this
