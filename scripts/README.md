@@ -63,6 +63,52 @@ scripts/evaluate.sh --mode championship \
   --championship-opponents "cpp-alphabeta:10:50000000 cpp-alphabeta:6:50000000 cpp-alphabeta:4:50000000 tactical threat-block openspiel-mcts:100 utttai:128"
 ```
 
+### Matched-opening search-budget comparison
+
+`--mode budget-compare` plays ONE checkpoint at several search budgets against
+ONE fixed opponent, on a pre-generated opening corpus SAVED to disk (not just
+seeded) and shared identically by every budget. Each opening pair is played
+with both colour assignments, and the budget play order is rotated per pair
+(pair `k` starts with `budgets[k % len(budgets)]`) so no arm's games are
+confined to one block of wall-clock time -- a real concern when a separate
+training run is competing for the same CPU cores. Full move sequences and
+per-move latency are recorded by default (`--save-moves`); disable with
+`--no-save-moves`. Requires `--opponent`.
+
+```bash
+# 50 opening pairs, both colours: 300 games total, 100 per budget.
+scripts/evaluate.sh --mode budget-compare \
+  --checkpoint runs/current/latest.pt --output runs/budget-compare-current \
+  --budgets "128 512 2000" --opponent utttai:128 --pairs 50 \
+  --backend cpp --device cpu --leaf-batch 16 --seed 4242
+```
+
+Artifacts in the output directory:
+
+* `openings.json` -- the saved opening corpus (`--openings-file` to reuse a
+  specific path; reusing an existing file with a matching pair count and
+  opening-ply count skips regeneration and plays the identical openings again).
+* `budget_<N>_games.csv` -- per-game rows for each budget, same schema as the
+  sweep.
+* `games-budget-compare.jsonl` -- every recorded game's full action sequence,
+  in the format `python -m sttt.ai reanalyse --records` reads (`actions`,
+  `id`, `result`, `opening_moves`, `movers`; the candidate's own plies are
+  labelled `learner`).
+* `games.partial.jsonl` / `progress.json` -- live per-game journal, same
+  durability contract as a championship. `progress.json["status"]` is
+  `"running"`, `"completed"`, or `"failed"` -- it is updated on a failure, not
+  left claiming `"running"` after the process has already stopped.
+* `manifest.json` -- provenance: checkpoint hash/iteration, resolved config,
+  native build identity, environment.
+* `summary.json` / `summary.md` -- per-arm score and mean per-move latency,
+  plus paired score differences bootstrapped over opening pairs (the two
+  largest budgets are marked `"primary": true`) and, when moves were saved,
+  the fraction of commonly reached positions where two budgets chose a
+  different move.
+
+Timings recorded while another process (e.g. training) shares the machine are
+measured, not controlled; treat them as approximate.
+
 The Python files here are reusable harnesses behind these entry points or
 readiness/benchmark tools. Their filenames describe a capability, not a run.
 Training always requires a new run directory. Evaluation also refuses a

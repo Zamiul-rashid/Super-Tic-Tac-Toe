@@ -241,6 +241,12 @@ class TestChampionshipConfiguration(unittest.TestCase):
             self.assertEqual(manifest["status"], "failed")
             self.assertEqual(manifest["completed_games"], 1)
             self.assertEqual(len((out / "games.partial.jsonl").read_text().splitlines()), 1)
+            # Known caveat: progress.json used to keep reporting "running" forever
+            # after a failure, because only the manifest was updated on this path.
+            progress = json.loads((out / "progress.json").read_text())
+            self.assertEqual(progress["status"], "failed")
+            self.assertIn("error", progress)
+            self.assertEqual(progress["completed_games"], 1)
 
     def test_duplicate_specs_are_rejected_before_checkpoint_load(self):
         with self.assertRaisesRegex(ValueError, "duplicates"):

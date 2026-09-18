@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import json
 import shutil
 import sys
 import time
@@ -272,6 +273,98 @@ def pair_bootstrap_difference(results_a: Sequence[Any], results_b: Sequence[Any]
         "iterations": int(iterations),
         "seed": int(seed),
     }
+
+
+def write_progress_json(path: str | Path, *, status: str, completed_games: int, total_games: int,
+                        started: float, last_game: Mapping[str, Any] | None = None,
+                        error: str | None = None) -> Path:
+    """Atomic progress write shared by every long-running evaluation mode.
+
+    `status` must be the real outcome: "running" while in flight, "completed" or
+    "failed" once the process actually stops. A caller whose `except` block
+    updates the manifest but skips this leaves progress.json claiming "running"
+    forever after the run has already died.
+    """
+    payload: dict[str, Any] = {"status": status, "completed_games": completed_games,
+                               "total_games": total_games,
+                               "elapsed_seconds": round(time.time() - started, 2)}
+    if last_game is not None:
+        payload["last_game"] = dict(last_game)
+    if error is not None:
+        payload["error"] = error
+    target = Path(path)
+    tmp = target.with_suffix(".tmp")
+    tmp.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(target)
+    return target
+
+
+def candidate_move_seconds(result: Any, candidate_name: str, opening_plies: int) -> list[float]:
+    """Per-move wall-clock seconds attributable to `candidate_name` in one game
+    recorded with `save_moves=True`.
+
+    `move_latencies` holds a latency for every chosen move regardless of which
+    side made it; this filters down to the plies the candidate itself chose, by
+    seat parity (X moves on even plies, O on odd, ply 0 is the first move after
+    the opening).
+    """
+    if result.move_latencies is None:
+        raise ValueError(f"game {result.game_id} was not recorded with save_moves=True")
+    candidate_is_x = candidate_name == result.player_x
+    return [latency for i, latency in enumerate(result.move_latencies)
+            if ((opening_plies + i) % 2 == 0) == candidate_is_x]
+
+
+def move_disagreement(results_a: Sequence[Any], results_b: Sequence[Any],
+                      opening_plies: int) -> dict[str, Any]:
+    """How often two recorded arms (`save_moves=True`), matched by `game_id`
+    (same opening, same colour assignment), chose different moves.
+
+    Walks each matched game pair's shared prefix from `opening_plies` onward and
+    stops at the first ply where the two recorded sequences diverge: beyond that
+    point the two games are no longer at the same position, so later plies are
+    not "commonly reached" and are not counted either way.
+    """
+    by_id_a = {r.game_id: r for r in results_a}
+    by_id_b = {r.game_id: r for r in results_b}
+    shared_ids = sorted(set(by_id_a) & set(by_id_b))
+    compared = disagreed = 0
+    for game_id in shared_ids:
+        seq_a, seq_b = by_id_a[game_id].moves_played, by_id_b[game_id].moves_played
+        if seq_a is None or seq_b is None:
+            raise ValueError(f"game {game_id} was not recorded with save_moves=True in both arms")
+        for i in range(opening_plies, min(len(seq_a), len(seq_b))):
+            compared += 1
+            if seq_a[i] != seq_b[i]:
+                disagreed += 1
+                break
+    return {
+        "matched_games": len(shared_ids),
+        "compared_positions": compared,
+        "disagreed_positions": disagreed,
+        "disagreement_rate": (disagreed / compared) if compared else None,
+    }
+
+
+def game_record_for_reanalysis(result: Any, candidate_name: str, opening_plies: int,
+                               record_id: str) -> dict[str, Any]:
+    """One `save_moves=True` game as a record `python -m sttt.ai reanalyse --records`
+    can read: `actions` plus `id`, `result`, `opening_moves` (a ply COUNT, matching
+    `sttt.reanalysis.select_tasks`) and `movers` ('opening' | 'learner' | 'opponent'
+    per ply). The candidate's own plies are labelled 'learner' so `--sides learner`
+    reviews exactly the moves this evaluation attributes to the model.
+    """
+    if result.moves_played is None:
+        raise ValueError(f"game {result.game_id} was not recorded with save_moves=True")
+    candidate_is_x = candidate_name == result.player_x
+    movers = []
+    for ply in range(len(result.moves_played)):
+        if ply < opening_plies:
+            movers.append("opening")
+        else:
+            movers.append("learner" if ((ply % 2 == 0) == candidate_is_x) else "opponent")
+    return {"id": record_id, "actions": list(result.moves_played), "result": int(result.winner),
+            "opening_moves": int(opening_plies), "movers": movers}
 
 
 def native_build_info() -> dict[str, Any]:

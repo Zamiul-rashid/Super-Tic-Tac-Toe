@@ -8,10 +8,11 @@ Usage:
   scripts/evaluate.sh --checkpoint PATH --output DIR [options]
 
 Modes:
-  --mode full          Grand championship followed by a budget sweep (default)
-  --mode championship  Grand championship only
-  --mode sweep         Search-budget sweep only; d10 by default
-  --mode compare       Candidate/reference comparison; requires --reference
+  --mode full            Grand championship followed by a budget sweep (default)
+  --mode championship    Grand championship only
+  --mode sweep           Search-budget sweep only; d10 by default
+  --mode compare         Candidate/reference comparison; requires --reference
+  --mode budget-compare  Matched-opening search-budget comparison; requires --opponent
 
 Common options:
   --checkpoint PATH
@@ -34,6 +35,13 @@ Compare-mode options:
   --reference PATH
   --h2h-games N                 Default: 50
   --round-robin-games N         Default: 20
+
+Budget-compare-mode options:
+  --opponent SPEC                bot spec, e.g. utttai:128 (required)
+  --pairs N                      opening pairs, both colours each; default: 50
+  --opening-plies N              random opening plies per pair; default: 2
+  --openings-file PATH           save/reuse the opening corpus; default: OUTPUT/openings.json
+  --save-moves / --no-save-moves Record full move sequences + per-move latency; default: on
 EOF
 }
 
@@ -60,6 +68,11 @@ SEED=4242
 H2H_GAMES=50
 ROUND_ROBIN_GAMES=20
 FORCE=0
+OPPONENT=""
+PAIRS=50
+OPENING_PLIES=2
+OPENINGS_FILE=""
+SAVE_MOVES=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -81,6 +94,12 @@ while [[ $# -gt 0 ]]; do
     --seed) SEED=${2:?missing value for --seed}; shift 2 ;;
     --h2h-games) H2H_GAMES=${2:?missing value for --h2h-games}; shift 2 ;;
     --round-robin-games) ROUND_ROBIN_GAMES=${2:?missing value for --round-robin-games}; shift 2 ;;
+    --opponent) OPPONENT=${2:?missing value for --opponent}; shift 2 ;;
+    --pairs) PAIRS=${2:?missing value for --pairs}; shift 2 ;;
+    --opening-plies) OPENING_PLIES=${2:?missing value for --opening-plies}; shift 2 ;;
+    --openings-file) OPENINGS_FILE=${2:?missing value for --openings-file}; shift 2 ;;
+    --save-moves) SAVE_MOVES=1; shift ;;
+    --no-save-moves) SAVE_MOVES=0; shift ;;
     --force) FORCE=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "unknown option: $1" >&2; usage >&2; exit 2 ;;
@@ -131,6 +150,25 @@ case "$MODE" in
       --simulations "$SIMULATIONS"
       --seed "$SEED"
     )
+    ;;
+  budget-compare)
+    [[ -n "$OPPONENT" ]] || { echo "--opponent is required in budget-compare mode" >&2; exit 2; }
+    COMMAND=(
+      "$PY" -u scripts/evaluation_suite.py
+      --checkpoint "$CHECKPOINT"
+      --output "$OUTPUT"
+      --budget-compare
+      --budgets "${BUDGETS[@]}"
+      --opponent "$OPPONENT"
+      --pairs "$PAIRS"
+      --opening-plies "$OPENING_PLIES"
+      --seed "$SEED"
+      --backend "$BACKEND"
+      --device "$DEVICE"
+      --leaf-batch "$LEAF_BATCH"
+    )
+    if [[ -n "$OPENINGS_FILE" ]]; then COMMAND+=(--openings-file "$OPENINGS_FILE"); fi
+    if [[ $SAVE_MOVES -eq 0 ]]; then COMMAND+=(--no-save-moves); fi
     ;;
   *) echo "invalid --mode: $MODE" >&2; usage >&2; exit 2 ;;
 esac

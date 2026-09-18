@@ -9,8 +9,9 @@ from dataclasses import dataclass, field
 import json
 import logging
 import math
+import time
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -36,6 +37,12 @@ class MatchResult:
     player_o: str
     winner: int  # 1 for X, -1 for O, 0 for Draw
     moves: int
+    # Populated only when the game was played with `record_moves`/`save_moves`
+    # True: the full action sequence (opening plies + every chosen move) and the
+    # wall-clock seconds `choose()` took for each chosen (non-opening) move, in
+    # the same order. None otherwise.
+    moves_played: list[int] | None = None
+    move_latencies: list[float] | None = None
 
 
 @dataclass
@@ -102,6 +109,35 @@ def paired_opening(seed: int, pair: int, plies: int | str = 2) -> tuple[State, l
     return state, opening_actions
 
 
+def generate_opening_corpus(seed: int, num_pairs: int, plies: int | str = 2) -> list[dict[str, Any]]:
+    """Pre-generate `num_pairs` openings the same way `paired_opening` derives them.
+
+    One entry per pair, so the corpus can be saved to disk and proven identical
+    across the arms of a comparison instead of re-derived from the seed on trust.
+    This is the opening RNG; it never touches the per-game search RNG that
+    `run_matchup`/`run_matched_budget_comparison` seed separately per game.
+    """
+    validated = _validate_opening_plies(plies)
+    return [{"pair_id": k, "opening_moves": paired_opening(seed, k, validated)[1]}
+            for k in range(int(num_pairs))]
+
+
+def save_opening_corpus(path: str | Path, corpus: list[dict[str, Any]], seed: int,
+                        plies: int | str) -> Path:
+    """Write a pre-generated opening corpus plus the seed/plies that produced it."""
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"seed": int(seed), "opening_plies": plies, "pairs": corpus}
+    target.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return target
+
+
+def load_opening_corpus(path: str | Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Read back a corpus written by `save_opening_corpus`: (pairs, {seed, opening_plies})."""
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    return payload["pairs"], {"seed": payload.get("seed"), "opening_plies": payload.get("opening_plies")}
+
+
 def _validate_sample_size(games: int) -> int:
     """Validate sample size constraints for paired matchups.
 
@@ -146,8 +182,18 @@ def _play_single_game(
     initial_state: State,
     opening_moves: list[int],
     game_rng: np.random.Generator,
-) -> tuple[int, int]:
-    """Execute a single game between bot_x and bot_o from initial_state."""
+    record_moves: bool = False,
+):
+    """Execute a single game between bot_x and bot_o from initial_state.
+
+    Returns `(result, total_moves)` by default. With `record_moves=True`, returns
+    `(result, total_moves, move_sequence, move_latencies)`: the full action list
+    (opening plies + every chosen move) and the wall-clock seconds `choose()`
+    took for each chosen (non-opening) move, in the same order -- what a
+    matched-opening budget comparison needs to replay a game and report
+    per-move latency. Kept as an optional extra return rather than a parallel
+    function so both call sites share one game loop.
+    """
     bot_x.reset()
     bot_o.reset()
 
@@ -157,18 +203,27 @@ def _play_single_game(
         bot_o.advance(m)
 
     state = initial_state
+    move_sequence = list(opening_moves) if record_moves else None
+    move_latencies: list[float] | None = [] if record_moves else None
     while state.result is None:
         curr_bot = bot_x if state.turn == 1 else bot_o
         other_bot = bot_o if state.turn == 1 else bot_x
 
+        started = time.perf_counter() if record_moves else None
         action = curr_bot.choose(state, game_rng)
+        if record_moves:
+            move_latencies.append(time.perf_counter() - started)
         if action not in state.legal_actions():
             raise ValueError(f"Bot '{curr_bot.name}' returned illegal action {action}")
+        if record_moves:
+            move_sequence.append(action)
 
         other_bot.advance(action)
         state = state.play(action)
 
     total_moves = 81 - state.cells.count(0)
+    if record_moves:
+        return state.result, total_moves, move_sequence, move_latencies
     return state.result, total_moves
 
 
@@ -260,6 +315,84 @@ def run_matchup(
             on_game(results[-1])
         if (k + 1) % 10 == 0 or (k + 1) == num_pairs:
             print(f"[{p_a} vs {p_b}] Completed {2*(k+1)}/{validated_games} games...", flush=True)
+
+    return results
+
+
+def run_matched_budget_comparison(
+    candidate_bots: Dict[Any, Bot],
+    opponent: Bot,
+    openings: Sequence[Mapping[str, Any]],
+    seed: int = 42,
+    save_moves: bool = True,
+    on_game: Callable[[Any, MatchResult], None] | None = None,
+) -> Dict[Any, List[MatchResult]]:
+    """Play every candidate arm against one fixed opponent from an identical,
+    pre-generated opening corpus, both colour assignments per opening.
+
+    `candidate_bots` maps an arm key (a search budget, in practice; must be an
+    int -- it seeds the per-game RNG) to a configured Bot. `openings` is the
+    corpus from `generate_opening_corpus`/`load_opening_corpus`:
+    `[{"pair_id": int, "opening_moves": [...]}, ...]`. Every arm faces every
+    opening from both seats, so the opening-pair bootstrap statistics in
+    `sttt.evaluation` (`pair_bootstrap_score`/`pair_bootstrap_difference`) apply
+    to the result unchanged.
+
+    The order arms are played in is rotated across opening pairs -- pair index
+    `idx` starts with `keys[idx % len(keys)]` -- instead of playing one arm's
+    games as a complete block. A block schedule confounds arm with wall-clock
+    position (e.g. machine load drifting over a multi-hour run); rotating
+    spreads every arm's games across the whole run instead.
+    """
+    if not candidate_bots:
+        raise ValueError("candidate_bots must be nonempty")
+    keys = list(candidate_bots.keys())
+    n = len(keys)
+    results: Dict[Any, List[MatchResult]] = {k: [] for k in keys}
+    opponent_name = opponent.name
+
+    for idx, entry in enumerate(openings):
+        pair_id = int(entry["pair_id"])
+        opening_moves = list(entry["opening_moves"])
+        init_state = State()
+        for move in opening_moves:
+            init_state = init_state.play(int(move))
+        order = keys[idx % n:] + keys[:idx % n]
+
+        for key in order:
+            candidate = candidate_bots[key]
+            cand_name = candidate.name
+            # Same SeedSequence for both colour assignments of one (pair, arm):
+            # a symmetric pair RNG, same convention as run_matchup's mirrored games.
+            seed_seq = np.random.SeedSequence([seed, pair_id, int(key), 9871])
+
+            rng_x = np.random.default_rng(seed_seq)
+            if save_moves:
+                winner_x, moves_x, seq_x, lat_x = _play_single_game(
+                    candidate, opponent, init_state, opening_moves, rng_x, record_moves=True)
+            else:
+                winner_x, moves_x = _play_single_game(candidate, opponent, init_state, opening_moves, rng_x)
+                seq_x = lat_x = None
+            result_x = MatchResult(game_id=2 * pair_id, pair_id=pair_id, opening_plies=len(opening_moves),
+                                   opening_moves=list(opening_moves), player_x=cand_name, player_o=opponent_name,
+                                   winner=winner_x, moves=moves_x, moves_played=seq_x, move_latencies=lat_x)
+            results[key].append(result_x)
+            if on_game is not None:
+                on_game(key, result_x)
+
+            rng_o = np.random.default_rng(seed_seq)
+            if save_moves:
+                winner_o, moves_o, seq_o, lat_o = _play_single_game(
+                    opponent, candidate, init_state, opening_moves, rng_o, record_moves=True)
+            else:
+                winner_o, moves_o = _play_single_game(opponent, candidate, init_state, opening_moves, rng_o)
+                seq_o = lat_o = None
+            result_o = MatchResult(game_id=2 * pair_id + 1, pair_id=pair_id, opening_plies=len(opening_moves),
+                                   opening_moves=list(opening_moves), player_x=opponent_name, player_o=cand_name,
+                                   winner=winner_o, moves=moves_o, moves_played=seq_o, move_latencies=lat_o)
+            results[key].append(result_o)
+            if on_game is not None:
+                on_game(key, result_o)
 
     return results
 
