@@ -53,7 +53,9 @@ an eight-engine round robin the latest checkpoint (iteration 6000) wins its
 head-to-head against the strongest public engine we integrated, \utttai\
 (8--7--5, 57.5\%), while placing second on aggregate score because \utttai\
 handles the depth-10 searcher better than we do---a reminder that pool rank
-depends on pool composition.
+depends on pool composition. Raising the agent's own search from 512 to
+2{,}000 simulations is worth about 155 Elo and takes first place in the same
+pool.
 \end{abstract}
 
 % ---------------------------------------------------------------------
@@ -599,6 +601,49 @@ iterations 1806 and 4193 scored 67.5\% and 65\% over 20-game sets. A
 20-game check of the 4530 checkpoint at 2{,}000 simulations against \utttai\
 scored 40\%, far too small a sample to say anything about search budget.
 
+\begin{table}[t]
+  \centering\footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \caption{What search budget buys at iteration 6000. Two championships over
+  the same eight-entrant pool, the same opening seed and the same anchor
+  (AlphaBeta d4 $=1500$), differing only in the candidate's simulations per
+  move. Scores are percentages with 95\% opening-pair bootstrap intervals;
+  20 games per opponent. This is not an equal-time comparison: 2{,}000
+  simulations cost about four times more per move.}
+  \label{tab:budget}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Opponent & 512 sims & 2{,}000 sims \\
+    \midrule
+    AlphaBeta d10 & 67.5 [52.5, 82.5] & 90.0 [82.5, 97.5] \\
+    AlphaBeta d6 & 95.0 [87.5, 100] & 100 \\
+    AlphaBeta d4 & 100 & 97.5 [92.5, 100] \\
+    Tactical / threat / OpenSpiel & 100 & 100 \\
+    \utttai\ (128) & 57.5 [37.5, 77.5] & 70.0 [57.5, 85.0] \\
+    \midrule
+    All 140 games & 117--14--9 (88.6) & 126--11--3 (93.9) \\
+    Bayesian Elo & 2318 $\pm$128 & 2473 $\pm$153 \\
+    Pool rank & 2nd & 1st \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{What search budget buys}
+The one knob we can turn at inference time is the simulation count, so we
+reran the same championship with the candidate at 2{,}000 simulations
+instead of 512 (Table~\ref{tab:budget}). Quadrupling the budget is worth
+about 155 Elo, and it improves every matchup that was not already saturated:
+against depth-10 the score rises from 67.5\% to 90.0\%, and against \utttai\
+from 57.5\% to 70.0\%. It is enough to take first place in the pool outright,
+2473 against \utttai's 2344. The two ratings come from separate fits rather
+than one pool containing both budgets, but they share an anchor, an opponent
+set and an opening seed, and the per-matchup improvements are consistent in
+sign, which is the stronger evidence. The caveat is the obvious one: this
+buys strength with four times the compute per move, so it says what our
+search does with more thinking time, not that the agent is stronger at equal
+cost. It does, however, settle the question the underpowered 20-game check
+at iteration 4530 could not: at this checkpoint, more search clearly helps.
+
 \paragraph{Search audit.}
 Because the gap to \utttai\ was stable, we audited the search with stub
 evaluators and known-outcome positions on both backends. Value
@@ -642,7 +687,9 @@ positions per stage; our policy targets at leaf batch 64 are flattened by
 virtual loss; and we regress the value to the game outcome where \utttai\
 uses the search value. Each is one controlled experiment away---a larger
 \utttai\ match set, a reanalysis on/off comparison, leaf-batch and
-value-target ablations---and the launchers exist.
+value-target ablations---and the launchers exist. The budget question, at
+least, is now answered: four times the search is worth about 155 Elo at this
+checkpoint.
 
 Two limitations apply to every number here. Budgets are configured
 simulation counts, not equal wall-clock or compute (the 6000 candidate also

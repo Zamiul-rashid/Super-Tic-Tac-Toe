@@ -28,6 +28,11 @@
       "label": "Iteration 6000 (new)",
       "key": "iter6000",
       "championship": "docs/report/evidence/iter6000-championship"
+    },
+    {
+      "label": "Iteration 6000, 2000 simulations (new)",
+      "key": "iter6000-s2000",
+      "championship": "docs/report/evidence/iter6000-s2000-championship"
     }
   ],
   "spot_checks": [

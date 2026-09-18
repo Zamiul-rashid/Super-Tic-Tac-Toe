@@ -317,6 +317,83 @@
           ]
         }
       }
+    },
+    {
+      "label": "Iteration 6000, 2000 simulations (new)",
+      "key": "iter6000-s2000",
+      "candidate": "ckpt-iter6000-e943b3ba-s2000",
+      "matchups": {
+        "cpp-alphabeta-d10": {
+          "wins": 16,
+          "draws": 4,
+          "losses": 0,
+          "score": 0.9,
+          "pair_bootstrap_ci95": [
+            0.825,
+            0.975
+          ]
+        },
+        "cpp-alphabeta-d6": {
+          "wins": 20,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "cpp-alphabeta-d4": {
+          "wins": 19,
+          "draws": 1,
+          "losses": 0,
+          "score": 0.975,
+          "pair_bootstrap_ci95": [
+            0.925,
+            1.0
+          ]
+        },
+        "tactical": {
+          "wins": 20,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "threat-block": {
+          "wins": 20,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "openspiel-mcts-100": {
+          "wins": 20,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "utttai-128": {
+          "wins": 11,
+          "draws": 6,
+          "losses": 3,
+          "score": 0.7,
+          "pair_bootstrap_ci95": [
+            0.575,
+            0.85
+          ]
+        }
+      }
     }
   ],
   "spot_checks": [
