@@ -50,7 +50,7 @@
   "rating_comparisons": [
     {
       "key": "iter6000-budget",
-      "label": "Iteration 6000: Bayesian Elo at two search budgets",
+      "label": "Iteration 6000: Bayesian Elo ratings",
       "a": "iter6000",
       "b": "iter6000-s2000",
       "labels": [

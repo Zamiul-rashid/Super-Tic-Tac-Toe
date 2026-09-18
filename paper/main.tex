@@ -536,13 +536,14 @@ settings, library versions and the native build id, plus per-game rows.
 \begin{figure*}[!t]
   \centering
   \includegraphics[width=0.74\textwidth]{ratings-comparison-iter6000-budget.png}
-  \caption{Iteration 6000 rated in the same eight-entrant, 560-game pool at
-  two search budgets, anchored at AlphaBeta d4 $=1500$. Every opponent lands
-  within a few Elo of its own rating in the other championship, so the pool
-  itself has not moved; the agent alone does, by about 155 Elo, which is what
-  makes the two separate fits comparable. At 512 simulations it sits just
-  behind \utttai\ despite winning their head-to-head; at 2{,}000 it leads
-  outright. Ratings are pool-local, not universal.}
+  \caption{Bayesian Elo in the eight-entrant, 560-game iteration-6000 pool,
+  anchored at AlphaBeta d4 $=1500$. Our agent appears twice: at 512
+  simulations, where it sits just behind \utttai\ despite winning their
+  head-to-head, and at 2{,}000, where it leads outright. Opponent ratings are
+  from the 512-simulation championship; the 2{,}000-simulation point comes
+  from a second championship over the same pool, opening seed and anchor, in
+  which the opponents' own ratings moved by at most 67 Elo (AlphaBeta d10)
+  against the agent's 155. Ratings are pool-local, not universal.}
   \label{fig:elo}
 \end{figure*}
 
@@ -635,10 +636,9 @@ about 155 Elo, and it improves every matchup that was not already saturated:
 against depth-10 the score rises from 67.5\% to 90.0\%, and against \utttai\
 from 57.5\% to 70.0\%. It is enough to take first place in the pool outright,
 2473 against \utttai's 2344. The two ratings come from separate fits rather
-than one pool containing both budgets, but Fig.~\ref{fig:elo} shows why
-they are nonetheless comparable: every opponent lands within a few Elo of
-its own rating in the other championship, so the pools themselves have not
-moved---only the agent has. The caveat is the obvious one: this
+than one pool containing both budgets. The pools themselves barely move
+between the two runs, though: every opponent is rated within 67 Elo of its
+own value in the other championship, against a 155-Elo shift for the agent. The caveat is the obvious one: this
 buys strength with four times the compute per move, so it says what our
 search does with more thinking time, not that the agent is stronger at equal
 cost. It does, however, settle the question the underpowered 20-game check
