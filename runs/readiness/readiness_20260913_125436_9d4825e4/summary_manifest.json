@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-09-13T12:54:37.599153+00:00",
+  "duration_sec": 0.9149541854858398,
+  "overall_status": "failed",
+  "requested_stage": "gpu",
+  "backend": "cpp",
+  "device": "cuda",
+  "stages": {
+    "gpu": {
+      "stage": "gpu",
+      "status": "failed",
+      "duration_sec": 0.9146983623504639,
+      "error": "No module named 'sttt.model'"
+    }
+  }
+}

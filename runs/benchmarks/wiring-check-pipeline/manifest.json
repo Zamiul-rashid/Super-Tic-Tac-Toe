@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "kind": "pipeline-benchmark",
+  "run_id": "2c8849300b1645ce847427c8373940ee",
+  "created_at": "2026-09-13T20:27:08.105503+00:00",
+  "status": "completed",
+  "checkpoints": {},
+  "config": {
+    "device": "cpu",
+    "arch": "mlp",
+    "games": 4,
+    "workers": 2,
+    "simulations": 32,
+    "leaf_batch": 4,
+    "inference_batch": 8,
+    "steps": 4,
+    "batch": 16,
+    "buffer": 1000,
+    "seed": 11,
+    "warmup_iterations": 2,
+    "measured_iterations": 3,
+    "eta_iterations": 5000,
+    "eta_eval_every": 0,
+    "population": false,
+    "backends": [
+      "cpp",
+      "python"
+    ],
+    "repeats": 1
+  },
+  "seeds": {
+    "training": 11
+  },
+  "argv": [
+    "scripts/run_pipeline_benchmark.py",
+    "--output",
+    "runs/benchmarks/wiring-check-pipeline",
+    "--backends",
+    "cpp",
+    "python",
+    "--measured-iterations",
+    "3",
+    "--eta-iterations",
+    "5000"
+  ],
+  "environment": {
+    "python": "3.14.6",
+    "executable": "/home/mt/miniconda3/envs/sttt/bin/python",
+    "torch": "2.14.0+cu130",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "native": {
+      "available": true,
+      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+      "version": "0.9.0",
+      "build_id": "20260913164113_35fd9f6",
+      "source_revision": "35fd9f6"
+    }
+  },
+  "summary": {
+    "arms": {
+      "cpp": {
+        "backend": "cpp",
+        "wall_seconds": 4.441804393001803,
+        "measured_iterations": 3,
+        "iteration_seconds": {
+          "median": 0.26322971399713424,
+          "mean": 0.256255802999173,
+          "min": 0.23678901799939922,
+          "max": 0.2687486770009855,
+          "stdev": 0.017083077206113427,
+          "repeats": 3
+        },
+        "stage_seconds_total": {
+          "selfplay": 0.6598761939967517,
+          "replay_preparation": 0.0017876180027087685,
+          "optimization": 0.014288813999883132,
+          "checkpoint_write": 0.09139808700274443
+        },
+        "stage_share": {
+          "selfplay": 0.8599408103957233,
+          "replay_preparation": 0.0023295971091433706,
+          "optimization": 0.018620969209738977,
+          "checkpoint_write": 0.11910862328539432
+        },
+        "evaluation_overhead_seconds": 0.0,
+        "throughput": {
+          "selfplay_games_per_sec": 18.303188340407917,
+          "learner_positions_per_sec": 1022.2748412031825,
+          "completed_simulations_per_sec": 30787.6771236386,
+          "inference_batch_occupancy": 0.9732149334602916
+        },
+        "output_dir": "runs/benchmarks/wiring-check-pipeline/cpp-r0",
+        "repeats": 1
+      },
+      "python": {
+        "backend": "python",
+        "wall_seconds": 5.107070988000487,
+        "measured_iterations": 3,
+        "iteration_seconds": {
+          "median": 0.4704370440013008,
+          "mean": 0.47438669933520333,
+          "min": 0.47002214200256276,
+          "max": 0.4827009120017465,
+          "stdev": 0.007203307234563773,
+          "repeats": 3
+        },
+        "stage_seconds_total": {
+          "selfplay": 1.2927240850003727,
+          "replay_preparation": 0.014260653995734174,
+          "optimization": 0.017926772001374047,
+          "checkpoint_write": 0.09667387599984067
+        },
+        "stage_share": {
+          "selfplay": 0.9093538079558272,
+          "replay_preparation": 0.010031514199689113,
+          "optimization": 0.012610408186059824,
+          "checkpoint_write": 0.06800426965842385
+        },
+        "evaluation_overhead_seconds": 0.0,
+        "throughput": {
+          "selfplay_games_per_sec": 9.286946899114985,
+          "learner_positions_per_sec": 548.3580714009867,
+          "completed_simulations_per_sec": 16408.7383268445,
+          "inference_batch_occupancy": 0.9698503507194265
+        },
+        "output_dir": "runs/benchmarks/wiring-check-pipeline/python-r0",
+        "repeats": 1
+      }
+    },
+    "comparison": {
+      "python_median_seconds": 0.4704370440013008,
+      "cpp_median_seconds": 0.26322971399713424,
+      "cpp_speedup_vs_python": 1.7871730241154402,
+      "regression_threshold": 0.05,
+      "regression_blocks_claim": false,
+      "note": "measured on one machine, this configuration and these budgets only"
+    },
+    "eta": {
+      "cpp": {
+        "total_iterations": 5000,
+        "mean_seconds_per_iteration": 0.256255802999173,
+        "hours_mean": 0.3559108374988514,
+        "hours_low": 0.3288736361102767,
+        "hours_high": 0.3732620513902576,
+        "evaluation_overhead_hours": 0.0,
+        "evaluations": 0,
+        "basis": "3 measured iterations, backend=cpp"
+      },
+      "python": {
+        "total_iterations": 5000,
+        "mean_seconds_per_iteration": 0.47438669933520333,
+        "hours_mean": 0.6588704157433379,
+        "hours_low": 0.6528085305591149,
+        "hours_high": 0.6704179333357589,
+        "evaluation_overhead_hours": 0.0,
+        "evaluations": 0,
+        "basis": "3 measured iterations, backend=python"
+      }
+    },
+    "native_build": {
+      "available": true,
+      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+      "version": "0.9.0",
+      "build_id": "20260913164113_35fd9f6",
+      "source_revision": "35fd9f6"
+    }
+  }
+}

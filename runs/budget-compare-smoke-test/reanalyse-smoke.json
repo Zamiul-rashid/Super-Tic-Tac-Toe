@@ -1,0 +1,523 @@
+{
+ "records": "runs/budget-compare-smoke-test/games-budget-compare.jsonl",
+ "checkpoint": "/tmp/claude-1000/-home-mt-Zami-Super-Tic-Tac-Toe/92191f58-bd66-4c5a-8167-fcc74627b753/scratchpad/iter4530.pt",
+ "checkpoint_iteration": 4530,
+ "simulations": 8,
+ "margin": 0.3,
+ "outcomes": [
+  "loss",
+  "draw",
+  "win"
+ ],
+ "sides": [
+  "learner"
+ ],
+ "backend": "cpp",
+ "games_in_records": 12,
+ "seconds": 1.61,
+ "positions": 267,
+ "learner_positions": 267,
+ "opponent_positions": 0,
+ "suspected_mistakes": 31,
+ "proven_mistakes": 0,
+ "games": [
+  {
+   "id": "budget8-pair0-x",
+   "result": -1,
+   "learner_outcome": null,
+   "positions_reviewed": 22,
+   "suspected_mistakes": [
+    {
+     "ply": 4,
+     "mover": "learner",
+     "played": 1,
+     "best": 6,
+     "q_played": -0.7019,
+     "q_best": 0.4814,
+     "q_gap": 1.1834,
+     "root_value": 0.0049,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 6,
+     "mover": "learner",
+     "played": 28,
+     "best": 34,
+     "q_played": -0.6661,
+     "q_best": 0.0898,
+     "q_gap": 0.7559,
+     "root_value": -0.6206,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 8,
+     "mover": "learner",
+     "played": 45,
+     "best": 48,
+     "q_played": -0.9889,
+     "q_best": 0.0786,
+     "q_gap": 1.0675,
+     "root_value": -0.5454,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget8-pair0-o",
+   "result": 1,
+   "learner_outcome": null,
+   "positions_reviewed": 20,
+   "suspected_mistakes": [
+    {
+     "ply": 3,
+     "mover": "learner",
+     "played": 54,
+     "best": 60,
+     "q_played": -0.7671,
+     "q_best": -0.0315,
+     "q_gap": 0.7357,
+     "root_value": -0.4778,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 7,
+     "mover": "learner",
+     "played": 63,
+     "best": 66,
+     "q_played": -0.8595,
+     "q_best": -0.3005,
+     "q_gap": 0.559,
+     "root_value": -0.6696,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 13,
+     "mover": "learner",
+     "played": 36,
+     "best": 42,
+     "q_played": -0.8807,
+     "q_best": -0.1198,
+     "q_gap": 0.7609,
+     "root_value": -0.7908,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget8-pair1-x",
+   "result": -1,
+   "learner_outcome": null,
+   "positions_reviewed": 19,
+   "suspected_mistakes": [
+    {
+     "ply": 2,
+     "mover": "learner",
+     "played": 45,
+     "best": 52,
+     "q_played": -0.5555,
+     "q_best": 0.1238,
+     "q_gap": 0.6793,
+     "root_value": -0.2612,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 10,
+     "mover": "learner",
+     "played": 36,
+     "best": 38,
+     "q_played": -0.1105,
+     "q_best": 0.2202,
+     "q_gap": 0.3307,
+     "root_value": 0.1052,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 16,
+     "mover": "learner",
+     "played": 64,
+     "best": 68,
+     "q_played": -0.9732,
+     "q_best": 0.2437,
+     "q_gap": 1.2169,
+     "root_value": -0.1264,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget8-pair1-o",
+   "result": 1,
+   "learner_outcome": null,
+   "positions_reviewed": 24,
+   "suspected_mistakes": [
+    {
+     "ply": 7,
+     "mover": "learner",
+     "played": 45,
+     "best": 49,
+     "q_played": -0.5651,
+     "q_best": -0.0177,
+     "q_gap": 0.5474,
+     "root_value": -0.3227,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget16-pair0-x",
+   "result": -1,
+   "learner_outcome": null,
+   "positions_reviewed": 25,
+   "suspected_mistakes": [
+    {
+     "ply": 24,
+     "mover": "learner",
+     "played": 77,
+     "best": 76,
+     "q_played": -0.1269,
+     "q_best": 0.7149,
+     "q_gap": 0.8418,
+     "root_value": 0.1121,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 26,
+     "mover": "learner",
+     "played": 71,
+     "best": 70,
+     "q_played": -0.1007,
+     "q_best": 0.8078,
+     "q_gap": 0.9085,
+     "root_value": 0.2131,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 28,
+     "mover": "learner",
+     "played": 3,
+     "best": 4,
+     "q_played": -0.1119,
+     "q_best": 0.9183,
+     "q_gap": 1.0302,
+     "root_value": 0.4267,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 34,
+     "mover": "learner",
+     "played": 61,
+     "best": 56,
+     "q_played": -0.2621,
+     "q_best": 0.16,
+     "q_gap": 0.4221,
+     "root_value": -0.4681,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget16-pair0-o",
+   "result": 1,
+   "learner_outcome": null,
+   "positions_reviewed": 20,
+   "suspected_mistakes": [
+    {
+     "ply": 13,
+     "mover": "learner",
+     "played": 48,
+     "best": 52,
+     "q_played": -0.204,
+     "q_best": 0.5504,
+     "q_gap": 0.7544,
+     "root_value": 0.1095,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 17,
+     "mover": "learner",
+     "played": 66,
+     "best": 68,
+     "q_played": -0.0467,
+     "q_best": 0.4299,
+     "q_gap": 0.4766,
+     "root_value": -0.073,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 21,
+     "mover": "learner",
+     "played": 1,
+     "best": 39,
+     "q_played": 0.2242,
+     "q_best": 0.5575,
+     "q_gap": 0.3333,
+     "root_value": 0.2669,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 35,
+     "mover": "learner",
+     "played": 2,
+     "best": 23,
+     "q_played": -0.1671,
+     "q_best": 0.2708,
+     "q_gap": 0.4379,
+     "root_value": -0.1123,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget16-pair1-x",
+   "result": -1,
+   "learner_outcome": null,
+   "positions_reviewed": 28,
+   "suspected_mistakes": [
+    {
+     "ply": 12,
+     "mover": "learner",
+     "played": 8,
+     "best": 4,
+     "q_played": -0.1037,
+     "q_best": 0.212,
+     "q_gap": 0.3156,
+     "root_value": 0.0523,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 28,
+     "mover": "learner",
+     "played": 1,
+     "best": 7,
+     "q_played": 0.2911,
+     "q_best": 0.6732,
+     "q_gap": 0.3821,
+     "root_value": 0.385,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 48,
+     "mover": "learner",
+     "played": 58,
+     "best": 55,
+     "q_played": -0.9337,
+     "q_best": 0.1376,
+     "q_gap": 1.0713,
+     "root_value": -0.5448,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 50,
+     "mover": "learner",
+     "played": 13,
+     "best": 15,
+     "q_played": -0.9345,
+     "q_best": -0.0955,
+     "q_gap": 0.839,
+     "root_value": -0.515,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget16-pair1-o",
+   "result": 1,
+   "learner_outcome": null,
+   "positions_reviewed": 17,
+   "suspected_mistakes": [
+    {
+     "ply": 31,
+     "mover": "learner",
+     "played": 20,
+     "best": 33,
+     "q_played": -0.6026,
+     "q_best": -0.2485,
+     "q_gap": 0.3541,
+     "root_value": -0.6419,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget32-pair0-x",
+   "result": 0,
+   "learner_outcome": null,
+   "positions_reviewed": 22,
+   "suspected_mistakes": [
+    {
+     "ply": 10,
+     "mover": "learner",
+     "played": 44,
+     "best": 36,
+     "q_played": 0.3971,
+     "q_best": 0.7263,
+     "q_gap": 0.3292,
+     "root_value": 0.4437,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget32-pair0-o",
+   "result": 1,
+   "learner_outcome": null,
+   "positions_reviewed": 19,
+   "suspected_mistakes": [
+    {
+     "ply": 5,
+     "mover": "learner",
+     "played": 8,
+     "best": 0,
+     "q_played": -0.036,
+     "q_best": 0.5025,
+     "q_gap": 0.5385,
+     "root_value": -0.1422,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 7,
+     "mover": "learner",
+     "played": 7,
+     "best": 0,
+     "q_played": -0.2242,
+     "q_best": 0.3958,
+     "q_gap": 0.62,
+     "root_value": -0.1689,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 23,
+     "mover": "learner",
+     "played": 34,
+     "best": 32,
+     "q_played": -0.3812,
+     "q_best": 0.2459,
+     "q_gap": 0.6271,
+     "root_value": -0.3436,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 31,
+     "mover": "learner",
+     "played": 71,
+     "best": 68,
+     "q_played": 0.1678,
+     "q_best": 0.5387,
+     "q_gap": 0.371,
+     "root_value": 0.2967,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  },
+  {
+   "id": "budget32-pair1-x",
+   "result": -1,
+   "learner_outcome": null,
+   "positions_reviewed": 26,
+   "suspected_mistakes": []
+  },
+  {
+   "id": "budget32-pair1-o",
+   "result": 1,
+   "learner_outcome": null,
+   "positions_reviewed": 25,
+   "suspected_mistakes": [
+    {
+     "ply": 17,
+     "mover": "learner",
+     "played": 42,
+     "best": 40,
+     "q_played": -0.7985,
+     "q_best": 0.1963,
+     "q_gap": 0.9948,
+     "root_value": -0.4893,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 19,
+     "mover": "learner",
+     "played": 30,
+     "best": 31,
+     "q_played": -0.5409,
+     "q_best": -0.1941,
+     "q_gap": 0.3468,
+     "root_value": -0.6521,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    },
+    {
+     "ply": 41,
+     "mover": "learner",
+     "played": 76,
+     "best": 73,
+     "q_played": -0.5906,
+     "q_best": -0.2099,
+     "q_gap": 0.3807,
+     "root_value": -0.673,
+     "q_played_exact": false,
+     "q_best_exact": false,
+     "proven": false
+    }
+   ]
+  }
+ ]
+}

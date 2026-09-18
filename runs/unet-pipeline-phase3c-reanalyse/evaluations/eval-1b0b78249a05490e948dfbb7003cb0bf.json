@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "kind": "sttt_evaluation",
+  "run_id": "1b0b78249a05490e948dfbb7003cb0bf",
+  "created_at": "2026-09-18T14:47:03.036903+00:00",
+  "checkpoint": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/unet-pipeline-phase3c-reanalyse/model-6000.pt",
+  "checkpoint_sha256": "e943b3ba6b5e2bd843e0a2552b59decfc1bfc36a174a370d893b00781f2e97a7",
+  "iteration": 6000,
+  "opponent": "alphabeta-v1",
+  "simulations": 512,
+  "seed": 42,
+  "requested_games": 20,
+  "adaptation": false,
+  "status": "interrupted",
+  "games": [
+    {
+      "game": 1,
+      "agent_side": "X",
+      "opening_pair": 1,
+      "opening_actions": [
+        75,
+        31
+      ],
+      "outcome": "wins",
+      "score": 1.0,
+      "moves": 49,
+      "seconds": 2.3254660420061555,
+      "agent_moves": 24,
+      "agent_search_seconds": 1.9813798420072999,
+      "completed_simulations": 9728,
+      "neural_positions": 9729,
+      "max_depth": 12,
+      "hard_pruned_choices": 1479,
+      "soft_rechecks": 323,
+      "retained_visits": 1054
+    },
+    {
+      "game": 2,
+      "agent_side": "O",
+      "opening_pair": 1,
+      "opening_actions": [
+        75,
+        31
+      ],
+      "outcome": "wins",
+      "score": 1.0,
+      "moves": 44,
+      "seconds": 2.1998059839825146,
+      "agent_moves": 21,
+      "agent_search_seconds": 1.6502945300599094,
+      "completed_simulations": 9316,
+      "neural_positions": 9317,
+      "max_depth": 11,
+      "hard_pruned_choices": 8012,
+      "soft_rechecks": 373,
+      "retained_visits": 1353
+    }
+  ],
+  "search_config": {
+    "soft_pruning": true,
+    "proofs": true,
+    "reuse": true,
+    "c_puct": 1.5,
+    "soft_margin": 0.2,
+    "soft_strength": 3.0,
+    "min_visits": 8,
+    "revisit_interval": 64
+  },
+  "leaf_batch": 64,
+  "opening_moves": 2,
+  "device": "cuda:0",
+  "search_version": "batched-puct-v2",
+  "opponent_depth": 4,
+  "opponent_nodes": 50000,
+  "opponent_simulations": null,
+  "summary": {
+    "wins": 2,
+    "draws": 0,
+    "losses": 0,
+    "games": 2,
+    "win_rate": 1.0,
+    "score_rate": 1.0,
+    "mean_moves": 46.5,
+    "mean_seconds": 2.262636012994335
+  },
+  "by_side": {
+    "X": {
+      "wins": 1,
+      "draws": 0,
+      "losses": 0,
+      "games": 1,
+      "win_rate": 1.0,
+      "score_rate": 1.0,
+      "mean_moves": 49.0,
+      "mean_seconds": 2.3254660420061555
+    },
+    "O": {
+      "wins": 1,
+      "draws": 0,
+      "losses": 0,
+      "games": 1,
+      "win_rate": 1.0,
+      "score_rate": 1.0,
+      "mean_moves": 44.0,
+      "mean_seconds": 2.1998059839825146
+    }
+  }
+}

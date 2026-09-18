@@ -1,0 +1,13 @@
+{
+  "seed": 555,
+  "opening_plies": 2,
+  "pairs": [
+    {
+      "pair_id": 0,
+      "opening_moves": [
+        61,
+        67
+      ]
+    }
+  ]
+}

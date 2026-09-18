@@ -1,0 +1,66 @@
+{
+  "stage": "build",
+  "status": "passed",
+  "duration_sec": 1.3996374607086182,
+  "checks": {
+    "dynamic_include_resolution": {
+      "include_dir": "/home/mt/miniconda3/envs/sttt/include/python3.14",
+      "python_h_found": true
+    },
+    "makefile_dynamic_resolution": true,
+    "make_exit_code": 0,
+    "provenance": {
+      "available": true,
+      "version": "0.9.0",
+      "build_id": "20260913164113_35fd9f6",
+      "source_revision": "35fd9f6",
+      "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+      "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+    },
+    "native_tests": {
+      "total_run": 44,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "suite_count_ok": true,
+    "full_suite": {
+      "status": "skipped_nested",
+      "reason": "invoked from within a test-suite run"
+    }
+  },
+  "manifest": {
+    "timestamp": "2026-09-13T20:31:07.979434+00:00",
+    "git_revision": "0964a74",
+    "python": {
+      "executable": "/home/mt/miniconda3/envs/sttt/bin/python",
+      "version": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+      "include_path": "/home/mt/miniconda3/envs/sttt/include/python3.14",
+      "python_h_exists": true
+    },
+    "torch": {
+      "available": true,
+      "version": "2.14.0+cu130",
+      "cuda_available": true,
+      "cuda_version": "13.0",
+      "device_count": 1
+    },
+    "cpp_provenance": {
+      "available": true,
+      "version": "0.9.0",
+      "build_id": "20260913164113_35fd9f6",
+      "source_revision": "35fd9f6",
+      "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+      "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+    },
+    "suite_discovery": {
+      "total_tests": 530
+    },
+    "requested_config": {
+      "backend": "cpp",
+      "device": "cpu",
+      "stage": "build",
+      "output_dir": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/readiness_20260913_203107_a1d0008a"
+    }
+  }
+}

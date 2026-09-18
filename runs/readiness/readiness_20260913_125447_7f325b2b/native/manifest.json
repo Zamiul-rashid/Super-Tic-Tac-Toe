@@ -1,0 +1,6 @@
+{
+  "stage": "native",
+  "status": "failed",
+  "duration_sec": 1.0231313705444336,
+  "error": "No module named 'sttt.model'"
+}

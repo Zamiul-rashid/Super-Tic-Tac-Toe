@@ -1,0 +1,31 @@
+{
+  "stage": "gpu",
+  "status": "passed",
+  "duration_sec": 41.83080816268921,
+  "checks": {
+    "device_name": "NVIDIA GeForce RTX 4090",
+    "fp32": {
+      "loss": 3.9487918615341187,
+      "policy_loss": 2.249610960483551,
+      "optimizer_updates": 4,
+      "peak_gpu_mb": 50.1
+    },
+    "fp16": {
+      "losses": [
+        3.175407588481903,
+        3.3500168323516846,
+        3.175407588481903,
+        3.3500168323516846,
+        4.018890202045441
+      ],
+      "scale_before_resume": 8192.0,
+      "scale_after_resume": 8192.0,
+      "growth_tracker_before": 4,
+      "growth_tracker_after": 8,
+      "resume_optimizer_updates": 4,
+      "resume_skipped_updates": 0,
+      "peak_gpu_mb": 50.1
+    },
+    "leftover_workers": []
+  }
+}

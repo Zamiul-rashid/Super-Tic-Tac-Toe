@@ -1,0 +1,20 @@
+{
+  "seed": 999,
+  "opening_plies": 2,
+  "pairs": [
+    {
+      "pair_id": 0,
+      "opening_moves": [
+        74,
+        20
+      ]
+    },
+    {
+      "pair_id": 1,
+      "opening_moves": [
+        60,
+        59
+      ]
+    }
+  ]
+}

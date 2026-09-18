@@ -1,0 +1,169 @@
+{
+  "stage": "mixed",
+  "status": "passed",
+  "duration_sec": 4.569992780685425,
+  "checks": {
+    "families": {
+      "self": {
+        "1": {
+          "positions": 52,
+          "outcome": -1,
+          "actual_kind": "self",
+          "plies": 54
+        },
+        "-1": {
+          "positions": 58,
+          "outcome": 0,
+          "actual_kind": "self",
+          "plies": 60
+        }
+      },
+      "history": {
+        "1": {
+          "positions": 33,
+          "outcome": 1,
+          "actual_kind": "history",
+          "plies": 67
+        },
+        "-1": {
+          "positions": 23,
+          "outcome": 1,
+          "actual_kind": "history",
+          "plies": 49
+        }
+      },
+      "best": {
+        "1": {
+          "positions": 33,
+          "outcome": 1,
+          "actual_kind": "best",
+          "plies": 67
+        },
+        "-1": {
+          "positions": 23,
+          "outcome": 1,
+          "actual_kind": "best",
+          "plies": 49
+        }
+      },
+      "alphabeta": {
+        "1": {
+          "positions": 15,
+          "outcome": 1,
+          "actual_kind": "alphabeta",
+          "plies": 31
+        },
+        "-1": {
+          "positions": 12,
+          "outcome": -1,
+          "actual_kind": "alphabeta",
+          "plies": 26
+        }
+      },
+      "tactical": {
+        "1": {
+          "positions": 20,
+          "outcome": -1,
+          "actual_kind": "tactical",
+          "plies": 42
+        },
+        "-1": {
+          "positions": 17,
+          "outcome": 1,
+          "actual_kind": "tactical",
+          "plies": 37
+        }
+      },
+      "threat": {
+        "1": {
+          "positions": 17,
+          "outcome": -1,
+          "actual_kind": "threat",
+          "plies": 36
+        },
+        "-1": {
+          "positions": 21,
+          "outcome": -1,
+          "actual_kind": "threat",
+          "plies": 44
+        }
+      },
+      "style": {
+        "1": {
+          "positions": 26,
+          "outcome": 1,
+          "actual_kind": "style",
+          "plies": 53
+        },
+        "-1": {
+          "positions": 30,
+          "outcome": 1,
+          "actual_kind": "style",
+          "plies": 63
+        }
+      },
+      "openspiel": {
+        "1": {
+          "positions": 21,
+          "outcome": 1,
+          "actual_kind": "openspiel",
+          "plies": 43
+        },
+        "-1": {
+          "positions": 33,
+          "outcome": 1,
+          "actual_kind": "openspiel",
+          "plies": 69
+        }
+      },
+      "utttai": {
+        "1": {
+          "positions": 22,
+          "outcome": -1,
+          "actual_kind": "utttai",
+          "plies": 46
+        },
+        "-1": {
+          "positions": 16,
+          "outcome": 1,
+          "actual_kind": "utttai",
+          "plies": 35
+        }
+      }
+    },
+    "quota_cycle": {
+      "slices": [
+        7,
+        13,
+        30,
+        21,
+        29
+      ],
+      "counts": {
+        "self": 30,
+        "utttai": 25,
+        "alphabeta": 25,
+        "history": 10,
+        "best": 5,
+        "tactical": 2,
+        "openspiel": 1,
+        "threat": 1,
+        "style": 1
+      },
+      "config": "baseline",
+      "config_sha256": "629831780b2a095ba0c714bcc193e68e9f3a3292ef55732e20718500338f0f08"
+    },
+    "sampled_requests": {
+      "self": 30,
+      "utttai": 25,
+      "alphabeta": 25,
+      "history": 10,
+      "best": 5,
+      "tactical": 2,
+      "openspiel": 1,
+      "threat": 1,
+      "style": 1
+    },
+    "test_budgets_note": "Budgets here are tiny test values, distinct from the production preset in configs/population/."
+  }
+}

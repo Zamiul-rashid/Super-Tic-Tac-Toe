@@ -1,0 +1,5 @@
+participant,elo,elo_ci95,glicko2,glicko2_rd,volatility,games,wins,draws,losses,win_rate,score_rate
+ckpt-iter4304,1812.86,110.27,1875.69,65.84,0.06,60,50,5,5,0.8333,0.875
+alphabeta-d3,1574.59,86.39,1600.18,65.84,0.06,60,32,8,20,0.5333,0.6
+tactical,1408.6,86.7,1383.12,65.84,0.06,60,19,8,33,0.3167,0.3833
+openspiel-mcts-50,1203.95,106.03,1141.01,65.84,0.06,60,6,5,49,0.1,0.1417

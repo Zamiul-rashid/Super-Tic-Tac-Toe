@@ -1,0 +1,192 @@
+{
+  "checkpoint": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/budget-compare-timing-probe/evaluation-inputs/candidate/iter4530.pt",
+  "opponent": "utttai:128",
+  "budgets": {
+    "128": {
+      "entrant": "ckpt-iter4530-cb04e705-s128",
+      "simulations": 128,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "61 67",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "61 67",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 51
+        }
+      ],
+      "mean_seconds_per_move": 0.06305023802238754,
+      "moves_timed": 47,
+      "score_rate": 0.5,
+      "ci_low": 0.5,
+      "ci_high": 0.5,
+      "confidence": 0.95,
+      "pairs": 1,
+      "games": 2,
+      "iterations": 10000,
+      "seed": 556
+    },
+    "512": {
+      "entrant": "ckpt-iter4530-cb04e705-s512",
+      "simulations": 512,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "61 67",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 48
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "61 67",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 53
+        }
+      ],
+      "mean_seconds_per_move": 0.2104836415619502,
+      "moves_timed": 48,
+      "score_rate": 0.25,
+      "ci_low": 0.25,
+      "ci_high": 0.25,
+      "confidence": 0.95,
+      "pairs": 1,
+      "games": 2,
+      "iterations": 10000,
+      "seed": 556
+    },
+    "2000": {
+      "entrant": "ckpt-iter4530-cb04e705-s2000",
+      "simulations": 2000,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "61 67",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 54
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "61 67",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 58
+        }
+      ],
+      "mean_seconds_per_move": 0.7493066952247992,
+      "moves_timed": 54,
+      "score_rate": 0.75,
+      "ci_low": 0.75,
+      "ci_high": 0.75,
+      "confidence": 0.95,
+      "pairs": 1,
+      "games": 2,
+      "iterations": 10000,
+      "seed": 556
+    }
+  },
+  "comparisons": {
+    "512-128": {
+      "subject": "ckpt-iter4530-cb04e705-s128",
+      "subject_b": "ckpt-iter4530-cb04e705-s512",
+      "difference": -0.25,
+      "score_rate_a": 0.5,
+      "score_rate_b": 0.25,
+      "ci_low": -0.25,
+      "ci_high": -0.25,
+      "confidence": 0.95,
+      "pairs": 1,
+      "games": 4,
+      "iterations": 10000,
+      "seed": 556,
+      "primary": false,
+      "move_disagreement": {
+        "matched_games": 2,
+        "compared_positions": 5,
+        "disagreed_positions": 2,
+        "disagreement_rate": 0.4
+      }
+    },
+    "2000-128": {
+      "subject": "ckpt-iter4530-cb04e705-s128",
+      "subject_b": "ckpt-iter4530-cb04e705-s2000",
+      "difference": 0.25,
+      "score_rate_a": 0.5,
+      "score_rate_b": 0.75,
+      "ci_low": 0.25,
+      "ci_high": 0.25,
+      "confidence": 0.95,
+      "pairs": 1,
+      "games": 4,
+      "iterations": 10000,
+      "seed": 556,
+      "primary": false,
+      "move_disagreement": {
+        "matched_games": 2,
+        "compared_positions": 5,
+        "disagreed_positions": 2,
+        "disagreement_rate": 0.4
+      }
+    },
+    "2000-512": {
+      "subject": "ckpt-iter4530-cb04e705-s512",
+      "subject_b": "ckpt-iter4530-cb04e705-s2000",
+      "difference": 0.5,
+      "score_rate_a": 0.25,
+      "score_rate_b": 0.75,
+      "ci_low": 0.5,
+      "ci_high": 0.5,
+      "confidence": 0.95,
+      "pairs": 1,
+      "games": 4,
+      "iterations": 10000,
+      "seed": 556,
+      "primary": true,
+      "move_disagreement": {
+        "matched_games": 2,
+        "compared_positions": 13,
+        "disagreed_positions": 2,
+        "disagreement_rate": 0.15384615384615385
+      }
+    }
+  },
+  "opening_pairs": 1,
+  "opening_plies": 2,
+  "openings_file": "runs/budget-compare-timing-probe/openings.json",
+  "total_games": 6,
+  "elapsed_seconds": 79.94,
+  "native_build": {
+    "available": true,
+    "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+    "version": "0.9.0",
+    "build_id": "20260918084249_63a72ea",
+    "source_revision": "63a72ea"
+  },
+  "note": "Timings are measured as observed, not controlled for other processes sharing the machine, and this is not an equal-time comparison across budgets."
+}

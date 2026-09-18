@@ -1,0 +1,2825 @@
+{
+  "participants": [
+    "tactical",
+    "alphabeta-d3",
+    "style-center",
+    "style-corners",
+    "python"
+  ],
+  "games_per_matchup": 20,
+  "ratings": {
+    "tactical": {
+      "elo": 1896.95,
+      "elo_ci95": 193.38,
+      "glicko2": 1790.6,
+      "glicko2_rd": 57.28,
+      "volatility": 0.06,
+      "games": 80,
+      "wins": 62,
+      "draws": 2,
+      "losses": 16,
+      "win_rate": 0.775,
+      "score_rate": 0.7875
+    },
+    "alphabeta-d3": {
+      "elo": 2172.29,
+      "elo_ci95": 221.29,
+      "glicko2": 1967.48,
+      "glicko2_rd": 57.28,
+      "volatility": 0.06,
+      "games": 80,
+      "wins": 76,
+      "draws": 2,
+      "losses": 2,
+      "win_rate": 0.95,
+      "score_rate": 0.9625
+    },
+    "style-center": {
+      "elo": 1126.21,
+      "elo_ci95": 142.88,
+      "glicko2": 1228.35,
+      "glicko2_rd": 57.28,
+      "volatility": 0.06,
+      "games": 80,
+      "wins": 18,
+      "draws": 1,
+      "losses": 61,
+      "win_rate": 0.225,
+      "score_rate": 0.2313
+    },
+    "style-corners": {
+      "elo": 1102.86,
+      "elo_ci95": 143.83,
+      "glicko2": 1203.08,
+      "glicko2_rd": 57.28,
+      "volatility": 0.06,
+      "games": 80,
+      "wins": 16,
+      "draws": 1,
+      "losses": 63,
+      "win_rate": 0.2,
+      "score_rate": 0.2062
+    },
+    "python": {
+      "elo": 1201.69,
+      "elo_ci95": 140.74,
+      "glicko2": 1310.48,
+      "glicko2_rd": 57.28,
+      "volatility": 0.06,
+      "games": 80,
+      "wins": 24,
+      "draws": 2,
+      "losses": 54,
+      "win_rate": 0.3,
+      "score_rate": 0.3125
+    }
+  },
+  "matchups": [
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        31
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 44
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        31
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 50
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        32
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 56
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        32
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 47
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        15,
+        56
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": 0,
+      "moves": 57
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        15,
+        56
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 53
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        50,
+        48
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 56
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        50,
+        48
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 43
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        59,
+        45
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": 0,
+      "moves": 58
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        59,
+        45
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 55
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        68,
+        47
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 52
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        68,
+        47
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 47
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        45,
+        6
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 54
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        45,
+        6
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 49
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        53,
+        79
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 48
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        53,
+        79
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 49
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        18
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 42
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        18
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 62
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        5
+      ],
+      "player_x": "tactical",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 52
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        5
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "tactical",
+      "winner": 1,
+      "moves": 53
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        1,
+        13
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        1,
+        13
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 44
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        69,
+        56
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 39
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        69,
+        56
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        38,
+        20
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 39
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        38,
+        20
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        38,
+        24
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 27
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        38,
+        24
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 20
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        27
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        27
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        73
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 45
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        73
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        76
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        76
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        6,
+        61
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        6,
+        61
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        24,
+        58
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        24,
+        58
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        27
+      ],
+      "player_x": "tactical",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 31
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        27
+      ],
+      "player_x": "style-center",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        27,
+        2
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        27,
+        2
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 38
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        12,
+        31
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 49
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        12,
+        31
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 46
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        4,
+        38
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        4,
+        38
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        77,
+        45
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 45
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        77,
+        45
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 38
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        9,
+        7
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 31
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        9,
+        7
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        11,
+        18
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 47
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        11,
+        18
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        34,
+        66
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        34,
+        66
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        76
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        76
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        0,
+        5
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 25
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        0,
+        5
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 26
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        65,
+        21
+      ],
+      "player_x": "tactical",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 49
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        65,
+        21
+      ],
+      "player_x": "style-corners",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 42
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        64,
+        13
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 31
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        64,
+        13
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 24
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        12,
+        35
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 23
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        12,
+        35
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 28
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        29
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 25
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        29
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        62,
+        78
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        62,
+        78
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        76,
+        44
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 23
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        76,
+        44
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        23,
+        51
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 23
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        23,
+        51
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        13
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 25
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        13
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 24
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        64,
+        13
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        64,
+        13
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 24
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        26,
+        79
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 23
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        26,
+        79
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        19
+      ],
+      "player_x": "tactical",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 29
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        19
+      ],
+      "player_x": "python",
+      "player_o": "tactical",
+      "winner": -1,
+      "moves": 18
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        35
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        35
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        27,
+        2
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        27,
+        2
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        8
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 29
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        8
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        54,
+        8
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        54,
+        8
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        76
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        76
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        70,
+        66
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        70,
+        66
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 36
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        43,
+        71
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 17
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        43,
+        71
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        66,
+        27
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 43
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        66,
+        27
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 36
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        25
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        25
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 46
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        42,
+        54
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 47
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        42,
+        54
+      ],
+      "player_x": "style-center",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 28
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        2,
+        25
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        2,
+        25
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        34,
+        70
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        34,
+        70
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 42
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        76
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 27
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        76
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        14,
+        50
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        14,
+        50
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        6
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 29
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        6
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        0,
+        2
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        0,
+        2
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        79
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 45
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        79
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        10,
+        11
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        10,
+        11
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        16,
+        65
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        16,
+        65
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 26
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        33
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 27
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        33
+      ],
+      "player_x": "style-corners",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        16
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 27
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        16
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 20
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        12
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        12
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        19,
+        15
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 19
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        19,
+        15
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 20
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        61,
+        67
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        61,
+        67
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 24
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        19
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 23
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        19
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 18
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        63,
+        7
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 25
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        63,
+        7
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        69,
+        59
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        69,
+        59
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        33,
+        59
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 29
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        33,
+        59
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 26
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        20
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 19
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        20
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 18
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        68,
+        52
+      ],
+      "player_x": "alphabeta-d3",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 23
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        68,
+        52
+      ],
+      "player_x": "python",
+      "player_o": "alphabeta-d3",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        28
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 44
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        28
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 54
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        42,
+        59
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 58
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        42,
+        59
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 50
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        79
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 46
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        17,
+        79
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        31,
+        42
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 43
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        31,
+        42
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 48
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        46,
+        13
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 43
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        46,
+        13
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 46
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        48,
+        35
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 48
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        48,
+        35
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 58
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        21,
+        32
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 53
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        21,
+        32
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 56
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        73
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 66
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        73
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 45
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        47,
+        22
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        47,
+        22
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 50
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        52,
+        71
+      ],
+      "player_x": "style-center",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 55
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        52,
+        71
+      ],
+      "player_x": "style-corners",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 54
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        8,
+        77
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 36
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        8,
+        77
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 0,
+      "moves": 46
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        11,
+        24
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 32
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        11,
+        24
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        8
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 39
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        8
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        44,
+        72
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        44,
+        72
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        10,
+        13
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 35
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        10,
+        13
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        23,
+        48
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        23,
+        48
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        38,
+        23
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        38,
+        23
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        56,
+        20
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        56,
+        20
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": -1,
+      "moves": 28
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        10,
+        16
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        10,
+        16
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 49
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        44,
+        72
+      ],
+      "player_x": "style-center",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 44
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        44,
+        72
+      ],
+      "player_x": "python",
+      "player_o": "style-center",
+      "winner": 1,
+      "moves": 39
+    },
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        73
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        80,
+        73
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": 0,
+      "moves": 53
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        9,
+        6
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        9,
+        6
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        62,
+        74
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 40
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        62,
+        74
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 42
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        71,
+        72
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 54
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        71,
+        72
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 59
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        10
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        73,
+        10
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 34
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        0,
+        2
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 37
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        0,
+        2
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 39
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        32,
+        46
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 41
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        32,
+        46
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 39
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        22,
+        37
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 33
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        22,
+        37
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 43
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        32,
+        49
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": 1,
+      "moves": 43
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        32,
+        49
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": -1,
+      "moves": 38
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        56,
+        24
+      ],
+      "player_x": "style-corners",
+      "player_o": "python",
+      "winner": -1,
+      "moves": 30
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        56,
+        24
+      ],
+      "player_x": "python",
+      "player_o": "style-corners",
+      "winner": 1,
+      "moves": 43
+    }
+  ],
+  "matrix": {
+    "tactical": {
+      "tactical": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "alphabeta-d3": {
+        "wins": 2,
+        "draws": 2,
+        "losses": 16
+      },
+      "style-center": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "style-corners": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "python": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      }
+    },
+    "alphabeta-d3": {
+      "tactical": {
+        "wins": 16,
+        "draws": 2,
+        "losses": 2
+      },
+      "alphabeta-d3": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "style-center": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "style-corners": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "python": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      }
+    },
+    "style-center": {
+      "tactical": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "alphabeta-d3": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "style-center": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "style-corners": {
+        "wins": 13,
+        "draws": 0,
+        "losses": 7
+      },
+      "python": {
+        "wins": 5,
+        "draws": 1,
+        "losses": 14
+      }
+    },
+    "style-corners": {
+      "tactical": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "alphabeta-d3": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "style-center": {
+        "wins": 7,
+        "draws": 0,
+        "losses": 13
+      },
+      "style-corners": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "python": {
+        "wins": 9,
+        "draws": 1,
+        "losses": 10
+      }
+    },
+    "python": {
+      "tactical": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "alphabeta-d3": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "style-center": {
+        "wins": 14,
+        "draws": 1,
+        "losses": 5
+      },
+      "style-corners": {
+        "wins": 10,
+        "draws": 1,
+        "losses": 9
+      },
+      "python": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      }
+    }
+  },
+  "side_stats": {
+    "x_wins": 97,
+    "o_wins": 99,
+    "draws": 4,
+    "total_games": 200,
+    "x_win_rate": 0.485,
+    "o_win_rate": 0.495,
+    "draw_rate": 0.02
+  }
+}

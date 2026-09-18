@@ -1,0 +1,25 @@
+{
+  "stage": "failure",
+  "status": "passed",
+  "duration_sec": 9.07372236251831,
+  "checks": {
+    "invalid_backend_rejected": true,
+    "malformed_inference_rejected": "ValueError: Evaluator returned an invalid policy entry at index 0: priors must be finite and non-negative",
+    "worker_exit_detected": {
+      "error": "BrokenPipeError: [Errno 32] Broken pipe",
+      "seconds_to_detect": 0.0
+    },
+    "worker_exit_cleanup": [],
+    "engine_timeout": {
+      "error": "RuntimeError: External bot 'sleeper' failed (exception: External bot 'sleeper' failed (timeout))",
+      "seconds": 3.02
+    },
+    "duplicate_writer_rejected": "another training process already owns /home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-cpu-20260914-011945/failure/ownership (lock: /home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-cpu-20260914-0119",
+    "ctrl_c": {
+      "exit_code": 0,
+      "iteration_preserved": 12,
+      "seconds_to_exit": 3.56,
+      "orphans": []
+    }
+  }
+}

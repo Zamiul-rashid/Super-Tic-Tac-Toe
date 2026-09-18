@@ -1,0 +1,81 @@
+{
+  "stage": "memory",
+  "status": "passed",
+  "duration_sec": 9.266449451446533,
+  "checks": {
+    "orphan_processes": [],
+    "games_played": 100,
+    "measured_iterations": 20,
+    "samples": [
+      {
+        "label": "post_warmup_baseline",
+        "owner_rss_kb": 536508,
+        "worker_rss_kb": {
+          "2521584": 528152,
+          "2521585": 528060
+        },
+        "worker_total_kb": 1056212,
+        "aggregate_rss_kb_upper_bound": 1592720
+      },
+      {
+        "label": "iteration_5",
+        "owner_rss_kb": 538076,
+        "worker_rss_kb": {
+          "2521584": 528184,
+          "2521585": 528120
+        },
+        "worker_total_kb": 1056304,
+        "aggregate_rss_kb_upper_bound": 1594380
+      },
+      {
+        "label": "iteration_10",
+        "owner_rss_kb": 539824,
+        "worker_rss_kb": {
+          "2521584": 528192,
+          "2521585": 528120
+        },
+        "worker_total_kb": 1056312,
+        "aggregate_rss_kb_upper_bound": 1596136
+      },
+      {
+        "label": "iteration_15",
+        "owner_rss_kb": 540208,
+        "worker_rss_kb": {
+          "2521584": 528204,
+          "2521585": 528124
+        },
+        "worker_total_kb": 1056328,
+        "aggregate_rss_kb_upper_bound": 1596536
+      },
+      {
+        "label": "iteration_20",
+        "owner_rss_kb": 540248,
+        "worker_rss_kb": {
+          "2521584": 528208,
+          "2521585": 528124
+        },
+        "worker_total_kb": 1056332,
+        "aggregate_rss_kb_upper_bound": 1596580
+      },
+      {
+        "label": "final",
+        "owner_rss_kb": 540248,
+        "worker_rss_kb": {
+          "2521584": 528208,
+          "2521585": 528124
+        },
+        "worker_total_kb": 1056332,
+        "aggregate_rss_kb_upper_bound": 1596580
+      }
+    ],
+    "growth": {
+      "baseline_kb": 1592720,
+      "final_kb": 1596580,
+      "growth_pct": 0.24,
+      "investigate_threshold_pct": 10.0,
+      "fail_threshold_pct": 25.0,
+      "note": "Replay is saturated before the baseline, so this is not buffer fill. Aggregate RSS double-counts shared pages and is an upper bound.",
+      "verdict": "stable"
+    }
+  }
+}

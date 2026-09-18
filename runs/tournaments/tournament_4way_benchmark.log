@@ -1,0 +1,19 @@
+[ckpt-iter4304 vs openspiel-mcts-50] Completed 20/20 games...
+[ckpt-iter4304 vs alphabeta-d3] Completed 20/20 games...
+[ckpt-iter4304 vs tactical] Completed 20/20 games...
+[openspiel-mcts-50 vs alphabeta-d3] Completed 20/20 games...
+[openspiel-mcts-50 vs tactical] Completed 20/20 games...
+[alphabeta-d3 vs tactical] Completed 20/20 games...
+==============================================================================================================
+                                       TOURNAMENT LEADERBOARD & RATINGS
+==============================================================================================================
+Rank  Participant               Bayesian Elo (95% CI)     Glicko-2 (±RD)         Score%   W     D     L     Win%  
+--------------------------------------------------------------------------------------------------------------
+1     ckpt-iter4304             1812.9 [±110.3]           1875.7 (±65.8)          87.5%  50    5     5      83.3%
+2     alphabeta-d3              1574.6 [±86.4]            1600.2 (±65.8)          60.0%  32    8     20     53.3%
+3     tactical                  1408.6 [±86.7]            1383.1 (±65.8)          38.3%  19    8     33     31.7%
+4     openspiel-mcts-50         1203.9 [±106.0]           1141.0 (±65.8)          14.2%  6     5     49     10.0%
+==============================================================================================================
+Total games played: 120
+Side stats: X win rate = 52.5%, O win rate = 36.7%, Draw rate = 10.8%
+Pairwise color bias delta: 0.00% across paired mirrors.

@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-09-13T12:55:08.010020+00:00",
+  "duration_sec": 0.0025801658630371094,
+  "overall_status": "passed",
+  "requested_stage": "memory",
+  "backend": "cpp",
+  "device": "cpu",
+  "stages": {
+    "memory": {
+      "stage": "memory",
+      "status": "passed",
+      "duration_sec": 0.002255678176879883,
+      "rss_before_kb": 36920,
+      "rss_after_kb": 36920
+    }
+  }
+}

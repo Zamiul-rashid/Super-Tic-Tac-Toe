@@ -1,0 +1,468 @@
+test_center_convergence_speed (test_adaptation.TestAdaptationBeliefConvergence.test_center_convergence_speed)
+Feed 10 consecutive center-targeted moves and verify rapid convergence. ... ok
+test_corners_convergence_speed (test_adaptation.TestAdaptationBeliefConvergence.test_corners_convergence_speed)
+Feed 10 consecutive corner-targeted moves and verify convergence. ... ok
+test_global_win_convergence (test_adaptation.TestAdaptationBeliefConvergence.test_global_win_convergence)
+Feed winning moves claiming the global game and verify rapid convergence. ... ok
+test_local_win_greed_convergence (test_adaptation.TestAdaptationBeliefConvergence.test_local_win_greed_convergence)
+Feed moves taking local board completions and verify convergence to 'local-win'. ... ok
+test_shannon_entropy_reduction (test_adaptation.TestAdaptationBeliefConvergence.test_shannon_entropy_reduction)
+Compute Shannon entropy H(b) = -sum(b_k * ln(b_k)). ... ok
+test_illegal_move_observation_rejected (test_adaptation.TestAdaptationEdgeCases.test_illegal_move_observation_rejected)
+Verify observing an illegal move raises ValueError. ... ok
+test_initial_uniform_weights (test_adaptation.TestAdaptationEdgeCases.test_initial_uniform_weights)
+Verify unobserved Opponent initializes with uniform weights across all policies. ... ok
+test_opponent_persistence_roundtrip (test_adaptation.TestAdaptationEdgeCases.test_opponent_persistence_roundtrip)
+Verify Opponent profile saves and reloads identically from disk. ... ok
+test_adaptation_win_rate_delta_paired_match (test_adaptation.TestAdaptationSearchIntegration.test_adaptation_win_rate_delta_paired_match)
+Run a paired match comparing adaptive vs non-adaptive agent against predictable StyleBot. ... ok
+test_expectimax_sampling_at_opponent_nodes (test_adaptation.TestAdaptationSearchIntegration.test_expectimax_sampling_at_opponent_nodes)
+Verify opponent nodes in TreeSearch use expectation sampling weighted by opponent.predict(). ... ok
+test_proof_pruning_disabled_when_adapting (test_adaptation.TestAdaptationSearchIntegration.test_proof_pruning_disabled_when_adapting)
+Verify minimax proof pruning is disabled when opponent modeling is provided. ... ok
+test_style_switching_recovery (test_adaptation.TestAdaptationStyleSwitching.test_style_switching_recovery)
+Feed 15 center moves (b_center > 0.95), then switch to 15 corner moves. ... ok
+test_trust_factor_monotonicity_and_cap (test_adaptation.TestAdaptationStyleSwitching.test_trust_factor_monotonicity_and_cap)
+Verify trust factor tau = min(0.5, N_obs / 100) across observations. ... ok
+test_adaptation (test_ai.Tests.test_adaptation) ... ok
+test_color_symmetry (test_ai.Tests.test_color_symmetry) ... ok
+test_finished_game (test_ai.Tests.test_finished_game) ... ok
+test_profile_persistence (test_ai.Tests.test_profile_persistence) ... ok
+test_random_games (test_ai.Tests.test_random_games) ... ok
+test_resnet (test_ai.Tests.test_resnet) ... ok
+test_rules (test_ai.Tests.test_rules) ... ok
+test_search_win (test_ai.Tests.test_search_win) ... ok
+test_action_coord_conversions (test_bots.BotTests.test_action_coord_conversions) ... ok
+test_alphabeta_and_tactical_bots (test_bots.BotTests.test_alphabeta_and_tactical_bots) ... ok
+test_bot_base_class_contract (test_bots.BotTests.test_bot_base_class_contract) ... ok
+test_checkpoint_bot (test_bots.BotTests.test_checkpoint_bot) ... ok
+test_create_bot_factory (test_bots.BotTests.test_create_bot_factory) ... ok
+test_external_process_bot_action_protocol (test_bots.BotTests.test_external_process_bot_action_protocol) ... ok
+test_external_process_bot_codingame_echo (test_bots.BotTests.test_external_process_bot_codingame_echo) ... ok
+test_external_process_bot_crash_and_recovery (test_bots.BotTests.test_external_process_bot_crash_and_recovery) ... ok
+test_external_process_bot_empty_command_cleanup (test_bots.BotTests.test_external_process_bot_empty_command_cleanup) ... ok
+test_external_process_bot_invalid_output (test_bots.BotTests.test_external_process_bot_invalid_output) ... ok
+test_external_process_bot_partial_stdout_timeout (test_bots.BotTests.test_external_process_bot_partial_stdout_timeout) ... ok
+test_external_process_bot_timeout_non_freezing (test_bots.BotTests.test_external_process_bot_timeout_non_freezing) ... ok
+test_style_bot_all_policies (test_bots.BotTests.test_style_bot_all_policies) ... ok
+test_style_bot_behavioral_bias (test_bots.BotTests.test_style_bot_behavioral_bias) ... ok
+test_clean_restart_after_reset (test_bots_adversarial.AdversarialExternalProcessBotTests.test_clean_restart_after_reset)
+Process crashes in Game 1. Calling bot.reset() restores a working process for Game 2. ... ok
+test_codingame_output_with_trailing_comment (test_bots_adversarial.AdversarialExternalProcessBotTests.test_codingame_output_with_trailing_comment)
+CodinGame protocol allows trailing comments (e.g. '0 0 my message'). ... ok
+test_empty_string_output (test_bots_adversarial.AdversarialExternalProcessBotTests.test_empty_string_output) ... ok
+test_fallback_raise_mode (test_bots_adversarial.AdversarialExternalProcessBotTests.test_fallback_raise_mode)
+fallback='raise' raises RuntimeError on crash or timeout. ... ok
+test_floating_point_numbers (test_bots_adversarial.AdversarialExternalProcessBotTests.test_floating_point_numbers) ... ok
+test_huge_stdout_output (test_bots_adversarial.AdversarialExternalProcessBotTests.test_huge_stdout_output)
+Process writes 100,000 characters of garbage on stdout. ... ok
+test_illegal_occupied_cell_move (test_bots_adversarial.AdversarialExternalProcessBotTests.test_illegal_occupied_cell_move)
+Bot attempts to play an already occupied cell. ... ok
+test_illegal_wrong_board_when_forced (test_bots_adversarial.AdversarialExternalProcessBotTests.test_illegal_wrong_board_when_forced)
+Bot attempts to play in board 0 when forced to board 4. ... ok
+test_immediate_exit_code_1 (test_bots_adversarial.AdversarialExternalProcessBotTests.test_immediate_exit_code_1)
+Process exits immediately with code 1. ... ok
+test_infinite_busy_cpu_loop_killed (test_bots_adversarial.AdversarialExternalProcessBotTests.test_infinite_busy_cpu_loop_killed)
+Subprocess spinning 100% CPU in while True must be terminated and reaped. ... ok
+test_mock_bot_sleep_10s_timeout_enforced (test_bots_adversarial.AdversarialExternalProcessBotTests.test_mock_bot_sleep_10s_timeout_enforced)
+Mock bot sleeps 10s. Timeout 0.2s must return in < 1.0s with legal fallback. ... ok
+test_nan_and_infinity (test_bots_adversarial.AdversarialExternalProcessBotTests.test_nan_and_infinity) ... ok
+test_negative_numbers (test_bots_adversarial.AdversarialExternalProcessBotTests.test_negative_numbers) ... ok
+test_nonexistent_executable_binary (test_bots_adversarial.AdversarialExternalProcessBotTests.test_nonexistent_executable_binary)
+Nonexistent executable path falls back gracefully without unhandled crash. ... ok
+test_out_of_bounds_action_and_coords (test_bots_adversarial.AdversarialExternalProcessBotTests.test_out_of_bounds_action_and_coords) ... ok
+test_partial_stdout_then_hang_vulnerability (test_bots_adversarial.AdversarialExternalProcessBotTests.test_partial_stdout_then_hang_vulnerability)
+Adversarial stress test: subprocess writes partial token without newline, then hangs. ... ok
+test_rapid_consecutive_games_reset_lifecycle (test_bots_adversarial.AdversarialExternalProcessBotTests.test_rapid_consecutive_games_reset_lifecycle)
+Verify 10 consecutive games with reset() do not leak file descriptors or processes. ... ok
+test_sigkill_mid_execution (test_bots_adversarial.AdversarialExternalProcessBotTests.test_sigkill_mid_execution)
+Process killed abruptly via SIGKILL mid-game. ... ok
+test_stderr_saturation_does_not_deadlock (test_bots_adversarial.AdversarialExternalProcessBotTests.test_stderr_saturation_does_not_deadlock)
+Subprocess writes 128KB to stderr (exceeding standard 64KB pipe buffer). ... ok
+test_subsequent_turns_in_same_game_skip_hanging (test_bots_adversarial.AdversarialExternalProcessBotTests.test_subsequent_turns_in_same_game_skip_hanging)
+Once crashed/timed out in a game, subsequent turns in the same game must not re-hang. ... ok
+test_timeout_hard_ceiling_cap_5s (test_bots_adversarial.AdversarialExternalProcessBotTests.test_timeout_hard_ceiling_cap_5s)
+Timeout argument > 5.0s (e.g. 10.0s) must be clamped to 5.0s. ... ok
+test_unhandled_exception_crash (test_bots_adversarial.AdversarialExternalProcessBotTests.test_unhandled_exception_crash)
+Process raises an unhandled ZeroDivisionError. ... ok
+test_whitespace_only_output (test_bots_adversarial.AdversarialExternalProcessBotTests.test_whitespace_only_output) ... ok
+test_advance_action_subtree_integrity (test_challenger_m1_adversarial.ChallengerAdversarialM1Tests.test_advance_action_subtree_integrity)
+Verify advance(action) correctly updates root state and preserves search subtree statistics. ... ok
+test_checkpoint_bot_cpu_inference_zero_gpu_vram (test_challenger_m1_adversarial.ChallengerAdversarialM1Tests.test_checkpoint_bot_cpu_inference_zero_gpu_vram)
+Verify CheckpointBot CPU inference does not allocate GPU VRAM (torch.cuda.memory_allocated() == 0). ... skipped 'CUDA not available on this platform'
+test_choose_on_terminal_state_raises_value_error (test_challenger_m1_adversarial.ChallengerAdversarialM1Tests.test_choose_on_terminal_state_raises_value_error)
+Verify calling choose() on any terminal state raises ValueError across all bot classes. ... ok
+test_style_bot_50_plus_randomized_games_all_styles (test_challenger_m1_adversarial.ChallengerAdversarialM1Tests.test_style_bot_50_plus_randomized_games_all_styles)
+Stress-test StyleBot across all 5 styles over 100+ games verifying move legality. ... ok
+test_checkpoint_and_external_in_tournament (test_challenger_m5_stress.ChallengerM5MultiAgentTournamentTests.test_checkpoint_and_external_in_tournament)
+Pit a real CheckpointBot, ExternalProcessBot, and heuristic bots in a tournament. ... [ckpt-starter vs external-mock] Completed 20/20 games...
+[ckpt-starter vs tactical-test] Completed 20/20 games...
+[ckpt-starter vs ab-d2] Completed 20/20 games...
+[external-mock vs tactical-test] Completed 20/20 games...
+[external-mock vs ab-d2] Completed 20/20 games...
+[tactical-test vs ab-d2] Completed 20/20 games...
+ok
+test_live_cli_tournament_all_bot_types_simultaneous (test_challenger_m5_stress.ChallengerM5MultiAgentTournamentTests.test_live_cli_tournament_all_bot_types_simultaneous)
+Run a live CLI tournament combining all bot types simultaneously. ... ok
+test_cpu_thread_confinement_during_sweeps (test_challenger_m5_stress.ChallengerM5StressResourceTests.test_cpu_thread_confinement_during_sweeps)
+Verify torch and OS threads remain confined to 1 during simulation sweeps. ... [candidate_sim_16 vs tactical] Completed 20/20 games...
+[candidate_sim_16 vs alphabeta-d3] Completed 20/20 games...
+[tactical vs alphabeta-d3] Completed 20/20 games...
+[candidate_sim_32 vs tactical] Completed 20/20 games...
+[candidate_sim_32 vs alphabeta-d3] Completed 20/20 games...
+[tactical vs alphabeta-d3] Completed 20/20 games...
+[candidate_sim_64 vs tactical] Completed 20/20 games...
+[candidate_sim_64 vs alphabeta-d3] Completed 20/20 games...
+[tactical vs alphabeta-d3] Completed 20/20 games...
+ok
+test_external_bot_zombie_process_prevention (test_challenger_m5_stress.ChallengerM5StressResourceTests.test_external_bot_zombie_process_prevention)
+Verify ExternalProcessBot terminates cleanly without leaving zombie children. ... ok
+test_memory_stability_across_multi_round_sweeps (test_challenger_m5_stress.ChallengerM5StressResourceTests.test_memory_stability_across_multi_round_sweeps)
+Verify RSS memory does not exhibit monotonic unbounded growth across 6 rounds. ... [b_0 vs b_1] Completed 20/20 games...
+[b_0 vs b_2] Completed 20/20 games...
+[b_1 vs b_2] Completed 20/20 games...
+[b_0 vs b_1] Completed 20/20 games...
+[b_0 vs b_2] Completed 20/20 games...
+[b_1 vs b_2] Completed 20/20 games...
+[b_0 vs b_1] Completed 20/20 games...
+[b_0 vs b_2] Completed 20/20 games...
+[b_1 vs b_2] Completed 20/20 games...
+[b_0 vs b_1] Completed 20/20 games...
+[b_0 vs b_2] Completed 20/20 games...
+[b_1 vs b_2] Completed 20/20 games...
+[b_0 vs b_1] Completed 20/20 games...
+[b_0 vs b_2] Completed 20/20 games...
+[b_1 vs b_2] Completed 20/20 games...
+[b_0 vs b_1] Completed 20/20 games...
+[b_0 vs b_2] Completed 20/20 games...
+[b_1 vs b_2] Completed 20/20 games...
+ok
+test_rejection_games_over_500 (test_cli_tournament.TestTournamentCLIArguments.test_rejection_games_over_500)
+Verify game counts > 500 are rejected with specific error. ... ok
+test_rejection_games_under_20 (test_cli_tournament.TestTournamentCLIArguments.test_rejection_games_under_20)
+Verify game counts < 20 are rejected with specific error. ... ok
+test_rejection_negative_seed (test_cli_tournament.TestTournamentCLIArguments.test_rejection_negative_seed)
+Verify negative seeds are rejected. ... ok
+test_rejection_opening_plies_over_4 (test_cli_tournament.TestTournamentCLIArguments.test_rejection_opening_plies_over_4)
+Verify opening plies > 4 are rejected with specific error. ... ok
+test_rejection_opening_plies_under_0 (test_cli_tournament.TestTournamentCLIArguments.test_rejection_opening_plies_under_0)
+Verify opening plies < 0 are rejected with specific error. ... ok
+test_tournament_help_displays_all_arguments (test_cli_tournament.TestTournamentCLIArguments.test_tournament_help_displays_all_arguments)
+Verify python -m sttt.ai tournament --help shows all expected options. ... ok
+test_checkpoint_integration_tournament (test_cli_tournament.TestTournamentCLIExecution.test_checkpoint_integration_tournament)
+Verify running tournament with a real neural model checkpoint. ... ok
+test_direct_tournament_cmd_execution (test_cli_tournament.TestTournamentCLIExecution.test_direct_tournament_cmd_execution)
+Verify tournament_cmd direct invocation creates all artifacts and prints scoreboard. ... ok
+test_simulation_budgets_sweep_outputs (test_cli_tournament.TestTournamentCLIExecution.test_simulation_budgets_sweep_outputs)
+Verify simulation budgets sweep generates scaling summary files. ... ok
+test_subprocess_tournament_execution_files_and_schemas (test_cli_tournament.TestTournamentCLIExecution.test_subprocess_tournament_execution_files_and_schemas)
+Verify subprocess tournament execution generates valid schemas. ... ok
+test_write_tournament_report_atomic_no_tmp (test_cli_tournament.TestWriteTournamentReportUnit.test_write_tournament_report_atomic_no_tmp)
+Verify write_tournament_report writes all files atomically leaving no .tmp files. ... ok
+test_f19_baseline_test_suite_all_pass (test_e2e_tournament.TestBaselineAndEnvironmentIsolation.test_f19_baseline_test_suite_all_pass)
+F19: Verifies all 26 existing unit tests continue to pass with 0 failures. ... ok
+test_f20_cpu_only_execution_no_gpu_allocation (test_e2e_tournament.TestBaselineAndEnvironmentIsolation.test_f20_cpu_only_execution_no_gpu_allocation)
+F20: Verifies tests execute safely on CPU without allocating GPU memory. ... ok
+test_f20_git_branch_isolation (test_e2e_tournament.TestBaselineAndEnvironmentIsolation.test_f20_git_branch_isolation)
+F20: Verifies execution is strictly isolated on the 'testing' branch. ... ok
+test_f20_training_process_undisturbed (test_e2e_tournament.TestBaselineAndEnvironmentIsolation.test_f20_training_process_undisturbed)
+F20: Verifies active training tmux session 'game' is running undisturbed. ... ok
+test_f13_center_bias_belief_convergence (test_e2e_tournament.TestTier1AdaptationMetrics.test_f13_center_bias_belief_convergence)
+F13: Observing repeated center cell moves rapidly converges belief to 'center'. ... ok
+test_f13_corner_bias_belief_convergence (test_e2e_tournament.TestTier1AdaptationMetrics.test_f13_corner_bias_belief_convergence)
+F13: Observing repeated corner cell moves increases belief in 'corners'. ... ok
+test_f13_trust_monotonic_scaling_and_saturation (test_e2e_tournament.TestTier1AdaptationMetrics.test_f13_trust_monotonic_scaling_and_saturation)
+F13: Trust scaling tau = min(0.5, N/100) caps at 0.50 at N >= 50. ... ok
+test_f13_uniform_prior_initialization (test_e2e_tournament.TestTier1AdaptationMetrics.test_f13_uniform_prior_initialization)
+F13: Initial Opponent belief distribution is uniform across all 5 styles. ... ok
+test_f14_style_switch_adaptation_recovery (test_e2e_tournament.TestTier1AdaptationMetrics.test_f14_style_switch_adaptation_recovery)
+F14: Discount factor allows belief inversion when opponent switches styles. ... ok
+test_f10_95_percent_confidence_interval_bounds (test_e2e_tournament.TestTier1BayesianElo.test_f10_95_percent_confidence_interval_bounds)
+F10: Fisher Information 95% CI error margin is positive and reasonable. ... ok
+test_f10_anchor_rating_is_fixed (test_e2e_tournament.TestTier1BayesianElo.test_f10_anchor_rating_is_fixed)
+F10: Baseline anchor player rating is fixed at base_elo. ... ok
+test_f10_draw_preserves_equal_ratings (test_e2e_tournament.TestTier1BayesianElo.test_f10_draw_preserves_equal_ratings)
+F10: Match with only draws yields equal ratings. ... ok
+test_f10_inversion_symmetry (test_e2e_tournament.TestTier1BayesianElo.test_f10_inversion_symmetry)
+F10: Inverting wins and losses inverts relative Elo difference. ... ok
+test_f10_rating_ordering_reflects_win_rates (test_e2e_tournament.TestTier1BayesianElo.test_f10_rating_ordering_reflects_win_rates)
+F10: Bot with higher score rate receives higher Bayesian Elo. ... ok
+test_f1_alphabeta_choose_returns_legal_action (test_e2e_tournament.TestTier1BotInterface.test_f1_alphabeta_choose_returns_legal_action)
+F1, F4: AlphaBetaBot returns a valid integer in state.legal_actions(). ... ok
+test_f1_bot_advance_and_reset_contract (test_e2e_tournament.TestTier1BotInterface.test_f1_bot_advance_and_reset_contract)
+F1: Bot interface supports advance(action) and reset() cleanly. ... ok
+test_f1_bot_name_attribute_or_class (test_e2e_tournament.TestTier1BotInterface.test_f1_bot_name_attribute_or_class)
+F1: Bot instance provides an identifiable name. ... ok
+test_f1_bot_terminal_state_error (test_e2e_tournament.TestTier1BotInterface.test_f1_bot_terminal_state_error)
+F1: Bot.choose on a terminal state raises ValueError. ... ok
+test_f1_create_bot_factory (test_e2e_tournament.TestTier1BotInterface.test_f1_create_bot_factory)
+F1: create_bot correctly instantiates requested bot specifications. ... ok
+test_f1_tactical_choose_returns_legal_action (test_e2e_tournament.TestTier1BotInterface.test_f1_tactical_choose_returns_legal_action)
+F1, F4: TacticalBot returns a valid integer in state.legal_actions(). ... ok
+test_f16_cli_help_lists_subcommands (test_e2e_tournament.TestTier1CLIOptions.test_f16_cli_help_lists_subcommands)
+F16: python -m sttt.ai --help executes cleanly and displays CLI options. ... ok
+test_f16_cli_invalid_games_rejection (test_e2e_tournament.TestTier1CLIOptions.test_f16_cli_invalid_games_rejection)
+F16: CLI rejects game counts outside [20, 500]. ... ok
+test_f16_cli_opening_plies_options (test_e2e_tournament.TestTier1CLIOptions.test_f16_cli_opening_plies_options)
+F16: Tournament CLI accepts --opening-plies parameter. ... ok
+test_f16_cli_simulation_budgets_sweep_option (test_e2e_tournament.TestTier1CLIOptions.test_f16_cli_simulation_budgets_sweep_option)
+F16: Tournament CLI accepts --simulation-budgets parameter. ... ok
+test_f16_tournament_subparser_arguments (test_e2e_tournament.TestTier1CLIOptions.test_f16_tournament_subparser_arguments)
+F16: python -m sttt.ai tournament --help displays tournament options. ... ok
+test_f2_advance_sends_move_to_engine (test_e2e_tournament.TestTier1ExternalProcessBot.test_f2_advance_sends_move_to_engine)
+F2: advance(action) notifies the engine of opponent moves. ... ok
+test_f2_grid_coordinate_translation (test_e2e_tournament.TestTier1ExternalProcessBot.test_f2_grid_coordinate_translation)
+F2: ExternalProcessBot translates row/col coordinates to action index. ... ok
+test_f2_mock_echo_bot_returns_valid_move (test_e2e_tournament.TestTier1ExternalProcessBot.test_f2_mock_echo_bot_returns_valid_move)
+F2, F6: ExternalProcessBot communicates with external engine over stdin/stdout. ... ok
+test_f2_reset_and_close_lifecycle (test_e2e_tournament.TestTier1ExternalProcessBot.test_f2_reset_and_close_lifecycle)
+F2: reset() and close() manage external process termination properly. ... ok
+test_f2_sequential_moves_reuse_process (test_e2e_tournament.TestTier1ExternalProcessBot.test_f2_sequential_moves_reuse_process)
+F2: ExternalProcessBot maintains single process across sequential moves. ... ok
+test_f11_canonical_glickman_vector (test_e2e_tournament.TestTier1Glicko2.test_f11_canonical_glickman_vector)
+F11: Tests against Mark Glickman's canonical 3-match reference vector. ... ok
+test_f11_rating_ordering_reflects_performance (test_e2e_tournament.TestTier1Glicko2.test_f11_rating_ordering_reflects_performance)
+F11: Dominant player receives higher Glicko-2 rating than losing player. ... ok
+test_f11_rd_decreases_with_more_games (test_e2e_tournament.TestTier1Glicko2.test_f11_rd_decreases_with_more_games)
+F11: Participating in games strictly reduces rating deviation (RD). ... ok
+test_f11_symmetric_match_equal_ratings (test_e2e_tournament.TestTier1Glicko2.test_f11_symmetric_match_equal_ratings)
+F11: Balanced outcomes between equal participants yield identical ratings. ... ok
+test_f11_volatility_bounded (test_e2e_tournament.TestTier1Glicko2.test_f11_volatility_bounded)
+F11: Updated volatility remains strictly positive and bounded. ... ok
+test_f18_csv_summary_has_header_and_data (test_e2e_tournament.TestTier1ReportExports.test_f18_csv_summary_has_header_and_data)
+F18: Generated CSV contains header matching report summary keys. ... ok
+test_f18_json_report_is_valid_json (test_e2e_tournament.TestTier1ReportExports.test_f18_json_report_is_valid_json)
+F18: Generated JSON report parses correctly. ... ok
+test_f18_write_report_atomic_staging (test_e2e_tournament.TestTier1ReportExports.test_f18_write_report_atomic_staging)
+F18: write_report writes JSON and CSV files atomically without temp residue. ... ok
+test_f3_center_style_prefers_center_cells (test_e2e_tournament.TestTier1StyleBot.test_f3_center_style_prefers_center_cells)
+F3: StyleBot('center') selects center cell (c=4) when legal. ... ok
+test_f3_corners_style_prefers_corner_cells (test_e2e_tournament.TestTier1StyleBot.test_f3_corners_style_prefers_corner_cells)
+F3: StyleBot('corners') selects corner cell (c in {0,2,6,8}) when legal. ... ok
+test_f3_deterministic_vs_stochastic_modes (test_e2e_tournament.TestTier1StyleBot.test_f3_deterministic_vs_stochastic_modes)
+F3: StyleBot supports deterministic (argmax) and stochastic sampling. ... ok
+test_f3_local_win_style_completes_board (test_e2e_tournament.TestTier1StyleBot.test_f3_local_win_style_completes_board)
+F3: StyleBot('local-win') takes immediate local board completion. ... ok
+test_f3_style_policy_distributions_exist (test_e2e_tournament.TestTier1StyleBot.test_f3_style_policy_distributions_exist)
+F3: sttt.opponent.policies returns valid 5-row probability vector. ... ok
+test_f7_opening_moves_are_strictly_legal (test_e2e_tournament.TestTier1TournamentPairing.test_f7_opening_moves_are_strictly_legal)
+F7: Opening move sequences are legal Super Tic-Tac-Toe transitions. ... [tactical vs tactical_2] Completed 2/2 games...
+ok
+test_f7_opening_positions_match_within_pair (test_e2e_tournament.TestTier1TournamentPairing.test_f7_opening_positions_match_within_pair)
+F7: Game 2k and Game 2k+1 share identical opening moves. ... [tactical vs tactical_2] Completed 4/4 games...
+ok
+test_f7_paired_seat_alternation_structure (test_e2e_tournament.TestTier1TournamentPairing.test_f7_paired_seat_alternation_structure)
+F7: Game 2k has A=X, B=O; Game 2k+1 has B=X, A=O. ... [tactical vs tactical_2] Completed 4/4 games...
+ok
+test_f7_symmetric_matchup_zero_color_bias (test_e2e_tournament.TestTier1TournamentPairing.test_f7_symmetric_matchup_zero_color_bias)
+F7: Paired match between identical bots cancels color bias (net score = 0.0). ... [tactical vs tactical_2] Completed 20/20 games...
+ok
+test_f8_sample_size_game_count (test_e2e_tournament.TestTier1TournamentPairing.test_f8_sample_size_game_count)
+F8: Matches run exactly the requested number of games. ... [tactical vs tactical_2] Completed 20/20 games...
+ok
+test_t2_immediate_crash_on_spawn_falls_back (test_e2e_tournament.TestTier2CrashAndCorruptOutput.test_t2_immediate_crash_on_spawn_falls_back)
+Tier 2: External process exiting with error code triggers fallback move. ... ok
+test_t2_invalid_non_numeric_output_falls_back (test_e2e_tournament.TestTier2CrashAndCorruptOutput.test_t2_invalid_non_numeric_output_falls_back)
+Tier 2: External process outputting garbage text triggers legal fallback. ... ok
+test_t2_occupied_cell_action_falls_back (test_e2e_tournament.TestTier2CrashAndCorruptOutput.test_t2_occupied_cell_action_falls_back)
+Tier 2: External process outputting already occupied cell triggers legal fallback. ... ok
+test_t2_out_of_bounds_action_falls_back (test_e2e_tournament.TestTier2CrashAndCorruptOutput.test_t2_out_of_bounds_action_falls_back)
+Tier 2: External process outputting out-of-range action triggers legal fallback. ... ok
+test_t2_stderr_noise_does_not_break_parser (test_e2e_tournament.TestTier2CrashAndCorruptOutput.test_t2_stderr_noise_does_not_break_parser)
+Tier 2: External engine emitting debug output to stderr does not corrupt parsing. ... ok
+test_t2_custom_timeout_configuration (test_e2e_tournament.TestTier2ExternalProcessEdgeCases.test_t2_custom_timeout_configuration)
+Tier 2: ExternalProcessBot allows custom timeout configuration <= 5.0s. ... ok
+test_t2_hanging_bot_terminated_within_timeout (test_e2e_tournament.TestTier2ExternalProcessEdgeCases.test_t2_hanging_bot_terminated_within_timeout)
+Tier 2: Hanging bot does not freeze the suite; terminates within timeout. ... ok
+test_t2_hanging_subprocess_killed_no_zombies (test_e2e_tournament.TestTier2ExternalProcessEdgeCases.test_t2_hanging_subprocess_killed_no_zombies)
+Tier 2: Hung subprocess is terminated cleanly on timeout. ... ok
+test_t2_hard_ceiling_timeout_enforcement (test_e2e_tournament.TestTier2ExternalProcessEdgeCases.test_t2_hard_ceiling_timeout_enforcement)
+Tier 2: Timeout is capped at maximum 5.0s. ... ok
+test_t2_subsequent_move_after_timeout_recovers (test_e2e_tournament.TestTier2ExternalProcessEdgeCases.test_t2_subsequent_move_after_timeout_recovers)
+Tier 2: Bot recovers and functions on subsequent choose call after a timeout. ... ok
+test_t2_excessive_opening_plies_rejected (test_e2e_tournament.TestTier2PairingBoundaries.test_t2_excessive_opening_plies_rejected)
+Tier 2: Opening plies > 4 raises ValueError. ... ok
+test_t2_four_opening_plies_maximum (test_e2e_tournament.TestTier2PairingBoundaries.test_t2_four_opening_plies_maximum)
+Tier 2: opening_plies=4 plays exactly 4 legal plies before bot control. ... [tactical vs tactical_2] Completed 2/2 games...
+ok
+test_t2_negative_opening_plies_rejected (test_e2e_tournament.TestTier2PairingBoundaries.test_t2_negative_opening_plies_rejected)
+Tier 2: Negative opening plies raises ValueError. ... ok
+test_t2_random_opening_plies_within_0_to_4 (test_e2e_tournament.TestTier2PairingBoundaries.test_t2_random_opening_plies_within_0_to_4)
+Tier 2: opening_plies='random' generates plies within [0, 4]. ... [tactical vs tactical_2] Completed 10/10 games...
+ok
+test_t2_zero_opening_plies_starts_from_empty_board (test_e2e_tournament.TestTier2PairingBoundaries.test_t2_zero_opening_plies_starts_from_empty_board)
+Tier 2: opening_plies=0 starts match directly from initial empty board. ... [tactical vs tactical_2] Completed 2/2 games...
+ok
+test_t2_100_percent_draw_rate_ratings (test_e2e_tournament.TestTier2RatingBoundaries.test_t2_100_percent_draw_rate_ratings)
+Tier 2: 100% draw rate preserves exact base_elo for both players. ... ok
+test_t2_extreme_100_percent_win_disparity (test_e2e_tournament.TestTier2RatingBoundaries.test_t2_extreme_100_percent_win_disparity)
+Tier 2: 100% win disparity converges without NaN or Inf. ... ok
+test_t2_extreme_initial_rd_in_glicko2 (test_e2e_tournament.TestTier2RatingBoundaries.test_t2_extreme_initial_rd_in_glicko2)
+Tier 2: Glicko-2 updates smoothly from extreme initial RD=350. ... ok
+test_t2_sample_size_ci_shrinkage (test_e2e_tournament.TestTier2RatingBoundaries.test_t2_sample_size_ci_shrinkage)
+Tier 2: 95% CI error margin shrinks monotonically as sample size increases. ... ok
+test_t2_unconnected_matchup_graph_regularized (test_e2e_tournament.TestTier2RatingBoundaries.test_t2_unconnected_matchup_graph_regularized)
+Tier 2: Gaussian prior regularizes unobserved pairs in round-robin. ... ok
+test_t2_maximum_sample_size_500_valid (test_e2e_tournament.TestTier2SampleSizeBoundaries.test_t2_maximum_sample_size_500_valid)
+Tier 2: Sample size 500 is accepted by matchup validator. ... ok
+test_t2_minimum_sample_size_20 (test_e2e_tournament.TestTier2SampleSizeBoundaries.test_t2_minimum_sample_size_20)
+Tier 2: Enforces minimum sample size of 20 games per matchup. ... [tactical vs tactical_2] Completed 20/20 games...
+ok
+test_t2_odd_game_count_auto_rounds_up (test_e2e_tournament.TestTier2SampleSizeBoundaries.test_t2_odd_game_count_auto_rounds_up)
+Tier 2: Odd game count (e.g. 21) automatically rounds up to next even (22). ... Sample size was odd; auto-rounded up to 22
+[tactical vs tactical_2] Completed 20/22 games...
+[tactical vs tactical_2] Completed 22/22 games...
+ok
+test_t2_over_maximum_sample_size_rejected (test_e2e_tournament.TestTier2SampleSizeBoundaries.test_t2_over_maximum_sample_size_rejected)
+Tier 2: Game count > 500 raises ValueError. ... ok
+test_t2_under_minimum_sample_size_rejected (test_e2e_tournament.TestTier2SampleSizeBoundaries.test_t2_under_minimum_sample_size_rejected)
+Tier 2: Game count < 20 raises ValueError. ... ok
+test_t3_adaptive_search_vs_style_bot_match (test_e2e_tournament.TestTier3CrossFeatureCombinations.test_t3_adaptive_search_vs_style_bot_match)
+Tier 3: Adaptive belief updates during gameplay against StyleBot. ... ok
+test_t3_bayesian_elo_and_glicko2_rank_agreement (test_e2e_tournament.TestTier3CrossFeatureCombinations.test_t3_bayesian_elo_and_glicko2_rank_agreement)
+Tier 3: Bayesian Elo and Glicko-2 produce concordant rankings on tournament results. ... ok
+test_t3_external_vs_tactical_paired_match (test_e2e_tournament.TestTier3CrossFeatureCombinations.test_t3_external_vs_tactical_paired_match)
+Tier 3: ExternalProcessBot vs TacticalBot in a paired tournament match. ... [ExtEcho vs tactical] Completed 4/4 games...
+ok
+test_t3_round_robin_to_bayesian_elo_pipeline (test_e2e_tournament.TestTier3CrossFeatureCombinations.test_t3_round_robin_to_bayesian_elo_pipeline)
+Tier 3: Multi-bot tournament directly feeds Bayesian Elo solver. ... [AlphaBeta vs Tactical] Completed 20/20 games...
+ok
+test_t3_round_robin_to_glicko2_pipeline (test_e2e_tournament.TestTier3CrossFeatureCombinations.test_t3_round_robin_to_glicko2_pipeline)
+Tier 3: Multi-bot tournament directly feeds Glicko-2 engine. ... [AlphaBeta vs Tactical] Completed 20/20 games...
+ok
+test_t3_simulation_budget_sweep_scaling (test_e2e_tournament.TestTier3CrossFeatureCombinations.test_t3_simulation_budget_sweep_scaling)
+Tier 3: run_simulation_sweep produces monotonic scaling summaries across budgets. ... ok
+test_t4_ascii_scoreboard_conformance (test_e2e_tournament.TestTier4RealWorldScenarios.test_t4_ascii_scoreboard_conformance)
+Tier 4: Validates scoreboard.txt format and content. ... [alphabeta-d3 vs tactical] Completed 20/20 games...
+==============================================================================================================
+                                       TOURNAMENT LEADERBOARD & RATINGS
+==============================================================================================================
+Rank  Participant               Bayesian Elo (95% CI)     Glicko-2 (±RD)         Score%   W     D     L     Win%  
+--------------------------------------------------------------------------------------------------------------
+1     alphabeta-d3              1662.8 [±109.5]           1827.5 (±110.2)         85.0%  16    2     2      80.0%
+2     tactical                  1337.2 [±109.5]           1172.5 (±110.2)         15.0%  2     2     16     10.0%
+==============================================================================================================
+Total games played: 20
+Side stats: X win rate = 40.0%, O win rate = 50.0%, Draw rate = 10.0%
+Pairwise color bias delta: 0.00% across paired mirrors.
+ok
+test_t4_full_tournament_cli_execution (test_e2e_tournament.TestTier4RealWorldScenarios.test_t4_full_tournament_cli_execution)
+Tier 4: Full tournament command execution via CLI into target directory. ... ok
+test_t4_simulation_sweep_cli_execution_and_reports (test_e2e_tournament.TestTier4RealWorldScenarios.test_t4_simulation_sweep_cli_execution_and_reports)
+Tier 4: Simulation budget sweep via CLI writes scaling summaries. ... ok
+test_t4_summary_and_matchups_csv_conformance (test_e2e_tournament.TestTier4RealWorldScenarios.test_t4_summary_and_matchups_csv_conformance)
+Tier 4: Validates summary.csv and matchups.csv column structures. ... [alphabeta-d3 vs tactical] Completed 20/20 games...
+==============================================================================================================
+                                       TOURNAMENT LEADERBOARD & RATINGS
+==============================================================================================================
+Rank  Participant               Bayesian Elo (95% CI)     Glicko-2 (±RD)         Score%   W     D     L     Win%  
+--------------------------------------------------------------------------------------------------------------
+1     alphabeta-d3              1662.8 [±109.5]           1827.5 (±110.2)         85.0%  16    2     2      80.0%
+2     tactical                  1337.2 [±109.5]           1172.5 (±110.2)         15.0%  2     2     16     10.0%
+==============================================================================================================
+Total games played: 20
+Side stats: X win rate = 40.0%, O win rate = 50.0%, Draw rate = 10.0%
+Pairwise color bias delta: 0.00% across paired mirrors.
+ok
+test_t4_tournament_json_schema_conformance (test_e2e_tournament.TestTier4RealWorldScenarios.test_t4_tournament_json_schema_conformance)
+Tier 4: Validates tournament.json schema fields. ... [alphabeta-d3 vs tactical] Completed 20/20 games...
+==============================================================================================================
+                                       TOURNAMENT LEADERBOARD & RATINGS
+==============================================================================================================
+Rank  Participant               Bayesian Elo (95% CI)     Glicko-2 (±RD)         Score%   W     D     L     Win%  
+--------------------------------------------------------------------------------------------------------------
+1     alphabeta-d3              1662.8 [±109.5]           1827.5 (±110.2)         85.0%  16    2     2      80.0%
+2     tactical                  1337.2 [±109.5]           1172.5 (±110.2)         15.0%  2     2     16     10.0%
+==============================================================================================================
+Total games played: 20
+Side stats: X win rate = 40.0%, O win rate = 50.0%, Draw rate = 10.0%
+Pairwise color bias delta: 0.00% across paired mirrors.
+ok
+test_external_turns_never_become_policy_targets (test_population.PopulationTests.test_external_turns_never_become_policy_targets) ... ok
+test_pool_mixes_history_and_live_inference_and_reuses_workers (test_population.PopulationTests.test_pool_mixes_history_and_live_inference_and_reuses_workers) ... ok
+test_sampler_varies_and_reproduces_without_live_checkpoint (test_population.PopulationTests.test_sampler_varies_and_reproduces_without_live_checkpoint) ... ok
+test_symmetry_respects_rules_and_forced_board (test_population.PopulationTests.test_symmetry_respects_rules_and_forced_board) ... ok
+test_empty_and_partial (test_reports.ReportTests.test_empty_and_partial) ... ok
+test_evaluation_openings_are_legal_paired_and_seeded (test_reports.ReportTests.test_evaluation_openings_are_legal_paired_and_seeded) ... ok
+test_evaluator_interrupt_saves_exports (test_reports.ReportTests.test_evaluator_interrupt_saves_exports) ... ok
+test_exports_and_discovery (test_reports.ReportTests.test_exports_and_discovery) ... ok
+test_batch_neural_evaluation_matches_single (test_search.SearchTests.test_batch_neural_evaluation_matches_single) ... ok
+test_batch_virtual_visits_released_even_on_failure (test_search.SearchTests.test_batch_virtual_visits_released_even_on_failure) ... ok
+test_bots_avoid_sending_opponent_to_global_win (test_search.SearchTests.test_bots_avoid_sending_opponent_to_global_win) ... ok
+test_bots_block_local_loss (test_search.SearchTests.test_bots_block_local_loss) ... ok
+test_bots_take_global_win (test_search.SearchTests.test_bots_take_global_win) ... ok
+test_exact_proofs_for_all_small_binary_games (test_search.SearchTests.test_exact_proofs_for_all_small_binary_games) ... ok
+test_minimax_proof_pruning_disabled_with_human_model (test_search.SearchTests.test_minimax_proof_pruning_disabled_with_human_model) ... ok
+test_proven_loss_excluded_when_unknown_alternative_exists (test_search.SearchTests.test_proven_loss_excluded_when_unknown_alternative_exists) ... ok
+test_real_late_games_match_exhaustive_solver (test_search.SearchTests.test_real_late_games_match_exhaustive_solver) ... ok
+test_reuse_and_noise_do_not_overwrite_base_priors (test_search.SearchTests.test_reuse_and_noise_do_not_overwrite_base_priors) ... ok
+test_sacrifice_and_misleading_network_are_not_proofs (test_search.SearchTests.test_sacrifice_and_misleading_network_are_not_proofs) ... ok
+test_soft_rechecks_preserve_bad_branches (test_search.SearchTests.test_soft_rechecks_preserve_bad_branches) ... ok
+test_worker_exception_propagates_and_cleanup_does_not_hang (test_selfplay.SelfPlayTests.test_worker_exception_propagates_and_cleanup_does_not_hang) ... ok
+test_worker_pool_routes_batches_and_keeps_workers_for_next_iteration (test_selfplay.SelfPlayTests.test_worker_pool_routes_batches_and_keeps_workers_for_next_iteration) ... ok
+test_bayesian_elo_all_draws_equal (test_tournament.TestBayesianEloRatingEngine.test_bayesian_elo_all_draws_equal)
+100% draw rate preserves equal base_elo ratings. ... ok
+test_bayesian_elo_anchor_player (test_tournament.TestBayesianEloRatingEngine.test_bayesian_elo_anchor_player)
+Anchor player rating is anchored precisely at base_elo. ... ok
+test_bayesian_elo_clean_sweep_finite (test_tournament.TestBayesianEloRatingEngine.test_bayesian_elo_clean_sweep_finite)
+50-0 clean sweep does not diverge or yield NaN/Inf due to Gaussian prior. ... ok
+test_bayesian_elo_confidence_interval_shrinkage (test_tournament.TestBayesianEloRatingEngine.test_bayesian_elo_confidence_interval_shrinkage)
+Error margin shrinks monotonically with increasing sample size. ... ok
+test_bayesian_elo_inversion_symmetry (test_tournament.TestBayesianEloRatingEngine.test_bayesian_elo_inversion_symmetry)
+Inverting wins and losses exactly inverts Elo delta. ... ok
+test_bayesian_elo_ordering_and_monotonicity (test_tournament.TestBayesianEloRatingEngine.test_bayesian_elo_ordering_and_monotonicity)
+Dominant player receives strictly higher Elo. ... ok
+test_bayesian_elo_unconnected_player_regularized (test_tournament.TestBayesianEloRatingEngine.test_bayesian_elo_unconnected_player_regularized)
+Unconnected participant who played 0 games is regularized to base_elo. ... ok
+test_canonical_glickman_benchmark_vector (test_tournament.TestGlicko2RatingEngine.test_canonical_glickman_benchmark_vector)
+Verifies against Mark Glickman's published 2013 canonical 3-game test vector. ... ok
+test_glicko2_rd_shrinks_with_games (test_tournament.TestGlicko2RatingEngine.test_glicko2_rd_shrinks_with_games)
+Participating in more games strictly reduces rating deviation (RD). ... ok
+test_glicko2_symmetric_equal_ratings (test_tournament.TestGlicko2RatingEngine.test_glicko2_symmetric_equal_ratings)
+Balanced match outcomes yield equal ratings and RDs. ... ok
+test_glicko2_volatility_bounded (test_tournament.TestGlicko2RatingEngine.test_glicko2_volatility_bounded)
+Updated volatility remains strictly positive and bounded. ... ok
+test_paired_opening_deterministic (test_tournament.TestPairedOpeningAndSeatAlternation.test_paired_opening_deterministic)
+Opening position is 100% deterministic for a given seed and pair index. ... ok
+test_paired_opening_different_pairs_differ (test_tournament.TestPairedOpeningAndSeatAlternation.test_paired_opening_different_pairs_differ)
+Different pair indices produce distinct opening sequences. ... ok
+test_paired_opening_plies_lengths (test_tournament.TestPairedOpeningAndSeatAlternation.test_paired_opening_plies_lengths)
+Plies parameter correctly controls length of opening move sequence. ... ok
+test_paired_opening_random_mode (test_tournament.TestPairedOpeningAndSeatAlternation.test_paired_opening_random_mode)
+Plies='random' generates sequences of length between 0 and 4. ... ok
+test_paired_seat_alternation_symmetry (test_tournament.TestPairedOpeningAndSeatAlternation.test_paired_seat_alternation_symmetry)
+Game 2k and Game 2k+1 share identical opening plies and inverted seats. ... [BotA vs BotB] Completed 4/4 games...
+ok
+test_symmetric_identical_bots_zero_bias (test_tournament.TestPairedOpeningAndSeatAlternation.test_symmetric_identical_bots_zero_bias)
+Paired matches between identical bots yield exact zero net score delta. ... [tactical vs tactical_2] Completed 20/20 games...
+ok
+test_opening_plies_boundaries (test_tournament.TestSampleSizeValidation.test_opening_plies_boundaries)
+Opening plies outside 0..4 raise ValueError. ... ok
+test_sample_size_maximum_500_accepted (test_tournament.TestSampleSizeValidation.test_sample_size_maximum_500_accepted)
+500 games is accepted without error. ... ok
+test_sample_size_minimum_20 (test_tournament.TestSampleSizeValidation.test_sample_size_minimum_20)
+20 games is accepted as valid minimum sample size. ... [tactical vs tactical_2] Completed 20/20 games...
+ok
+test_sample_size_odd_auto_rounds_up (test_tournament.TestSampleSizeValidation.test_sample_size_odd_auto_rounds_up)
+Odd game count (e.g. 21) automatically rounds up to next even (22). ... Sample size was odd; auto-rounded up to 22
+[tactical vs tactical_2] Completed 20/22 games...
+[tactical vs tactical_2] Completed 22/22 games...
+ok
+test_sample_size_over_500_rejected (test_tournament.TestSampleSizeValidation.test_sample_size_over_500_rejected)
+Game count > 500 raises ValueError. ... ok
+test_sample_size_under_20_rejected (test_tournament.TestSampleSizeValidation.test_sample_size_under_20_rejected)
+Game count in 11..19 raises ValueError. ... ok
+test_simulation_sweep_data_structure (test_tournament.TestSimulationBudgetSweeps.test_simulation_sweep_data_structure)
+run_simulation_sweep produces valid scaling summary across budgets. ... [candidate_sim_128 vs tactical] Completed 2/2 games...
+[candidate_sim_512 vs tactical] Completed 2/2 games...
+ok
+test_format_scoreboard (test_tournament.TestTournamentRoundRobin.test_format_scoreboard)
+format_scoreboard produces cleanly aligned ASCII table with expected headers. ... ok
+test_run_tournament_round_robin_execution (test_tournament.TestTournamentRoundRobin.test_run_tournament_round_robin_execution)
+Round-robin executes all pairwise matchups and returns structured data. ... [AlphaBeta vs Tactical] Completed 20/20 games...
+ok
+
+----------------------------------------------------------------------
+Ran 210 tests in 243.999s
+
+OK (skipped=1)

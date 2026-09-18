@@ -1,0 +1,6 @@
+==========================================================================================
+     MATCHED-OPENING SEARCH BUDGET COMPARISON (shared, saved opening corpus)
+==========================================================================================
+Checkpoint: /home/mt/Zami/Super-Tic-Tac-Toe/runs/budget-compare-iter4530-utttai128-20260918-par/evaluation-inputs/candidate/iter4530.pt
+Opponent:   utttai:128
+Budgets:    [128, 512, 2000]   Opening pairs: 50   Openings file: runs/budget-compare-iter4530-utttai128-20260918-par/openings.json

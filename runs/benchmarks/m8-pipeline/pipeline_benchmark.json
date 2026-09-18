@@ -1,0 +1,109 @@
+{
+  "arms": {
+    "cpp": {
+      "backend": "cpp",
+      "wall_seconds": 9.45127319400126,
+      "measured_iterations": 20,
+      "iteration_seconds": {
+        "median": 0.27283389499916666,
+        "mean": 0.30456795840009365,
+        "min": 0.20527223399949435,
+        "max": 0.4807950400008849,
+        "stdev": 0.092034474333048,
+        "repeats": 20
+      },
+      "stage_seconds_total": {
+        "selfplay": 5.219564164004623,
+        "replay_preparation": 0.013785094000922982,
+        "optimization": 0.09582299900102953,
+        "checkpoint_write": 0.7495510749977257
+      },
+      "stage_share": {
+        "selfplay": 0.8586612482466128,
+        "replay_preparation": 0.0022677613781737463,
+        "optimization": 0.015763671706610537,
+        "checkpoint_write": 0.12330731866860284
+      },
+      "evaluation_overhead_seconds": 0.0,
+      "throughput": {
+        "selfplay_games_per_sec": 16.873163934377285,
+        "learner_positions_per_sec": 915.8674365041259,
+        "completed_simulations_per_sec": 27333.914052580163,
+        "inference_batch_occupancy": 0.9567821034913306
+      },
+      "output_dir": "runs/benchmarks/m8-pipeline/cpp-r0",
+      "repeats": 1
+    },
+    "python": {
+      "backend": "python",
+      "wall_seconds": 13.915192411001044,
+      "measured_iterations": 20,
+      "iteration_seconds": {
+        "median": 0.4664423889998943,
+        "mean": 0.5314892011500888,
+        "min": 0.4128002319994266,
+        "max": 1.0034926749995066,
+        "stdev": 0.1440390629330093,
+        "repeats": 20
+      },
+      "stage_seconds_total": {
+        "selfplay": 9.604103326997574,
+        "replay_preparation": 0.06964323499960301,
+        "optimization": 0.19104530200456793,
+        "checkpoint_write": 0.7512753260016325
+      },
+      "stage_share": {
+        "selfplay": 0.9046762002449721,
+        "replay_preparation": 0.006560172778972479,
+        "optimization": 0.017995864060135734,
+        "checkpoint_write": 0.07076776291591966
+      },
+      "evaluation_overhead_seconds": 0.0,
+      "throughput": {
+        "selfplay_games_per_sec": 8.712400506130539,
+        "learner_positions_per_sec": 492.22854135365014,
+        "completed_simulations_per_sec": 14799.147180254673,
+        "inference_batch_occupancy": 0.9502384717712207
+      },
+      "output_dir": "runs/benchmarks/m8-pipeline/python-r0",
+      "repeats": 1
+    }
+  },
+  "comparison": {
+    "python_median_seconds": 0.4664423889998943,
+    "cpp_median_seconds": 0.27283389499916666,
+    "cpp_speedup_vs_python": 1.7096203864307953,
+    "regression_threshold": 0.05,
+    "regression_blocks_claim": false,
+    "note": "measured on one machine, this configuration and these budgets only"
+  },
+  "eta": {
+    "cpp": {
+      "total_iterations": 5000,
+      "mean_seconds_per_iteration": 0.30456795840009365,
+      "hours_mean": 0.4230110533334634,
+      "hours_low": 0.2851003249992977,
+      "hours_high": 0.6677708888901179,
+      "evaluation_overhead_hours": 0.0,
+      "evaluations": 0,
+      "basis": "20 measured iterations, backend=cpp"
+    },
+    "python": {
+      "total_iterations": 5000,
+      "mean_seconds_per_iteration": 0.5314892011500888,
+      "hours_mean": 0.73817944604179,
+      "hours_low": 0.5733336555547592,
+      "hours_high": 1.3937398263882035,
+      "evaluation_overhead_hours": 0.0,
+      "evaluations": 0,
+      "basis": "20 measured iterations, backend=python"
+    }
+  },
+  "native_build": {
+    "available": true,
+    "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+    "version": "0.9.0",
+    "build_id": "20260913164113_35fd9f6",
+    "source_revision": "35fd9f6"
+  }
+}

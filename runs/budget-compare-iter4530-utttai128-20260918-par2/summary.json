@@ -1,0 +1,3132 @@
+{
+  "checkpoint": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/budget-compare-iter4530-utttai128-20260918-par2/evaluation-inputs/candidate/iter4530.pt",
+  "opponent": "utttai:128",
+  "budgets": {
+    "128": {
+      "entrant": "ckpt-iter4530-cb04e705-s128",
+      "simulations": 128,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 54
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 41
+        },
+        {
+          "game_id": 2,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 3,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 43
+        },
+        {
+          "game_id": 4,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 5,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 6,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 7,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 8,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 42
+        },
+        {
+          "game_id": 9,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 10,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 48
+        },
+        {
+          "game_id": 11,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 12,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 13,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 47
+        },
+        {
+          "game_id": 14,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 15,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 16,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 17,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 18,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 19,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 20,
+          "pair_id": 10,
+          "opening_plies": 2,
+          "opening_moves": "42 56",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 21,
+          "pair_id": 10,
+          "opening_plies": 2,
+          "opening_moves": "42 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 22,
+          "pair_id": 11,
+          "opening_plies": 2,
+          "opening_moves": "24 56",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 23,
+          "pair_id": 11,
+          "opening_plies": 2,
+          "opening_moves": "24 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 24,
+          "pair_id": 12,
+          "opening_plies": 2,
+          "opening_moves": "18 2",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 48
+        },
+        {
+          "game_id": 25,
+          "pair_id": 12,
+          "opening_plies": 2,
+          "opening_moves": "18 2",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 37
+        },
+        {
+          "game_id": 26,
+          "pair_id": 13,
+          "opening_plies": 2,
+          "opening_moves": "55 13",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 27,
+          "pair_id": 13,
+          "opening_plies": 2,
+          "opening_moves": "55 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 28,
+          "pair_id": 14,
+          "opening_plies": 2,
+          "opening_moves": "32 51",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 29,
+          "pair_id": 14,
+          "opening_plies": 2,
+          "opening_moves": "32 51",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 30,
+          "pair_id": 15,
+          "opening_plies": 2,
+          "opening_moves": "2 26",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 46
+        },
+        {
+          "game_id": 31,
+          "pair_id": 15,
+          "opening_plies": 2,
+          "opening_moves": "2 26",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 32,
+          "pair_id": 16,
+          "opening_plies": 2,
+          "opening_moves": "46 17",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 33,
+          "pair_id": 16,
+          "opening_plies": 2,
+          "opening_moves": "46 17",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 34,
+          "pair_id": 17,
+          "opening_plies": 2,
+          "opening_moves": "15 62",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 47
+        },
+        {
+          "game_id": 35,
+          "pair_id": 17,
+          "opening_plies": 2,
+          "opening_moves": "15 62",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 36,
+          "pair_id": 18,
+          "opening_plies": 2,
+          "opening_moves": "55 16",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 37,
+          "pair_id": 18,
+          "opening_plies": 2,
+          "opening_moves": "55 16",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 38,
+          "pair_id": 19,
+          "opening_plies": 2,
+          "opening_moves": "65 20",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 39,
+          "pair_id": 19,
+          "opening_plies": 2,
+          "opening_moves": "65 20",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 40,
+          "pair_id": 20,
+          "opening_plies": 2,
+          "opening_moves": "65 26",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 41,
+          "pair_id": 20,
+          "opening_plies": 2,
+          "opening_moves": "65 26",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 42,
+          "pair_id": 21,
+          "opening_plies": 2,
+          "opening_moves": "16 65",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 43,
+          "pair_id": 21,
+          "opening_plies": 2,
+          "opening_moves": "16 65",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 61
+        },
+        {
+          "game_id": 44,
+          "pair_id": 22,
+          "opening_plies": 2,
+          "opening_moves": "5 49",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 45,
+          "pair_id": 22,
+          "opening_plies": 2,
+          "opening_moves": "5 49",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 46,
+          "pair_id": 23,
+          "opening_plies": 2,
+          "opening_moves": "39 35",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 47,
+          "pair_id": 23,
+          "opening_plies": 2,
+          "opening_moves": "39 35",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 43
+        },
+        {
+          "game_id": 48,
+          "pair_id": 24,
+          "opening_plies": 2,
+          "opening_moves": "17 78",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 49,
+          "pair_id": 24,
+          "opening_plies": 2,
+          "opening_moves": "17 78",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 50,
+          "pair_id": 25,
+          "opening_plies": 2,
+          "opening_moves": "22 42",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 40
+        },
+        {
+          "game_id": 51,
+          "pair_id": 25,
+          "opening_plies": 2,
+          "opening_moves": "22 42",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 43
+        },
+        {
+          "game_id": 52,
+          "pair_id": 26,
+          "opening_plies": 2,
+          "opening_moves": "28 16",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 53,
+          "pair_id": 26,
+          "opening_plies": 2,
+          "opening_moves": "28 16",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 54,
+          "pair_id": 27,
+          "opening_plies": 2,
+          "opening_moves": "13 44",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 55,
+          "pair_id": 27,
+          "opening_plies": 2,
+          "opening_moves": "13 44",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 56,
+          "pair_id": 28,
+          "opening_plies": 2,
+          "opening_moves": "6 55",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 40
+        },
+        {
+          "game_id": 57,
+          "pair_id": 28,
+          "opening_plies": 2,
+          "opening_moves": "6 55",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 58,
+          "pair_id": 29,
+          "opening_plies": 2,
+          "opening_moves": "31 36",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 59,
+          "pair_id": 29,
+          "opening_plies": 2,
+          "opening_moves": "31 36",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 60,
+          "pair_id": 30,
+          "opening_plies": 2,
+          "opening_moves": "58 39",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 59
+        },
+        {
+          "game_id": 61,
+          "pair_id": 30,
+          "opening_plies": 2,
+          "opening_moves": "58 39",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 57
+        },
+        {
+          "game_id": 62,
+          "pair_id": 31,
+          "opening_plies": 2,
+          "opening_moves": "42 58",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 42
+        },
+        {
+          "game_id": 63,
+          "pair_id": 31,
+          "opening_plies": 2,
+          "opening_moves": "42 58",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 64,
+          "pair_id": 32,
+          "opening_plies": 2,
+          "opening_moves": "48 32",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 65,
+          "pair_id": 32,
+          "opening_plies": 2,
+          "opening_moves": "48 32",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 66,
+          "pair_id": 33,
+          "opening_plies": 2,
+          "opening_moves": "37 11",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 67,
+          "pair_id": 33,
+          "opening_plies": 2,
+          "opening_moves": "37 11",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 68,
+          "pair_id": 34,
+          "opening_plies": 2,
+          "opening_moves": "1 10",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 69,
+          "pair_id": 34,
+          "opening_plies": 2,
+          "opening_moves": "1 10",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 70,
+          "pair_id": 35,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 48
+        },
+        {
+          "game_id": 71,
+          "pair_id": 35,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 72,
+          "pair_id": 36,
+          "opening_plies": 2,
+          "opening_moves": "37 12",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 73,
+          "pair_id": 36,
+          "opening_plies": 2,
+          "opening_moves": "37 12",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 74,
+          "pair_id": 37,
+          "opening_plies": 2,
+          "opening_moves": "37 13",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 75,
+          "pair_id": 37,
+          "opening_plies": 2,
+          "opening_moves": "37 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 61
+        },
+        {
+          "game_id": 76,
+          "pair_id": 38,
+          "opening_plies": 2,
+          "opening_moves": "78 56",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 77,
+          "pair_id": 38,
+          "opening_plies": 2,
+          "opening_moves": "78 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 78,
+          "pair_id": 39,
+          "opening_plies": 2,
+          "opening_moves": "44 79",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 79,
+          "pair_id": 39,
+          "opening_plies": 2,
+          "opening_moves": "44 79",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 80,
+          "pair_id": 40,
+          "opening_plies": 2,
+          "opening_moves": "55 11",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 60
+        },
+        {
+          "game_id": 81,
+          "pair_id": 40,
+          "opening_plies": 2,
+          "opening_moves": "55 11",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 82,
+          "pair_id": 41,
+          "opening_plies": 2,
+          "opening_moves": "52 71",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 83,
+          "pair_id": 41,
+          "opening_plies": 2,
+          "opening_moves": "52 71",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 44
+        },
+        {
+          "game_id": 84,
+          "pair_id": 42,
+          "opening_plies": 2,
+          "opening_moves": "54 2",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 43
+        },
+        {
+          "game_id": 85,
+          "pair_id": 42,
+          "opening_plies": 2,
+          "opening_moves": "54 2",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 86,
+          "pair_id": 43,
+          "opening_plies": 2,
+          "opening_moves": "51 56",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 87,
+          "pair_id": 43,
+          "opening_plies": 2,
+          "opening_moves": "51 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 88,
+          "pair_id": 44,
+          "opening_plies": 2,
+          "opening_moves": "4 38",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 89,
+          "pair_id": 44,
+          "opening_plies": 2,
+          "opening_moves": "4 38",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 90,
+          "pair_id": 45,
+          "opening_plies": 2,
+          "opening_moves": "10 13",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 91,
+          "pair_id": 45,
+          "opening_plies": 2,
+          "opening_moves": "10 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 49
+        },
+        {
+          "game_id": 92,
+          "pair_id": 46,
+          "opening_plies": 2,
+          "opening_moves": "8 72",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 58
+        },
+        {
+          "game_id": 93,
+          "pair_id": 46,
+          "opening_plies": 2,
+          "opening_moves": "8 72",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 94,
+          "pair_id": 47,
+          "opening_plies": 2,
+          "opening_moves": "41 46",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 95,
+          "pair_id": 47,
+          "opening_plies": 2,
+          "opening_moves": "41 46",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 61
+        },
+        {
+          "game_id": 96,
+          "pair_id": 48,
+          "opening_plies": 2,
+          "opening_moves": "69 55",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 46
+        },
+        {
+          "game_id": 97,
+          "pair_id": 48,
+          "opening_plies": 2,
+          "opening_moves": "69 55",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 98,
+          "pair_id": 49,
+          "opening_plies": 2,
+          "opening_moves": "41 47",
+          "player_x": "ckpt-iter4530-cb04e705-s128",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 49
+        },
+        {
+          "game_id": 99,
+          "pair_id": 49,
+          "opening_plies": 2,
+          "opening_moves": "41 47",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s128",
+          "winner": 1,
+          "moves": 47
+        }
+      ],
+      "mean_seconds_per_move": 0.1103851088565227,
+      "moves_timed": 2371,
+      "score_rate": 0.22,
+      "ci_low": 0.16,
+      "ci_high": 0.28,
+      "confidence": 0.95,
+      "pairs": 50,
+      "games": 100,
+      "iterations": 10000,
+      "seed": 4243
+    },
+    "512": {
+      "entrant": "ckpt-iter4530-cb04e705-s512",
+      "simulations": 512,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 59
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 41
+        },
+        {
+          "game_id": 2,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 61
+        },
+        {
+          "game_id": 3,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 4,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 5,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 63
+        },
+        {
+          "game_id": 6,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 60
+        },
+        {
+          "game_id": 7,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 49
+        },
+        {
+          "game_id": 8,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 9,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 58
+        },
+        {
+          "game_id": 10,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 11,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 12,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 60
+        },
+        {
+          "game_id": 13,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 47
+        },
+        {
+          "game_id": 14,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 15,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 16,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 17,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 18,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 61
+        },
+        {
+          "game_id": 19,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 20,
+          "pair_id": 10,
+          "opening_plies": 2,
+          "opening_moves": "42 56",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 42
+        },
+        {
+          "game_id": 21,
+          "pair_id": 10,
+          "opening_plies": 2,
+          "opening_moves": "42 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 22,
+          "pair_id": 11,
+          "opening_plies": 2,
+          "opening_moves": "24 56",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 23,
+          "pair_id": 11,
+          "opening_plies": 2,
+          "opening_moves": "24 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 24,
+          "pair_id": 12,
+          "opening_plies": 2,
+          "opening_moves": "18 2",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 25,
+          "pair_id": 12,
+          "opening_plies": 2,
+          "opening_moves": "18 2",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 26,
+          "pair_id": 13,
+          "opening_plies": 2,
+          "opening_moves": "55 13",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 27,
+          "pair_id": 13,
+          "opening_plies": 2,
+          "opening_moves": "55 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 28,
+          "pair_id": 14,
+          "opening_plies": 2,
+          "opening_moves": "32 51",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 29,
+          "pair_id": 14,
+          "opening_plies": 2,
+          "opening_moves": "32 51",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 30,
+          "pair_id": 15,
+          "opening_plies": 2,
+          "opening_moves": "2 26",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 31,
+          "pair_id": 15,
+          "opening_plies": 2,
+          "opening_moves": "2 26",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 32,
+          "pair_id": 16,
+          "opening_plies": 2,
+          "opening_moves": "46 17",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 59
+        },
+        {
+          "game_id": 33,
+          "pair_id": 16,
+          "opening_plies": 2,
+          "opening_moves": "46 17",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 34,
+          "pair_id": 17,
+          "opening_plies": 2,
+          "opening_moves": "15 62",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 64
+        },
+        {
+          "game_id": 35,
+          "pair_id": 17,
+          "opening_plies": 2,
+          "opening_moves": "15 62",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 36,
+          "pair_id": 18,
+          "opening_plies": 2,
+          "opening_moves": "55 16",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 37,
+          "pair_id": 18,
+          "opening_plies": 2,
+          "opening_moves": "55 16",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 38,
+          "pair_id": 19,
+          "opening_plies": 2,
+          "opening_moves": "65 20",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 39,
+          "pair_id": 19,
+          "opening_plies": 2,
+          "opening_moves": "65 20",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 40,
+          "pair_id": 20,
+          "opening_plies": 2,
+          "opening_moves": "65 26",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 55
+        },
+        {
+          "game_id": 41,
+          "pair_id": 20,
+          "opening_plies": 2,
+          "opening_moves": "65 26",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 42,
+          "pair_id": 21,
+          "opening_plies": 2,
+          "opening_moves": "16 65",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 43,
+          "pair_id": 21,
+          "opening_plies": 2,
+          "opening_moves": "16 65",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 57
+        },
+        {
+          "game_id": 44,
+          "pair_id": 22,
+          "opening_plies": 2,
+          "opening_moves": "5 49",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 45,
+          "pair_id": 22,
+          "opening_plies": 2,
+          "opening_moves": "5 49",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 46,
+          "pair_id": 23,
+          "opening_plies": 2,
+          "opening_moves": "39 35",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 47,
+          "pair_id": 23,
+          "opening_plies": 2,
+          "opening_moves": "39 35",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 43
+        },
+        {
+          "game_id": 48,
+          "pair_id": 24,
+          "opening_plies": 2,
+          "opening_moves": "17 78",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 49,
+          "pair_id": 24,
+          "opening_plies": 2,
+          "opening_moves": "17 78",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 50,
+          "pair_id": 25,
+          "opening_plies": 2,
+          "opening_moves": "22 42",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 55
+        },
+        {
+          "game_id": 51,
+          "pair_id": 25,
+          "opening_plies": 2,
+          "opening_moves": "22 42",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 43
+        },
+        {
+          "game_id": 52,
+          "pair_id": 26,
+          "opening_plies": 2,
+          "opening_moves": "28 16",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 53,
+          "pair_id": 26,
+          "opening_plies": 2,
+          "opening_moves": "28 16",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 54,
+          "pair_id": 27,
+          "opening_plies": 2,
+          "opening_moves": "13 44",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 56
+        },
+        {
+          "game_id": 55,
+          "pair_id": 27,
+          "opening_plies": 2,
+          "opening_moves": "13 44",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 56,
+          "pair_id": 28,
+          "opening_plies": 2,
+          "opening_moves": "6 55",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 57,
+          "pair_id": 28,
+          "opening_plies": 2,
+          "opening_moves": "6 55",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 58,
+          "pair_id": 29,
+          "opening_plies": 2,
+          "opening_moves": "31 36",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 59,
+          "pair_id": 29,
+          "opening_plies": 2,
+          "opening_moves": "31 36",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 60,
+          "pair_id": 30,
+          "opening_plies": 2,
+          "opening_moves": "58 39",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 61,
+          "pair_id": 30,
+          "opening_plies": 2,
+          "opening_moves": "58 39",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 62,
+          "pair_id": 31,
+          "opening_plies": 2,
+          "opening_moves": "42 58",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 63,
+          "pair_id": 31,
+          "opening_plies": 2,
+          "opening_moves": "42 58",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 64,
+          "pair_id": 32,
+          "opening_plies": 2,
+          "opening_moves": "48 32",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 54
+        },
+        {
+          "game_id": 65,
+          "pair_id": 32,
+          "opening_plies": 2,
+          "opening_moves": "48 32",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 66,
+          "pair_id": 33,
+          "opening_plies": 2,
+          "opening_moves": "37 11",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 67,
+          "pair_id": 33,
+          "opening_plies": 2,
+          "opening_moves": "37 11",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 68,
+          "pair_id": 34,
+          "opening_plies": 2,
+          "opening_moves": "1 10",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 69,
+          "pair_id": 34,
+          "opening_plies": 2,
+          "opening_moves": "1 10",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 61
+        },
+        {
+          "game_id": 70,
+          "pair_id": 35,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 71,
+          "pair_id": 35,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 72,
+          "pair_id": 36,
+          "opening_plies": 2,
+          "opening_moves": "37 12",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 61
+        },
+        {
+          "game_id": 73,
+          "pair_id": 36,
+          "opening_plies": 2,
+          "opening_moves": "37 12",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": -1,
+          "moves": 60
+        },
+        {
+          "game_id": 74,
+          "pair_id": 37,
+          "opening_plies": 2,
+          "opening_moves": "37 13",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 61
+        },
+        {
+          "game_id": 75,
+          "pair_id": 37,
+          "opening_plies": 2,
+          "opening_moves": "37 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 76,
+          "pair_id": 38,
+          "opening_plies": 2,
+          "opening_moves": "78 56",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 59
+        },
+        {
+          "game_id": 77,
+          "pair_id": 38,
+          "opening_plies": 2,
+          "opening_moves": "78 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 78,
+          "pair_id": 39,
+          "opening_plies": 2,
+          "opening_moves": "44 79",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 79,
+          "pair_id": 39,
+          "opening_plies": 2,
+          "opening_moves": "44 79",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 80,
+          "pair_id": 40,
+          "opening_plies": 2,
+          "opening_moves": "55 11",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 81,
+          "pair_id": 40,
+          "opening_plies": 2,
+          "opening_moves": "55 11",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 82,
+          "pair_id": 41,
+          "opening_plies": 2,
+          "opening_moves": "52 71",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 83,
+          "pair_id": 41,
+          "opening_plies": 2,
+          "opening_moves": "52 71",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 44
+        },
+        {
+          "game_id": 84,
+          "pair_id": 42,
+          "opening_plies": 2,
+          "opening_moves": "54 2",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 42
+        },
+        {
+          "game_id": 85,
+          "pair_id": 42,
+          "opening_plies": 2,
+          "opening_moves": "54 2",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 86,
+          "pair_id": 43,
+          "opening_plies": 2,
+          "opening_moves": "51 56",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 87,
+          "pair_id": 43,
+          "opening_plies": 2,
+          "opening_moves": "51 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 88,
+          "pair_id": 44,
+          "opening_plies": 2,
+          "opening_moves": "4 38",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 46
+        },
+        {
+          "game_id": 89,
+          "pair_id": 44,
+          "opening_plies": 2,
+          "opening_moves": "4 38",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 90,
+          "pair_id": 45,
+          "opening_plies": 2,
+          "opening_moves": "10 13",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 91,
+          "pair_id": 45,
+          "opening_plies": 2,
+          "opening_moves": "10 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 92,
+          "pair_id": 46,
+          "opening_plies": 2,
+          "opening_moves": "8 72",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 93,
+          "pair_id": 46,
+          "opening_plies": 2,
+          "opening_moves": "8 72",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 94,
+          "pair_id": 47,
+          "opening_plies": 2,
+          "opening_moves": "41 46",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 95,
+          "pair_id": 47,
+          "opening_plies": 2,
+          "opening_moves": "41 46",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 96,
+          "pair_id": 48,
+          "opening_plies": 2,
+          "opening_moves": "69 55",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 58
+        },
+        {
+          "game_id": 97,
+          "pair_id": 48,
+          "opening_plies": 2,
+          "opening_moves": "69 55",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 60
+        },
+        {
+          "game_id": 98,
+          "pair_id": 49,
+          "opening_plies": 2,
+          "opening_moves": "41 47",
+          "player_x": "ckpt-iter4530-cb04e705-s512",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 99,
+          "pair_id": 49,
+          "opening_plies": 2,
+          "opening_moves": "41 47",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s512",
+          "winner": 0,
+          "moves": 52
+        }
+      ],
+      "mean_seconds_per_move": 0.3534416206552291,
+      "moves_timed": 2514,
+      "score_rate": 0.41,
+      "ci_low": 0.34,
+      "ci_high": 0.485,
+      "confidence": 0.95,
+      "pairs": 50,
+      "games": 100,
+      "iterations": 10000,
+      "seed": 4243
+    },
+    "2000": {
+      "entrant": "ckpt-iter4530-cb04e705-s2000",
+      "simulations": 2000,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 2,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 59
+        },
+        {
+          "game_id": 3,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 4,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 60
+        },
+        {
+          "game_id": 5,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 6,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 7,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 8,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 9,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 61
+        },
+        {
+          "game_id": 10,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 11,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 49
+        },
+        {
+          "game_id": 12,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 13,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 63
+        },
+        {
+          "game_id": 14,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 15,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 16,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 44
+        },
+        {
+          "game_id": 17,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 18,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 59
+        },
+        {
+          "game_id": 19,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 20,
+          "pair_id": 10,
+          "opening_plies": 2,
+          "opening_moves": "42 56",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 21,
+          "pair_id": 10,
+          "opening_plies": 2,
+          "opening_moves": "42 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 22,
+          "pair_id": 11,
+          "opening_plies": 2,
+          "opening_moves": "24 56",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 23,
+          "pair_id": 11,
+          "opening_plies": 2,
+          "opening_moves": "24 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 24,
+          "pair_id": 12,
+          "opening_plies": 2,
+          "opening_moves": "18 2",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 25,
+          "pair_id": 12,
+          "opening_plies": 2,
+          "opening_moves": "18 2",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 26,
+          "pair_id": 13,
+          "opening_plies": 2,
+          "opening_moves": "55 13",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 61
+        },
+        {
+          "game_id": 27,
+          "pair_id": 13,
+          "opening_plies": 2,
+          "opening_moves": "55 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 28,
+          "pair_id": 14,
+          "opening_plies": 2,
+          "opening_moves": "32 51",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 29,
+          "pair_id": 14,
+          "opening_plies": 2,
+          "opening_moves": "32 51",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 30,
+          "pair_id": 15,
+          "opening_plies": 2,
+          "opening_moves": "2 26",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 31,
+          "pair_id": 15,
+          "opening_plies": 2,
+          "opening_moves": "2 26",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 55
+        },
+        {
+          "game_id": 32,
+          "pair_id": 16,
+          "opening_plies": 2,
+          "opening_moves": "46 17",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 33,
+          "pair_id": 16,
+          "opening_plies": 2,
+          "opening_moves": "46 17",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 34,
+          "pair_id": 17,
+          "opening_plies": 2,
+          "opening_moves": "15 62",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 49
+        },
+        {
+          "game_id": 35,
+          "pair_id": 17,
+          "opening_plies": 2,
+          "opening_moves": "15 62",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 47
+        },
+        {
+          "game_id": 36,
+          "pair_id": 18,
+          "opening_plies": 2,
+          "opening_moves": "55 16",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 37,
+          "pair_id": 18,
+          "opening_plies": 2,
+          "opening_moves": "55 16",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 38,
+          "pair_id": 19,
+          "opening_plies": 2,
+          "opening_moves": "65 20",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 39,
+          "pair_id": 19,
+          "opening_plies": 2,
+          "opening_moves": "65 20",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 56
+        },
+        {
+          "game_id": 40,
+          "pair_id": 20,
+          "opening_plies": 2,
+          "opening_moves": "65 26",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 41,
+          "pair_id": 20,
+          "opening_plies": 2,
+          "opening_moves": "65 26",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 42,
+          "pair_id": 21,
+          "opening_plies": 2,
+          "opening_moves": "16 65",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 43,
+          "pair_id": 21,
+          "opening_plies": 2,
+          "opening_moves": "16 65",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 47
+        },
+        {
+          "game_id": 44,
+          "pair_id": 22,
+          "opening_plies": 2,
+          "opening_moves": "5 49",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 47
+        },
+        {
+          "game_id": 45,
+          "pair_id": 22,
+          "opening_plies": 2,
+          "opening_moves": "5 49",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 46,
+          "pair_id": 23,
+          "opening_plies": 2,
+          "opening_moves": "39 35",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 62
+        },
+        {
+          "game_id": 47,
+          "pair_id": 23,
+          "opening_plies": 2,
+          "opening_moves": "39 35",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 48,
+          "pair_id": 24,
+          "opening_plies": 2,
+          "opening_moves": "17 78",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 49,
+          "pair_id": 24,
+          "opening_plies": 2,
+          "opening_moves": "17 78",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 38
+        },
+        {
+          "game_id": 50,
+          "pair_id": 25,
+          "opening_plies": 2,
+          "opening_moves": "22 42",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 45
+        },
+        {
+          "game_id": 51,
+          "pair_id": 25,
+          "opening_plies": 2,
+          "opening_moves": "22 42",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 55
+        },
+        {
+          "game_id": 52,
+          "pair_id": 26,
+          "opening_plies": 2,
+          "opening_moves": "28 16",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 53,
+          "pair_id": 26,
+          "opening_plies": 2,
+          "opening_moves": "28 16",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 46
+        },
+        {
+          "game_id": 54,
+          "pair_id": 27,
+          "opening_plies": 2,
+          "opening_moves": "13 44",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 39
+        },
+        {
+          "game_id": 55,
+          "pair_id": 27,
+          "opening_plies": 2,
+          "opening_moves": "13 44",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 56,
+          "pair_id": 28,
+          "opening_plies": 2,
+          "opening_moves": "6 55",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 57,
+          "pair_id": 28,
+          "opening_plies": 2,
+          "opening_moves": "6 55",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 58,
+          "pair_id": 29,
+          "opening_plies": 2,
+          "opening_moves": "31 36",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 59,
+          "pair_id": 29,
+          "opening_plies": 2,
+          "opening_moves": "31 36",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 60,
+          "pair_id": 30,
+          "opening_plies": 2,
+          "opening_moves": "58 39",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 61,
+          "pair_id": 30,
+          "opening_plies": 2,
+          "opening_moves": "58 39",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 62,
+          "pair_id": 31,
+          "opening_plies": 2,
+          "opening_moves": "42 58",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 63,
+          "pair_id": 31,
+          "opening_plies": 2,
+          "opening_moves": "42 58",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 59
+        },
+        {
+          "game_id": 64,
+          "pair_id": 32,
+          "opening_plies": 2,
+          "opening_moves": "48 32",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 65,
+          "pair_id": 32,
+          "opening_plies": 2,
+          "opening_moves": "48 32",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 55
+        },
+        {
+          "game_id": 66,
+          "pair_id": 33,
+          "opening_plies": 2,
+          "opening_moves": "37 11",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 67,
+          "pair_id": 33,
+          "opening_plies": 2,
+          "opening_moves": "37 11",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 68,
+          "pair_id": 34,
+          "opening_plies": 2,
+          "opening_moves": "1 10",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 69,
+          "pair_id": 34,
+          "opening_plies": 2,
+          "opening_moves": "1 10",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 70,
+          "pair_id": 35,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 71,
+          "pair_id": 35,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 49
+        },
+        {
+          "game_id": 72,
+          "pair_id": 36,
+          "opening_plies": 2,
+          "opening_moves": "37 12",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 62
+        },
+        {
+          "game_id": 73,
+          "pair_id": 36,
+          "opening_plies": 2,
+          "opening_moves": "37 12",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 60
+        },
+        {
+          "game_id": 74,
+          "pair_id": 37,
+          "opening_plies": 2,
+          "opening_moves": "37 13",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 75,
+          "pair_id": 37,
+          "opening_plies": 2,
+          "opening_moves": "37 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 58
+        },
+        {
+          "game_id": 76,
+          "pair_id": 38,
+          "opening_plies": 2,
+          "opening_moves": "78 56",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 77,
+          "pair_id": 38,
+          "opening_plies": 2,
+          "opening_moves": "78 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 78,
+          "pair_id": 39,
+          "opening_plies": 2,
+          "opening_moves": "44 79",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 79,
+          "pair_id": 39,
+          "opening_plies": 2,
+          "opening_moves": "44 79",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 80,
+          "pair_id": 40,
+          "opening_plies": 2,
+          "opening_moves": "55 11",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 43
+        },
+        {
+          "game_id": 81,
+          "pair_id": 40,
+          "opening_plies": 2,
+          "opening_moves": "55 11",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 82,
+          "pair_id": 41,
+          "opening_plies": 2,
+          "opening_moves": "52 71",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 83,
+          "pair_id": 41,
+          "opening_plies": 2,
+          "opening_moves": "52 71",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 50
+        },
+        {
+          "game_id": 84,
+          "pair_id": 42,
+          "opening_plies": 2,
+          "opening_moves": "54 2",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 85,
+          "pair_id": 42,
+          "opening_plies": 2,
+          "opening_moves": "54 2",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 54
+        },
+        {
+          "game_id": 86,
+          "pair_id": 43,
+          "opening_plies": 2,
+          "opening_moves": "51 56",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 87,
+          "pair_id": 43,
+          "opening_plies": 2,
+          "opening_moves": "51 56",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 88,
+          "pair_id": 44,
+          "opening_plies": 2,
+          "opening_moves": "4 38",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 89,
+          "pair_id": 44,
+          "opening_plies": 2,
+          "opening_moves": "4 38",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 90,
+          "pair_id": 45,
+          "opening_plies": 2,
+          "opening_moves": "10 13",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 91,
+          "pair_id": 45,
+          "opening_plies": 2,
+          "opening_moves": "10 13",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 92,
+          "pair_id": 46,
+          "opening_plies": 2,
+          "opening_moves": "8 72",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 93,
+          "pair_id": 46,
+          "opening_plies": 2,
+          "opening_moves": "8 72",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 94,
+          "pair_id": 47,
+          "opening_plies": 2,
+          "opening_moves": "41 46",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 95,
+          "pair_id": 47,
+          "opening_plies": 2,
+          "opening_moves": "41 46",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 46
+        },
+        {
+          "game_id": 96,
+          "pair_id": 48,
+          "opening_plies": 2,
+          "opening_moves": "69 55",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 97,
+          "pair_id": 48,
+          "opening_plies": 2,
+          "opening_moves": "69 55",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 98,
+          "pair_id": 49,
+          "opening_plies": 2,
+          "opening_moves": "41 47",
+          "player_x": "ckpt-iter4530-cb04e705-s2000",
+          "player_o": "utttai-128",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 99,
+          "pair_id": 49,
+          "opening_plies": 2,
+          "opening_moves": "41 47",
+          "player_x": "utttai-128",
+          "player_o": "ckpt-iter4530-cb04e705-s2000",
+          "winner": 0,
+          "moves": 52
+        }
+      ],
+      "mean_seconds_per_move": 1.2087623178743554,
+      "moves_timed": 2499,
+      "score_rate": 0.565,
+      "ci_low": 0.5,
+      "ci_high": 0.63,
+      "confidence": 0.95,
+      "pairs": 50,
+      "games": 100,
+      "iterations": 10000,
+      "seed": 4243
+    }
+  },
+  "comparisons": {
+    "512-128": {
+      "subject": "ckpt-iter4530-cb04e705-s128",
+      "subject_b": "ckpt-iter4530-cb04e705-s512",
+      "difference": 0.19,
+      "score_rate_a": 0.22,
+      "score_rate_b": 0.41,
+      "ci_low": 0.0898750000000011,
+      "ci_high": 0.295,
+      "confidence": 0.95,
+      "pairs": 50,
+      "games": 200,
+      "iterations": 10000,
+      "seed": 4243,
+      "primary": false,
+      "move_disagreement": {
+        "matched_games": 100,
+        "compared_positions": 1099,
+        "disagreed_positions": 95,
+        "disagreement_rate": 0.08644222020018198
+      }
+    },
+    "2000-128": {
+      "subject": "ckpt-iter4530-cb04e705-s128",
+      "subject_b": "ckpt-iter4530-cb04e705-s2000",
+      "difference": 0.345,
+      "score_rate_a": 0.22,
+      "score_rate_b": 0.565,
+      "ci_low": 0.25,
+      "ci_high": 0.44,
+      "confidence": 0.95,
+      "pairs": 50,
+      "games": 200,
+      "iterations": 10000,
+      "seed": 4243,
+      "primary": false,
+      "move_disagreement": {
+        "matched_games": 100,
+        "compared_positions": 624,
+        "disagreed_positions": 100,
+        "disagreement_rate": 0.16025641025641027
+      }
+    },
+    "2000-512": {
+      "subject": "ckpt-iter4530-cb04e705-s512",
+      "subject_b": "ckpt-iter4530-cb04e705-s2000",
+      "difference": 0.155,
+      "score_rate_a": 0.41,
+      "score_rate_b": 0.565,
+      "ci_low": 0.045,
+      "ci_high": 0.265,
+      "confidence": 0.95,
+      "pairs": 50,
+      "games": 200,
+      "iterations": 10000,
+      "seed": 4243,
+      "primary": true,
+      "move_disagreement": {
+        "matched_games": 100,
+        "compared_positions": 1126,
+        "disagreed_positions": 98,
+        "disagreement_rate": 0.08703374777975133
+      }
+    }
+  },
+  "opening_pairs": 50,
+  "opening_plies": 2,
+  "openings_file": "runs/budget-compare-iter4530-utttai128-20260918-par2/openings.json",
+  "total_games": 300,
+  "elapsed_seconds": 696.18,
+  "native_build": {
+    "available": true,
+    "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+    "version": "0.9.0",
+    "build_id": "20260918084249_63a72ea",
+    "source_revision": "63a72ea"
+  },
+  "note": "Timings are measured as observed, not controlled for other processes sharing the machine, and this is not an equal-time comparison across budgets."
+}

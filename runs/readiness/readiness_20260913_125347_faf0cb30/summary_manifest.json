@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-09-13T12:53:53.481981+00:00",
+  "duration_sec": 5.616457223892212,
+  "overall_status": "failed",
+  "requested_stage": "build",
+  "backend": "cpp",
+  "device": "cuda",
+  "stages": {
+    "build": {
+      "stage": "build",
+      "status": "failed",
+      "duration_sec": 5.616245985031128,
+      "error": "C++ extension is not available. Run 'make -C cpp' or 'python setup.py build_ext --inplace'.",
+      "checks": {
+        "dynamic_include_resolution": {
+          "include_dir": "/usr/include/python3.14",
+          "python_h_found": true
+        },
+        "makefile_dynamic_resolution": true,
+        "make_exit_code": 0,
+        "provenance": {
+          "available": false,
+          "version": null,
+          "build_id": null,
+          "source_revision": null,
+          "compiler_flags": null,
+          "binary_path": null
+        }
+      },
+      "manifest": {
+        "timestamp": "2026-09-13T12:53:49.013636+00:00",
+        "git_revision": "b90d928",
+        "python": {
+          "executable": "/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python",
+          "version": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "include_path": "/usr/include/python3.14",
+          "python_h_exists": true
+        },
+        "torch": {
+          "available": true,
+          "version": "2.14.0+cu130",
+          "cuda_available": true,
+          "cuda_version": "13.0",
+          "device_count": 1
+        },
+        "cpp_provenance": {
+          "available": false,
+          "version": null,
+          "build_id": null,
+          "source_revision": null,
+          "compiler_flags": null,
+          "binary_path": null
+        },
+        "suite_discovery": {
+          "total_tests": 279
+        },
+        "requested_config": {
+          "backend": "cpp",
+          "device": "cuda",
+          "stage": "build",
+          "output_dir": "/home/entropy/Code/Super-Tic-Tac-Toe/runs/readiness/readiness_20260913_125347_faf0cb30"
+        }
+      }
+    }
+  }
+}

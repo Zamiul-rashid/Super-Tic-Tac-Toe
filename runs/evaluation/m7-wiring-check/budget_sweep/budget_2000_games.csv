@@ -1,0 +1,21 @@
+game_id,pair_id,opening_plies,opening_moves,player_x,player_o,winner,moves
+0,0,2,77 49,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,1,51
+1,0,2,77 49,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,-1,50
+2,1,2,68 47,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,1,49
+3,1,2,68 47,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,-1,54
+4,2,2,43 63,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,0,51
+5,2,2,43 63,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,1,45
+6,3,2,18 8,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,0,55
+7,3,2,18 8,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,-1,58
+8,4,2,77 51,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,1,51
+9,4,2,77 51,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,1,43
+10,5,2,34 68,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,-1,48
+11,5,2,34 68,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,-1,48
+12,6,2,80 74,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,0,57
+13,6,2,80 74,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,0,58
+14,7,2,79 67,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,1,51
+15,7,2,79 67,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,0,56
+16,8,2,28 10,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,-1,46
+17,8,2,28 10,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,0,53
+18,9,2,22 37,ckpt-iter5750-72a7934c-s2000,cpp-alphabeta-d6-n2000000,1,47
+19,9,2,22 37,cpp-alphabeta-d6-n2000000,ckpt-iter5750-72a7934c-s2000,-1,50

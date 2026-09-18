@@ -1,0 +1,104 @@
+{
+  "stage": "pilot",
+  "command": [
+    "bash",
+    "/home/mt/Zami/Super-Tic-Tac-Toe/train.sh",
+    "/home/mt/Zami/Super-Tic-Tac-Toe/runs/run_v2/latest.pt",
+    "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-gpu-20260914-024448/pilot/run",
+    "/home/mt/Zami/Super-Tic-Tac-Toe/configs/population/baseline.json"
+  ],
+  "environment": {
+    "STTT_PY": "/home/mt/miniconda3/envs/sttt/bin/python",
+    "WORKERS": "10",
+    "ITERATIONS": "3",
+    "LR_HORIZON": "5000"
+  },
+  "start_checkpoint": {
+    "source": "runs/run_v2/latest.pt",
+    "frozen": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-gpu-20260914-024448/pilot/run/start-checkpoint/latest.pt",
+    "sha256": "125c82d8d4ee43ac2890266c430ef9f6c3171d560af6c8fd2c9828286659748f"
+  },
+  "gpu": {
+    "device_name": "NVIDIA GeForce RTX 4090",
+    "total_mb": 24079.9,
+    "free_mb_before_pilot": 19960.1,
+    "peak_reserved_mb": 68.0,
+    "peak_allocated_mb": 60.4,
+    "headroom_mb": 24011.9
+  },
+  "measured": {
+    "warmup_iterations": 1,
+    "measured_iterations": 2,
+    "per_iteration_seconds": [
+      39.39,
+      36.43
+    ],
+    "stage_seconds": [
+      {
+        "elapsed_seconds": 39.3914213379976,
+        "stages": {
+          "selfplay": 24.43801295600133,
+          "replay_preparation": 0.001512301001639571,
+          "optimization": 5.730745980999927,
+          "checkpoint_write": 9.214163946999179
+        },
+        "aggregates": {
+          "owner_inference": {
+            "seconds": 20.13980733797507,
+            "workers": 1
+          },
+          "worker_game_time": {
+            "seconds": 161.80970493400673,
+            "workers": 10
+          }
+        },
+        "accounted_seconds": 39.384435185002076,
+        "unaccounted_seconds": 0.006986152995523298
+      },
+      {
+        "elapsed_seconds": 36.43168460399829,
+        "stages": {
+          "selfplay": 20.22142421600074,
+          "replay_preparation": 0.0014726649969816208,
+          "optimization": 6.420388564001769,
+          "checkpoint_write": 9.781643793998228
+        },
+        "aggregates": {
+          "owner_inference": {
+            "seconds": 16.07614127708439,
+            "workers": 1
+          },
+          "worker_game_time": {
+            "seconds": 151.5581112660002,
+            "workers": 10
+          }
+        },
+        "accounted_seconds": 36.42492923899772,
+        "unaccounted_seconds": 0.006755365000572056
+      }
+    ],
+    "iteration_seconds": {
+      "mean": 37.91,
+      "median": 37.91,
+      "min": 36.43,
+      "max": 39.39,
+      "stdev": 1.4800000000000004
+    }
+  },
+  "eta": {
+    "total_iterations": 5000,
+    "mean_seconds_per_iteration": 37.91,
+    "hours_mean": 52.65277777777777,
+    "hours_low": 50.59722222222222,
+    "hours_high": 54.708333333333336,
+    "evaluation_overhead_hours": 0.0,
+    "evaluations": 50,
+    "basis": "2 measured iterations, backend=cpp"
+  },
+  "checkpoints": [
+    "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-gpu-20260914-024448/pilot/run/latest.pt"
+  ],
+  "status": "pending",
+  "duration_sec": 160.59511137008667,
+  "reason": "only 2 measured iterations; the representative pilot needs at least 20 (rerun with --pilot-iterations 20)"
+}

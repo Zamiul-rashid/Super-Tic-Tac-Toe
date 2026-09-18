@@ -1,0 +1,8 @@
+{
+  "stage": "failure",
+  "status": "passed",
+  "duration_sec": 1.7843849658966064,
+  "checks": {
+    "invalid_backend_rejected": true
+  }
+}

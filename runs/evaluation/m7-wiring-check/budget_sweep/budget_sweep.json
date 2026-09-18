@@ -1,0 +1,687 @@
+{
+  "budgets": {
+    "512": {
+      "entrant": "ckpt-iter5750-72a7934c-s512",
+      "simulations": 512,
+      "precision": "torch.float32",
+      "elapsed_seconds": 7.746,
+      "seconds_per_game": 0.3873,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 2,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 0,
+          "moves": 52
+        },
+        {
+          "game_id": 3,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 1,
+          "moves": 53
+        },
+        {
+          "game_id": 4,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 41
+        },
+        {
+          "game_id": 5,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 1,
+          "moves": 57
+        },
+        {
+          "game_id": 6,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 7,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 1,
+          "moves": 57
+        },
+        {
+          "game_id": 8,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 9,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 10,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 11,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 12,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 13,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 1,
+          "moves": 55
+        },
+        {
+          "game_id": 14,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 15,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 16,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 0,
+          "moves": 59
+        },
+        {
+          "game_id": 17,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": -1,
+          "moves": 44
+        },
+        {
+          "game_id": 18,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "ckpt-iter5750-72a7934c-s512",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 19,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s512",
+          "winner": 1,
+          "moves": 51
+        }
+      ],
+      "score_rate": 0.475,
+      "ci_low": 0.275,
+      "ci_high": 0.65,
+      "confidence": 0.95,
+      "pairs": 10,
+      "games": 20,
+      "iterations": 10000,
+      "seed": 4243
+    },
+    "1024": {
+      "entrant": "ckpt-iter5750-72a7934c-s1024",
+      "simulations": 1024,
+      "precision": "torch.float32",
+      "elapsed_seconds": 14.076,
+      "seconds_per_game": 0.7038,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": 0,
+          "moves": 61
+        },
+        {
+          "game_id": 2,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 41
+        },
+        {
+          "game_id": 3,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 4,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 5,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": 0,
+          "moves": 49
+        },
+        {
+          "game_id": 6,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 7,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 8,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 0,
+          "moves": 58
+        },
+        {
+          "game_id": 9,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": 1,
+          "moves": 43
+        },
+        {
+          "game_id": 10,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 41
+        },
+        {
+          "game_id": 11,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": -1,
+          "moves": 48
+        },
+        {
+          "game_id": 12,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": -1,
+          "moves": 52
+        },
+        {
+          "game_id": 13,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": 0,
+          "moves": 48
+        },
+        {
+          "game_id": 14,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 15,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 16,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 17,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 18,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "ckpt-iter5750-72a7934c-s1024",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 43
+        },
+        {
+          "game_id": 19,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s1024",
+          "winner": -1,
+          "moves": 46
+        }
+      ],
+      "score_rate": 0.575,
+      "ci_low": 0.35,
+      "ci_high": 0.8,
+      "confidence": 0.95,
+      "pairs": 10,
+      "games": 20,
+      "iterations": 10000,
+      "seed": 4243
+    },
+    "2000": {
+      "entrant": "ckpt-iter5750-72a7934c-s2000",
+      "simulations": 2000,
+      "precision": "torch.float32",
+      "elapsed_seconds": 27.046,
+      "seconds_per_game": 1.3523,
+      "game_rows": [
+        {
+          "game_id": 0,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 1,
+          "pair_id": 0,
+          "opening_plies": 2,
+          "opening_moves": "77 49",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": -1,
+          "moves": 50
+        },
+        {
+          "game_id": 2,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 49
+        },
+        {
+          "game_id": 3,
+          "pair_id": 1,
+          "opening_plies": 2,
+          "opening_moves": "68 47",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": -1,
+          "moves": 54
+        },
+        {
+          "game_id": 4,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 0,
+          "moves": 51
+        },
+        {
+          "game_id": 5,
+          "pair_id": 2,
+          "opening_plies": 2,
+          "opening_moves": "43 63",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": 1,
+          "moves": 45
+        },
+        {
+          "game_id": 6,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 0,
+          "moves": 55
+        },
+        {
+          "game_id": 7,
+          "pair_id": 3,
+          "opening_plies": 2,
+          "opening_moves": "18 8",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": -1,
+          "moves": 58
+        },
+        {
+          "game_id": 8,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 9,
+          "pair_id": 4,
+          "opening_plies": 2,
+          "opening_moves": "77 51",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": 1,
+          "moves": 43
+        },
+        {
+          "game_id": 10,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": -1,
+          "moves": 48
+        },
+        {
+          "game_id": 11,
+          "pair_id": 5,
+          "opening_plies": 2,
+          "opening_moves": "34 68",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": -1,
+          "moves": 48
+        },
+        {
+          "game_id": 12,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 0,
+          "moves": 57
+        },
+        {
+          "game_id": 13,
+          "pair_id": 6,
+          "opening_plies": 2,
+          "opening_moves": "80 74",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": 0,
+          "moves": 58
+        },
+        {
+          "game_id": 14,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 51
+        },
+        {
+          "game_id": 15,
+          "pair_id": 7,
+          "opening_plies": 2,
+          "opening_moves": "79 67",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": 0,
+          "moves": 56
+        },
+        {
+          "game_id": 16,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": -1,
+          "moves": 46
+        },
+        {
+          "game_id": 17,
+          "pair_id": 8,
+          "opening_plies": 2,
+          "opening_moves": "28 10",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": 0,
+          "moves": 53
+        },
+        {
+          "game_id": 18,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "ckpt-iter5750-72a7934c-s2000",
+          "player_o": "cpp-alphabeta-d6-n2000000",
+          "winner": 1,
+          "moves": 47
+        },
+        {
+          "game_id": 19,
+          "pair_id": 9,
+          "opening_plies": 2,
+          "opening_moves": "22 37",
+          "player_x": "cpp-alphabeta-d6-n2000000",
+          "player_o": "ckpt-iter5750-72a7934c-s2000",
+          "winner": -1,
+          "moves": 50
+        }
+      ],
+      "score_rate": 0.65,
+      "ci_low": 0.475,
+      "ci_high": 0.825,
+      "confidence": 0.95,
+      "pairs": 10,
+      "games": 20,
+      "iterations": 10000,
+      "seed": 4243
+    }
+  },
+  "comparisons": {
+    "512->1024": {
+      "subject": "ckpt-iter5750-72a7934c-s512",
+      "subject_b": "ckpt-iter5750-72a7934c-s1024",
+      "difference": 0.1,
+      "score_rate_a": 0.475,
+      "score_rate_b": 0.575,
+      "ci_low": -0.175,
+      "ci_high": 0.35,
+      "confidence": 0.95,
+      "pairs": 10,
+      "games": 40,
+      "iterations": 10000,
+      "seed": 4243
+    },
+    "512->2000": {
+      "subject": "ckpt-iter5750-72a7934c-s512",
+      "subject_b": "ckpt-iter5750-72a7934c-s2000",
+      "difference": 0.175,
+      "score_rate_a": 0.475,
+      "score_rate_b": 0.65,
+      "ci_low": -0.125,
+      "ci_high": 0.45,
+      "confidence": 0.95,
+      "pairs": 10,
+      "games": 40,
+      "iterations": 10000,
+      "seed": 4243
+    }
+  },
+  "baseline_budget": 512,
+  "opening_seed": 4242
+}

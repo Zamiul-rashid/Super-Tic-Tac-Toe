@@ -1,0 +1,6 @@
+{
+  "stage": "gpu",
+  "status": "failed",
+  "duration_sec": 0.9146983623504639,
+  "error": "No module named 'sttt.model'"
+}

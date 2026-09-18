@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-09-13T12:55:05.384972+00:00",
+  "duration_sec": 1.0731332302093506,
+  "overall_status": "failed",
+  "requested_stage": "mixed",
+  "backend": "cpp",
+  "device": "cpu",
+  "stages": {
+    "mixed": {
+      "stage": "mixed",
+      "status": "failed",
+      "duration_sec": 1.0727975368499756,
+      "error": "AlphaBetaBot.choose() missing 1 required positional argument: 'rng'"
+    }
+  }
+}

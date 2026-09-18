@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-09-13T20:08:04.562478+00:00",
+  "duration_sec": 5.414315938949585,
+  "overall_status": "passed",
+  "requested_stage": "native",
+  "backend": "cpp",
+  "device": "cpu",
+  "stages": {
+    "native": {
+      "stage": "native",
+      "status": "passed",
+      "duration_sec": 5.413973093032837,
+      "checks": {
+        "mlp_worker_reports": [
+          {
+            "cpp_available": true,
+            "cpp_build_id": "20260913164113_35fd9f6",
+            "cpp_version": "0.9.0",
+            "pid": 2834015
+          },
+          {
+            "cpp_available": true,
+            "cpp_build_id": "20260913164113_35fd9f6",
+            "cpp_version": "0.9.0",
+            "pid": 2834016
+          }
+        ],
+        "mlp_rounds": [
+          {
+            "games": 4,
+            "inference_positions": 6735,
+            "mean_inference_batch": 7.6971428571428575
+          },
+          {
+            "games": 4,
+            "inference_positions": 6861,
+            "mean_inference_batch": 7.959396751740139
+          }
+        ],
+        "mlp_worker_pids": [
+          2834015,
+          2834016
+        ],
+        "resnet_worker_reports": [
+          {
+            "cpp_available": true,
+            "cpp_build_id": "20260913164113_35fd9f6",
+            "cpp_version": "0.9.0",
+            "pid": 2834234
+          },
+          {
+            "cpp_available": true,
+            "cpp_build_id": "20260913164113_35fd9f6",
+            "cpp_version": "0.9.0",
+            "pid": 2834235
+          }
+        ],
+        "resnet_rounds": [
+          {
+            "games": 4,
+            "inference_positions": 6898,
+            "mean_inference_batch": 7.261052631578948
+          },
+          {
+            "games": 4,
+            "inference_positions": 6890,
+            "mean_inference_batch": 7.802944507361269
+          }
+        ],
+        "resnet_worker_pids": [
+          2834234,
+          2834235
+        ],
+        "python_backend_games": 4
+      }
+    }
+  }
+}

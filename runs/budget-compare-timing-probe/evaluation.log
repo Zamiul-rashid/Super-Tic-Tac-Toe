@@ -1,0 +1,15 @@
+==========================================================================================
+     MATCHED-OPENING SEARCH BUDGET COMPARISON (shared, saved opening corpus)
+==========================================================================================
+Checkpoint: /home/mt/Zami/Super-Tic-Tac-Toe/runs/budget-compare-timing-probe/evaluation-inputs/candidate/iter4530.pt
+Opponent:   utttai:128
+Budgets:    [128, 512, 2000]   Opening pairs: 1   Openings file: runs/budget-compare-timing-probe/openings.json
+budget 128: score 50.0% (95% CI 50.0-50.0%)
+budget 512: score 25.0% (95% CI 25.0-25.0%)
+budget 2000: score 75.0% (95% CI 75.0-75.0%)
+
+Paired score differences (bootstrapped over opening pairs):
+  512-128: -25.0 pts (95% CI -25.0 to -25.0, 1 pairs)
+  2000-128: +25.0 pts (95% CI +25.0 to +25.0, 1 pairs)
+  2000-512 [PRIMARY]: +50.0 pts (95% CI +50.0 to +50.0, 1 pairs)
+Artifacts saved to runs/budget-compare-timing-probe/

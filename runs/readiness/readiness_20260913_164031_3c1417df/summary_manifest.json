@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-09-13T16:40:31.221113+00:00",
+  "duration_sec": 0.1020517349243164,
+  "overall_status": "failed",
+  "requested_stage": "all",
+  "backend": "cpp",
+  "device": "cpu",
+  "stages": {
+    "build": {
+      "stage": "build",
+      "status": "failed",
+      "duration_sec": 0.1020359992980957,
+      "error": "Native unit tests failed:\nEEEE.EEEEEEE\n======================================================================\nERROR: test_cpp_engine (unittest.loader._FailedTest)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_cpp_engine\nTraceback (most recent call last):\n  File \"/usr/lib/python3.10/unittest/loader.py\", line 154, in loadTestsFromName\n    module = __import__(module_name)\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_engine.py\", line 7, in <module>\n    from sttt.learning import encode as py_encode\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/sttt/learning.py\", line 3, in <module>\n    import torch\nModuleNotFoundError: No module named 'torch'\n\n\n======================================================================\nERROR: test_advance_invalid_action_raises (tests.test_cpp_mcts.TestCppMCTS)\nCalling advance with out-of-range action must raise ValueError, not crash.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 178, in test_advance_invalid_action_raises\n    tree.run(State(), simulations=16)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_differential_search_vs_python_treesearch (tests.test_cpp_mcts.TestCppMCTS)\nRun differential search between Python and C++ MCTS across game positions.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 73, in test_differential_search_vs_python_treesearch\n    cpp_pi = cpp_tree.run(s, simulations=64, batch_size=4)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_heuristic_search_pure_cpp (tests.test_cpp_mcts.TestCppMCTS)\nVerify pure C++ heuristic search runs cleanly without a Python model.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 46, in test_heuristic_search_pure_cpp\n    pi = tree.run(s, simulations=256, batch_size=8)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_nan_value_mid_batch_does_not_corrupt_inflight (tests.test_cpp_mcts.TestCppMCTS)\nA NaN value mid-batch must raise ValueError and not leave negative in_flight.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 201, in test_nan_value_mid_batch_does_not_corrupt_inflight\n    tree.run(state, simulations=64, batch_size=8)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_proof_solving_differential (tests.test_cpp_mcts.TestCppMCTS)\nVerify C++ MCTS solves proven wins/losses matching game theoretical logic.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 98, in test_proof_solving_differential\n    pi = cpp_tree.run(s, simulations=100, batch_size=4)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_rng_seed_independence (tests.test_cpp_mcts.TestCppMCTS)\nTwo CppTreeSearch instances with different seeds must produce different policies under noise.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 156, in test_rng_seed_independence\n    pi1 = tree1.run(state, simulations=64, batch_size=1, noise=True)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_stats_no_leak (tests.test_cpp_mcts.TestCppMCTS)\nReading stats repeatedly must not leak Python object references.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 165, in test_stats_no_leak\n    tree.run(State(), simulations=64)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_subtree_reuse_differential (tests.test_cpp_mcts.TestCppMCTS)\nVerify subtree retention matches Python semantics across consecutive turns.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 112, in test_subtree_reuse_differential\n    cpp_pi = cpp_tree.run(s, simulations=128, batch_size=8)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_terminal_state_error_handling (tests.test_cpp_mcts.TestCppMCTS)\nVerify passing terminal state raises ValueError.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 148, in test_terminal_state_error_handling\n    tree.run(terminal_s, simulations=64)\nTypeError: state must be a State, FastState, or CppState\n\n======================================================================\nERROR: test_virtual_losses_released_on_evaluator_exception (tests.test_cpp_mcts.TestCppMCTS)\nVerify virtual losses are completely unwound if inference raises an exception.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_cpp_mcts.py\", line 137, in test_virtual_losses_released_on_evaluator_exception\n    tree.run(s, simulations=32, batch_size=4)\nTypeError: state must be a State, FastState, or CppState\n\n----------------------------------------------------------------------\nRan 12 tests in 0.022s\n\nFAILED (errors=11)\n",
+      "checks": {
+        "dynamic_include_resolution": {
+          "include_dir": "/usr/include/python3.10",
+          "python_h_found": true
+        },
+        "makefile_dynamic_resolution": true,
+        "make_exit_code": 0,
+        "provenance": {
+          "available": true,
+          "version": "0.9.0",
+          "build_id": "20260913144515_997c42a",
+          "source_revision": "997c42a",
+          "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+          "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.so"
+        },
+        "native_tests": {
+          "total_run": 12,
+          "failures": 0,
+          "errors": 11,
+          "skips": 0
+        }
+      },
+      "manifest": {
+        "timestamp": "2026-09-13T16:40:31.196111+00:00",
+        "git_revision": "35fd9f6",
+        "python": {
+          "executable": "/usr/bin/python3",
+          "version": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+          "include_path": "/usr/include/python3.10",
+          "python_h_exists": true
+        },
+        "torch": {
+          "available": false
+        },
+        "cpp_provenance": {
+          "available": true,
+          "version": "0.9.0",
+          "build_id": "20260913144515_997c42a",
+          "source_revision": "997c42a",
+          "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+          "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.so"
+        },
+        "suite_discovery": {
+          "total_tests": 172
+        },
+        "requested_config": {
+          "backend": "cpp",
+          "device": "cpu",
+          "stage": "all",
+          "output_dir": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/readiness_20260913_164031_3c1417df"
+        }
+      }
+    }
+  }
+}

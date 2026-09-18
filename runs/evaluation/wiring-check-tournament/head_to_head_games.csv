@@ -1,0 +1,11 @@
+game_id,pair_id,opening_plies,opening_moves,player_x,player_o,winner,moves
+0,0,2,77 49,ckpt-iter1600-d2ea2405-s64,ckpt-iter5750-72a7934c-s64,0,50
+1,0,2,77 49,ckpt-iter5750-72a7934c-s64,ckpt-iter1600-d2ea2405-s64,1,47
+2,1,2,68 47,ckpt-iter1600-d2ea2405-s64,ckpt-iter5750-72a7934c-s64,0,57
+3,1,2,68 47,ckpt-iter5750-72a7934c-s64,ckpt-iter1600-d2ea2405-s64,1,47
+4,2,2,43 63,ckpt-iter1600-d2ea2405-s64,ckpt-iter5750-72a7934c-s64,1,49
+5,2,2,43 63,ckpt-iter5750-72a7934c-s64,ckpt-iter1600-d2ea2405-s64,1,53
+6,3,2,18 8,ckpt-iter1600-d2ea2405-s64,ckpt-iter5750-72a7934c-s64,-1,58
+7,3,2,18 8,ckpt-iter5750-72a7934c-s64,ckpt-iter1600-d2ea2405-s64,0,50
+8,4,2,77 51,ckpt-iter1600-d2ea2405-s64,ckpt-iter5750-72a7934c-s64,-1,50
+9,4,2,77 51,ckpt-iter5750-72a7934c-s64,ckpt-iter1600-d2ea2405-s64,-1,32

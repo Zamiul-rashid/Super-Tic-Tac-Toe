@@ -1,0 +1,10 @@
+{
+  "stage": "cpu",
+  "status": "passed",
+  "duration_sec": 11.841153860092163,
+  "details": {
+    "checkpoint": "/home/entropy/Code/Super-Tic-Tac-Toe/runs/readiness/readiness_20260913_125452_62f51940/cpu/run/latest.pt",
+    "initial_iterations": 2,
+    "resumed_iterations": 1
+  }
+}

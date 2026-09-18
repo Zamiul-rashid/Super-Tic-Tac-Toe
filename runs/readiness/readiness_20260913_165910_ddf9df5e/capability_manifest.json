@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-09-13T16:59:11.214694+00:00",
+  "git_revision": "1941ea9",
+  "python": {
+    "executable": "/home/mt/miniconda3/envs/sttt/bin/python",
+    "version": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+    "include_path": "/home/mt/miniconda3/envs/sttt/include/python3.14",
+    "python_h_exists": true
+  },
+  "torch": {
+    "available": true,
+    "version": "2.14.0+cu130",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "device_count": 1
+  },
+  "cpp_provenance": {
+    "available": true,
+    "version": "0.9.0",
+    "build_id": "20260913164113_35fd9f6",
+    "source_revision": "35fd9f6",
+    "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+    "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+  },
+  "suite_discovery": {
+    "total_tests": 481
+  },
+  "requested_config": {
+    "backend": "cpp",
+    "device": "cpu",
+    "stage": "all",
+    "output_dir": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/readiness_20260913_165910_ddf9df5e"
+  }
+}

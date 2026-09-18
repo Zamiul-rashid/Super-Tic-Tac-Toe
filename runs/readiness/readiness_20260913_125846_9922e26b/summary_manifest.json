@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-09-13T12:58:49.666240+00:00",
+  "duration_sec": 2.682321071624756,
+  "overall_status": "passed",
+  "requested_stage": "build",
+  "backend": "cpp",
+  "device": "cpu",
+  "stages": {
+    "build": {
+      "stage": "build",
+      "status": "passed",
+      "duration_sec": 2.681931495666504,
+      "checks": {
+        "dynamic_include_resolution": {
+          "include_dir": "/usr/include/python3.14",
+          "python_h_found": true
+        },
+        "makefile_dynamic_resolution": true,
+        "make_exit_code": 0,
+        "provenance": {
+          "available": true,
+          "version": "0.9.0",
+          "build_id": "20260913125605_b90d928",
+          "source_revision": "b90d928",
+          "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+          "binary_path": "/home/entropy/Code/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+        },
+        "native_tests": {
+          "total_run": 41,
+          "failures": 0,
+          "errors": 0,
+          "skips": 0
+        },
+        "suite_count_ok": true
+      },
+      "manifest": {
+        "timestamp": "2026-09-13T12:58:48.243034+00:00",
+        "git_revision": "b90d928",
+        "python": {
+          "executable": "/home/entropy/Code/Super-Tic-Tac-Toe/.venv/bin/python",
+          "version": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+          "include_path": "/usr/include/python3.14",
+          "python_h_exists": true
+        },
+        "torch": {
+          "available": true,
+          "version": "2.14.0+cu130",
+          "cuda_available": true,
+          "cuda_version": "13.0",
+          "device_count": 1
+        },
+        "cpp_provenance": {
+          "available": true,
+          "version": "0.9.0",
+          "build_id": "20260913125605_b90d928",
+          "source_revision": "b90d928",
+          "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+          "binary_path": "/home/entropy/Code/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+        },
+        "suite_discovery": {
+          "total_tests": 311
+        },
+        "requested_config": {
+          "backend": "cpp",
+          "device": "cpu",
+          "stage": "build",
+          "output_dir": "/home/entropy/Code/Super-Tic-Tac-Toe/runs/readiness/readiness_20260913_125846_9922e26b"
+        }
+      }
+    }
+  }
+}

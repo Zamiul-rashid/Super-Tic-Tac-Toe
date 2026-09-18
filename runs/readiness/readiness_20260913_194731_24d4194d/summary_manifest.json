@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-09-13T19:50:50.941058+00:00",
+  "duration_sec": 199.27984404563904,
+  "overall_status": "failed",
+  "requested_stage": "build",
+  "backend": "cpp",
+  "device": "cpu",
+  "stages": {
+    "build": {
+      "stage": "build",
+      "status": "failed",
+      "duration_sec": 199.27979230880737,
+      "error": "Full test suite failed: test_backend_python_skips_native_stage_cleanly, test_f20_git_branch_isolation\n                                    TOURNAMENT LEADERBOARD & RATINGS\n==============================================================================================================\nRank  Participant               Bayesian Elo (95% CI)     Glicko-2 (\u00b1RD)         Score%   W     D     L     Win%  \n--------------------------------------------------------------------------------------------------------------\n1     alphabeta-d3              1662.8 [\u00b1109.5]           1827.5 (\u00b1110.2)         85.0%  16    2     2      80.0%\n2     tactical                  1337.2 [\u00b1109.5]           1172.5 (\u00b1110.2)         15.0%  2     2     16     10.0%\n==============================================================================================================\nTotal games played: 20\nSide stats: X win rate = 40.0%, O win rate = 50.0%, Draw rate = 10.0%\nPairwise color bias delta: 0.00% across paired mirrors.\n\n==========================================\nSTAGE 1: BUILD GATE & CAPABILITY MANIFEST\n==========================================\n[build] Invoking make -C cpp to ensure clean build...\n[build] Executing native unit test suites to verify 0 skips...\n[build] Nested invocation: skipping the full-suite check.\n[BotA vs BotB] Completed 4/4 games...\n[tactical vs tactical_2] Completed 20/20 games...\n[tactical vs tactical_2] Completed 20/20 games...\n[tactical vs tactical_2] Completed 20/22 games...\n[tactical vs tactical_2] Completed 22/22 games...\n[candidate_sim_128 vs tactical] Completed 2/2 games...\n[candidate_sim_512 vs tactical] Completed 2/2 games...\n[AlphaBeta vs Tactical] Completed 20/20 games...\n............................................................................................................................................s.....................warning: failed to close boom: close failed\n........................................................F...................................................................Sample size was odd; auto-rounded up to 22\n.................................................................................................................................F....................................................................Sample size was odd; auto-rounded up to 22\n..............................................\n======================================================================\nFAIL: test_f20_git_branch_isolation (test_e2e_tournament.TestBaselineAndEnvironmentIsolation.test_f20_git_branch_isolation)\nF20: Verifies execution is strictly isolated on the 'testing' branch.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_e2e_tournament.py\", line 115, in test_f20_git_branch_isolation\n    self.assertIn(current_branch, (\"testing\", \"cpp\", \"main\"), f\"Expected branch 'testing', 'cpp', or 'main', got '{current_branch}'\")\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'feat/m1-native-robustness' not found in ('testing', 'cpp', 'main') : Expected branch 'testing', 'cpp', or 'main', got 'feat/m1-native-robustness'\n\n======================================================================\nFAIL: test_backend_python_skips_native_stage_cleanly (test_readiness_adversarial.TestCliFlagsAndCombinations.test_backend_python_skips_native_stage_cleanly)\n--backend python --stage native must skip cleanly with a clear reason.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/mt/Zami/Super-Tic-Tac-Toe/tests/test_readiness_adversarial.py\", line 290, in test_backend_python_skips_native_stage_cleanly\n    self.assertEqual(data[\"status\"], \"skipped\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'passed' != 'skipped'\n- passed\n+ skipped\n\n\n----------------------------------------------------------------------\nRan 530 tests in 196.855s\n\nFAILED (failures=2, skipped=1)\n",
+      "checks": {
+        "dynamic_include_resolution": {
+          "include_dir": "/home/mt/miniconda3/envs/sttt/include/python3.14",
+          "python_h_found": true
+        },
+        "makefile_dynamic_resolution": true,
+        "make_exit_code": 0,
+        "provenance": {
+          "available": true,
+          "version": "0.9.0",
+          "build_id": "20260913164113_35fd9f6",
+          "source_revision": "35fd9f6",
+          "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+          "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+        },
+        "native_tests": {
+          "total_run": 44,
+          "failures": 0,
+          "errors": 0,
+          "skips": 0
+        },
+        "suite_count_ok": true,
+        "full_suite": {
+          "exit_code": 1,
+          "summary": "Ran 530 tests in 196.855s",
+          "failed_tests": [
+            "test_backend_python_skips_native_stage_cleanly",
+            "test_f20_git_branch_isolation"
+          ]
+        }
+      },
+      "manifest": {
+        "timestamp": "2026-09-13T19:47:32.365786+00:00",
+        "git_revision": "625cad0",
+        "python": {
+          "executable": "/home/mt/miniconda3/envs/sttt/bin/python",
+          "version": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:37:38) [GCC 14.3.0]",
+          "include_path": "/home/mt/miniconda3/envs/sttt/include/python3.14",
+          "python_h_exists": true
+        },
+        "torch": {
+          "available": true,
+          "version": "2.14.0+cu130",
+          "cuda_available": true,
+          "cuda_version": "13.0",
+          "device_count": 1
+        },
+        "cpp_provenance": {
+          "available": true,
+          "version": "0.9.0",
+          "build_id": "20260913164113_35fd9f6",
+          "source_revision": "35fd9f6",
+          "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+          "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+        },
+        "suite_discovery": {
+          "total_tests": 530
+        },
+        "requested_config": {
+          "backend": "cpp",
+          "device": "cpu",
+          "stage": "build",
+          "output_dir": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/readiness_20260913_194731_24d4194d"
+        }
+      }
+    }
+  }
+}

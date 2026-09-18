@@ -1,0 +1,22 @@
+game 1/20: wins
+game 2/20: losses
+game 3/20: wins
+game 4/20: draws
+game 5/20: losses
+game 6/20: wins
+game 7/20: losses
+game 8/20: wins
+game 9/20: losses
+game 10/20: losses
+game 11/20: wins
+game 12/20: losses
+game 13/20: wins
+game 14/20: losses
+game 15/20: wins
+game 16/20: wins
+game 17/20: losses
+game 18/20: draws
+game 19/20: losses
+game 20/20: losses
+Reports: /home/entropy/Code/Super-Tic-Tac-Toe/runs/big_run/benchmarks/20260911T043914287973Z/tactical/eval-188265f9deed47738ac15cca20881e57.json (plus _games.csv and _summary.csv)
+{"wins": 8, "draws": 2, "losses": 10, "games": 20, "win_rate": 0.4, "score_rate": 0.45, "mean_moves": 54.1, "mean_seconds": 2.199034118549025}

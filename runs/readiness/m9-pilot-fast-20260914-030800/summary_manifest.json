@@ -1,0 +1,136 @@
+{
+  "timestamp": "2026-09-13T21:09:51.722765+00:00",
+  "duration_sec": 110.65893483161926,
+  "overall_status": "pending",
+  "requested_stage": "pilot",
+  "backend": "cpp",
+  "device": "cuda",
+  "stages": {
+    "pilot": {
+      "stage": "pilot",
+      "command": [
+        "bash",
+        "/home/mt/Zami/Super-Tic-Tac-Toe/train.sh",
+        "/home/mt/Zami/Super-Tic-Tac-Toe/runs/run_v2/latest.pt",
+        "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-pilot-fast-20260914-030800/pilot/run",
+        "/home/mt/Zami/Super-Tic-Tac-Toe/configs/population/baseline.json"
+      ],
+      "environment": {
+        "STTT_PY": "/home/mt/miniconda3/envs/sttt/bin/python",
+        "WORKERS": "16",
+        "ITERATIONS": "4",
+        "LR_HORIZON": "5000"
+      },
+      "start_checkpoint": {
+        "source": "runs/run_v2/latest.pt",
+        "frozen": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-pilot-fast-20260914-030800/pilot/run/start-checkpoint/latest.pt",
+        "sha256": "125c82d8d4ee43ac2890266c430ef9f6c3171d560af6c8fd2c9828286659748f"
+      },
+      "gpu": {
+        "device_name": "NVIDIA GeForce RTX 4090",
+        "total_mb": 24079.9,
+        "free_mb_before_pilot": 19951.8,
+        "peak_reserved_mb": 88.0,
+        "peak_allocated_mb": 60.4,
+        "headroom_mb": 23991.9
+      },
+      "measured": {
+        "warmup_iterations": 1,
+        "measured_iterations": 3,
+        "per_iteration_seconds": [
+          17.07,
+          15.97,
+          15.59
+        ],
+        "stage_seconds": [
+          {
+            "elapsed_seconds": 17.069746708999446,
+            "stages": {
+              "selfplay": 9.530874836000294,
+              "replay_preparation": 0.0015101079989108257,
+              "optimization": 6.991901968001912,
+              "checkpoint_write": 0.2294082359985623
+            },
+            "aggregates": {
+              "owner_inference": {
+                "seconds": 5.192256143975101,
+                "workers": 1
+              },
+              "worker_game_time": {
+                "seconds": 76.79178923900326,
+                "workers": 16
+              }
+            },
+            "accounted_seconds": 16.75369514799968,
+            "unaccounted_seconds": 0.3160515609997674
+          },
+          {
+            "elapsed_seconds": 15.968922893000126,
+            "stages": {
+              "selfplay": 9.051360162000492,
+              "replay_preparation": 0.002416937997622881,
+              "optimization": 6.2097101920007844,
+              "checkpoint_write": 0.31182882899884135
+            },
+            "aggregates": {
+              "owner_inference": {
+                "seconds": 4.6539496410077845,
+                "workers": 1
+              },
+              "worker_game_time": {
+                "seconds": 81.97718999900826,
+                "workers": 16
+              }
+            },
+            "accounted_seconds": 15.57531612099774,
+            "unaccounted_seconds": 0.3936067720023857
+          },
+          {
+            "elapsed_seconds": 15.591004719997727,
+            "stages": {
+              "selfplay": 9.2920696220026,
+              "replay_preparation": 0.002134776997991139,
+              "optimization": 5.554371752001316,
+              "checkpoint_write": 0.3575090820013429
+            },
+            "aggregates": {
+              "owner_inference": {
+                "seconds": 4.7376250679917575,
+                "workers": 1
+              },
+              "worker_game_time": {
+                "seconds": 78.57853152400276,
+                "workers": 16
+              }
+            },
+            "accounted_seconds": 15.20608523300325,
+            "unaccounted_seconds": 0.38491948699447676
+          }
+        ],
+        "iteration_seconds": {
+          "mean": 16.21,
+          "median": 15.97,
+          "min": 15.59,
+          "max": 17.07,
+          "stdev": 0.6275879752406565
+        }
+      },
+      "eta": {
+        "total_iterations": 5000,
+        "mean_seconds_per_iteration": 16.21,
+        "hours_mean": 22.51388888888889,
+        "hours_low": 21.65277777777778,
+        "hours_high": 23.708333333333332,
+        "evaluation_overhead_hours": 0.0,
+        "evaluations": 50,
+        "basis": "3 measured iterations, backend=cpp"
+      },
+      "checkpoints": [
+        "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-pilot-fast-20260914-030800/pilot/run/latest.pt"
+      ],
+      "status": "pending",
+      "duration_sec": 110.65875124931335,
+      "reason": "only 3 measured iterations; the representative pilot needs at least 20 (rerun with --pilot-iterations 20)"
+    }
+  }
+}

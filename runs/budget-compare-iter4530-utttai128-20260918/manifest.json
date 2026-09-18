@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "kind": "matched-opening-budget-comparison",
+  "run_id": "ef40a873294b49bbaf0c3caa22adc2d5",
+  "created_at": "2026-09-18T09:21:38.367182+00:00",
+  "status": "running",
+  "checkpoints": {
+    "candidate": {
+      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/budget-compare-iter4530-utttai128-20260918/evaluation-inputs/candidate/iter4530.pt",
+      "sha256": "cb04e705a015be6fc1e3c244ffd4f0f23dc277fa99fb2798bfcc104a3f671c6d",
+      "sha8": "cb04e705",
+      "iteration": 4530,
+      "arch": "unet"
+    }
+  },
+  "config": {
+    "budgets": [
+      128,
+      512,
+      2000
+    ],
+    "pairs": 50,
+    "opening_plies": 2,
+    "opponent": "utttai:128",
+    "openings_file": "runs/budget-compare-iter4530-utttai128-20260918/openings.json",
+    "backend": "cpp",
+    "device": "cpu",
+    "leaf_batch": 16,
+    "save_moves": true,
+    "workers": 1,
+    "checkpoint_source": "/tmp/claude-1000/-home-mt-Zami-Super-Tic-Tac-Toe/92191f58-bd66-4c5a-8167-fcc74627b753/scratchpad/iter4530.pt",
+    "budget_order": "rotated per opening pair",
+    "equal_time_comparison": false
+  },
+  "seeds": {
+    "openings": 4242,
+    "game_rng": 4242,
+    "bootstrap": 4243
+  },
+  "argv": [
+    "scripts/evaluation_suite.py",
+    "--checkpoint",
+    "/tmp/claude-1000/-home-mt-Zami-Super-Tic-Tac-Toe/92191f58-bd66-4c5a-8167-fcc74627b753/scratchpad/iter4530.pt",
+    "--output",
+    "runs/budget-compare-iter4530-utttai128-20260918",
+    "--budget-compare",
+    "--budgets",
+    "128",
+    "512",
+    "2000",
+    "--opponent",
+    "utttai:128",
+    "--pairs",
+    "50",
+    "--opening-plies",
+    "2",
+    "--seed",
+    "4242",
+    "--backend",
+    "cpp",
+    "--device",
+    "cpu",
+    "--leaf-batch",
+    "16"
+  ],
+  "environment": {
+    "python": "3.14.6",
+    "executable": "/home/mt/miniconda3/envs/sttt/bin/python",
+    "torch": "2.14.0+cu130",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "native": {
+      "available": true,
+      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+      "version": "0.9.0",
+      "build_id": "20260918084249_63a72ea",
+      "source_revision": "63a72ea"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+==========================================================================================
+       SUPER TIC-TAC-TOE: RUN_V2 (FRESH RESNET) VS BIG_RUN (6000 ITER)       
+==========================================================================================
+Candidate Checkpoint: runs/run_v2/model-2000.pt
+Legacy Best: runs/big_run/best.pt
+Output Directory: runs/tournaments/run_v2_iter2000_vs_bigrun
+==========================================================================================
+
+[Phase 1/3] DIRECT HEAD-TO-HEAD SHOWDOWN: 50 paired games (100 games total)...
+Completed 50 games in 53.3s (1.066s/game)
+  run_v2 Wins: 20 (40.0%)
+  big_run Wins: 25 (50.0%)
+  Draws: 5 (10.0%)
+  run_v2 Total Score: 45.0%
+  >>> big_run leads run_v2 by +5.0% score margin. <<<
+
+[Phase 2/3] 8-ENGINE ROUND-ROBIN TOURNAMENT (20 games per matchup)...
+
+Tournament completed in 1035.0s!
+
+==============================================================================================================
+                                       TOURNAMENT LEADERBOARD & RATINGS
+==============================================================================================================
+Rank  Participant               Bayesian Elo (95% CI)     Glicko-2 (±RD)         Score%   W     D     L     Win%  
+--------------------------------------------------------------------------------------------------------------
+1     utttai-128                2318.2 [±204.0]           1996.6 (±43.5)          98.6%  137   2     1      97.9%
+2     cpp-alphabeta-d6          1663.7 [±80.0]            1675.3 (±43.5)          67.1%  84    20    36     60.0%
+3     big_run-best-s512         1626.1 [±78.3]            1642.4 (±43.5)          63.9%  84    11    45     60.0%
+4     run_v2-s512               1585.9 [±76.9]            1605.9 (±43.5)          60.4%  76    17    47     54.3%
+5     cpp-alphabeta-d4          1465.9 [±75.3]            1492.7 (±43.5)          49.3%  57    24    59     40.7%
+6     tactical                  1274.6 [±79.5]            1317.4 (±43.5)          32.1%  33    24    83     23.6%
+7     openspiel-mcts            1111.0 [±89.8]            1185.9 (±43.5)          19.3%  16    22    102    11.4%
+8     threat-block              954.8 [±106.8]            1083.7 (±43.5)           9.3%  4     18    118     2.9%
+==============================================================================================================
+Total games played: 560
+Side stats: X win rate = 45.7%, O win rate = 42.0%, Draw rate = 12.3%
+Pairwise color bias delta: 0.00% across paired mirrors.
+
+[Phase 3/3] GRANDMASTER ORACLE CHALLENGE (vs Alpha-Beta Depth 10, 20 paired games)...
+Oracle Challenge (20 games) completed in 226.7s
+  run_v2 vs Alpha-Beta Depth 10: 3 Wins, 2 Draws, 15 Losses (Score: 20.0%)
+
+Saving artifacts...

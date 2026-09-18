@@ -1,0 +1,356 @@
+{
+  "seed": 4242,
+  "opening_plies": 2,
+  "pairs": [
+    {
+      "pair_id": 0,
+      "opening_moves": [
+        77,
+        49
+      ]
+    },
+    {
+      "pair_id": 1,
+      "opening_moves": [
+        68,
+        47
+      ]
+    },
+    {
+      "pair_id": 2,
+      "opening_moves": [
+        43,
+        63
+      ]
+    },
+    {
+      "pair_id": 3,
+      "opening_moves": [
+        18,
+        8
+      ]
+    },
+    {
+      "pair_id": 4,
+      "opening_moves": [
+        77,
+        51
+      ]
+    },
+    {
+      "pair_id": 5,
+      "opening_moves": [
+        34,
+        68
+      ]
+    },
+    {
+      "pair_id": 6,
+      "opening_moves": [
+        80,
+        74
+      ]
+    },
+    {
+      "pair_id": 7,
+      "opening_moves": [
+        79,
+        67
+      ]
+    },
+    {
+      "pair_id": 8,
+      "opening_moves": [
+        28,
+        10
+      ]
+    },
+    {
+      "pair_id": 9,
+      "opening_moves": [
+        22,
+        37
+      ]
+    },
+    {
+      "pair_id": 10,
+      "opening_moves": [
+        42,
+        56
+      ]
+    },
+    {
+      "pair_id": 11,
+      "opening_moves": [
+        24,
+        56
+      ]
+    },
+    {
+      "pair_id": 12,
+      "opening_moves": [
+        18,
+        2
+      ]
+    },
+    {
+      "pair_id": 13,
+      "opening_moves": [
+        55,
+        13
+      ]
+    },
+    {
+      "pair_id": 14,
+      "opening_moves": [
+        32,
+        51
+      ]
+    },
+    {
+      "pair_id": 15,
+      "opening_moves": [
+        2,
+        26
+      ]
+    },
+    {
+      "pair_id": 16,
+      "opening_moves": [
+        46,
+        17
+      ]
+    },
+    {
+      "pair_id": 17,
+      "opening_moves": [
+        15,
+        62
+      ]
+    },
+    {
+      "pair_id": 18,
+      "opening_moves": [
+        55,
+        16
+      ]
+    },
+    {
+      "pair_id": 19,
+      "opening_moves": [
+        65,
+        20
+      ]
+    },
+    {
+      "pair_id": 20,
+      "opening_moves": [
+        65,
+        26
+      ]
+    },
+    {
+      "pair_id": 21,
+      "opening_moves": [
+        16,
+        65
+      ]
+    },
+    {
+      "pair_id": 22,
+      "opening_moves": [
+        5,
+        49
+      ]
+    },
+    {
+      "pair_id": 23,
+      "opening_moves": [
+        39,
+        35
+      ]
+    },
+    {
+      "pair_id": 24,
+      "opening_moves": [
+        17,
+        78
+      ]
+    },
+    {
+      "pair_id": 25,
+      "opening_moves": [
+        22,
+        42
+      ]
+    },
+    {
+      "pair_id": 26,
+      "opening_moves": [
+        28,
+        16
+      ]
+    },
+    {
+      "pair_id": 27,
+      "opening_moves": [
+        13,
+        44
+      ]
+    },
+    {
+      "pair_id": 28,
+      "opening_moves": [
+        6,
+        55
+      ]
+    },
+    {
+      "pair_id": 29,
+      "opening_moves": [
+        31,
+        36
+      ]
+    },
+    {
+      "pair_id": 30,
+      "opening_moves": [
+        58,
+        39
+      ]
+    },
+    {
+      "pair_id": 31,
+      "opening_moves": [
+        42,
+        58
+      ]
+    },
+    {
+      "pair_id": 32,
+      "opening_moves": [
+        48,
+        32
+      ]
+    },
+    {
+      "pair_id": 33,
+      "opening_moves": [
+        37,
+        11
+      ]
+    },
+    {
+      "pair_id": 34,
+      "opening_moves": [
+        1,
+        10
+      ]
+    },
+    {
+      "pair_id": 35,
+      "opening_moves": [
+        34,
+        68
+      ]
+    },
+    {
+      "pair_id": 36,
+      "opening_moves": [
+        37,
+        12
+      ]
+    },
+    {
+      "pair_id": 37,
+      "opening_moves": [
+        37,
+        13
+      ]
+    },
+    {
+      "pair_id": 38,
+      "opening_moves": [
+        78,
+        56
+      ]
+    },
+    {
+      "pair_id": 39,
+      "opening_moves": [
+        44,
+        79
+      ]
+    },
+    {
+      "pair_id": 40,
+      "opening_moves": [
+        55,
+        11
+      ]
+    },
+    {
+      "pair_id": 41,
+      "opening_moves": [
+        52,
+        71
+      ]
+    },
+    {
+      "pair_id": 42,
+      "opening_moves": [
+        54,
+        2
+      ]
+    },
+    {
+      "pair_id": 43,
+      "opening_moves": [
+        51,
+        56
+      ]
+    },
+    {
+      "pair_id": 44,
+      "opening_moves": [
+        4,
+        38
+      ]
+    },
+    {
+      "pair_id": 45,
+      "opening_moves": [
+        10,
+        13
+      ]
+    },
+    {
+      "pair_id": 46,
+      "opening_moves": [
+        8,
+        72
+      ]
+    },
+    {
+      "pair_id": 47,
+      "opening_moves": [
+        41,
+        46
+      ]
+    },
+    {
+      "pair_id": 48,
+      "opening_moves": [
+        69,
+        55
+      ]
+    },
+    {
+      "pair_id": 49,
+      "opening_moves": [
+        41,
+        47
+      ]
+    }
+  ]
+}

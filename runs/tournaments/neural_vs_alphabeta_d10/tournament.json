@@ -1,0 +1,332 @@
+{
+  "participants": [
+    "ckpt-iter6019",
+    "cpp-alphabeta-d10"
+  ],
+  "games_per_matchup": 20,
+  "ratings": {
+    "ckpt-iter6019": {
+      "elo": 1419.99,
+      "elo_ci95": 86.5,
+      "glicko2": 1312.87,
+      "glicko2_rd": 110.21,
+      "volatility": 0.06,
+      "games": 20,
+      "wins": 5,
+      "draws": 2,
+      "losses": 13,
+      "win_rate": 0.25,
+      "score_rate": 0.3
+    },
+    "cpp-alphabeta-d10": {
+      "elo": 1580.01,
+      "elo_ci95": 86.5,
+      "glicko2": 1687.13,
+      "glicko2_rd": 110.21,
+      "volatility": 0.06,
+      "games": 20,
+      "wins": 13,
+      "draws": 2,
+      "losses": 5,
+      "win_rate": 0.65,
+      "score_rate": 0.7
+    }
+  },
+  "matchups": [
+    {
+      "game_id": 0,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        31
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": 1,
+      "moves": 43
+    },
+    {
+      "game_id": 1,
+      "pair_id": 0,
+      "opening_plies": 2,
+      "opening_moves": [
+        75,
+        31
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 1,
+      "moves": 51
+    },
+    {
+      "game_id": 2,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        32
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": -1,
+      "moves": 52
+    },
+    {
+      "game_id": 3,
+      "pair_id": 1,
+      "opening_plies": 2,
+      "opening_moves": [
+        39,
+        32
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 1,
+      "moves": 55
+    },
+    {
+      "game_id": 4,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        15,
+        56
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": 1,
+      "moves": 51
+    },
+    {
+      "game_id": 5,
+      "pair_id": 2,
+      "opening_plies": 2,
+      "opening_moves": [
+        15,
+        56
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 0,
+      "moves": 51
+    },
+    {
+      "game_id": 6,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        50,
+        48
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": 1,
+      "moves": 47
+    },
+    {
+      "game_id": 7,
+      "pair_id": 3,
+      "opening_plies": 2,
+      "opening_moves": [
+        50,
+        48
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 1,
+      "moves": 45
+    },
+    {
+      "game_id": 8,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        59,
+        45
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": -1,
+      "moves": 54
+    },
+    {
+      "game_id": 9,
+      "pair_id": 4,
+      "opening_plies": 2,
+      "opening_moves": [
+        59,
+        45
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": -1,
+      "moves": 46
+    },
+    {
+      "game_id": 10,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        68,
+        47
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": -1,
+      "moves": 50
+    },
+    {
+      "game_id": 11,
+      "pair_id": 5,
+      "opening_plies": 2,
+      "opening_moves": [
+        68,
+        47
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 1,
+      "moves": 47
+    },
+    {
+      "game_id": 12,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        45,
+        6
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": -1,
+      "moves": 54
+    },
+    {
+      "game_id": 13,
+      "pair_id": 6,
+      "opening_plies": 2,
+      "opening_moves": [
+        45,
+        6
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 1,
+      "moves": 51
+    },
+    {
+      "game_id": 14,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        53,
+        79
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": -1,
+      "moves": 54
+    },
+    {
+      "game_id": 15,
+      "pair_id": 7,
+      "opening_plies": 2,
+      "opening_moves": [
+        53,
+        79
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 1,
+      "moves": 55
+    },
+    {
+      "game_id": 16,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        18
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": -1,
+      "moves": 52
+    },
+    {
+      "game_id": 17,
+      "pair_id": 8,
+      "opening_plies": 2,
+      "opening_moves": [
+        29,
+        18
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": 1,
+      "moves": 45
+    },
+    {
+      "game_id": 18,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        5
+      ],
+      "player_x": "ckpt-iter6019",
+      "player_o": "cpp-alphabeta-d10",
+      "winner": 0,
+      "moves": 51
+    },
+    {
+      "game_id": 19,
+      "pair_id": 9,
+      "opening_plies": 2,
+      "opening_moves": [
+        18,
+        5
+      ],
+      "player_x": "cpp-alphabeta-d10",
+      "player_o": "ckpt-iter6019",
+      "winner": -1,
+      "moves": 36
+    }
+  ],
+  "matrix": {
+    "ckpt-iter6019": {
+      "ckpt-iter6019": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "cpp-alphabeta-d10": {
+        "wins": 5,
+        "draws": 2,
+        "losses": 13
+      }
+    },
+    "cpp-alphabeta-d10": {
+      "ckpt-iter6019": {
+        "wins": 13,
+        "draws": 2,
+        "losses": 5
+      },
+      "cpp-alphabeta-d10": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      }
+    }
+  },
+  "side_stats": {
+    "x_wins": 10,
+    "o_wins": 8,
+    "draws": 2,
+    "total_games": 20,
+    "x_win_rate": 0.5,
+    "o_win_rate": 0.4,
+    "draw_rate": 0.1
+  }
+}

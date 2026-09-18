@@ -1,0 +1,444 @@
+{
+  "participants": [
+    "ckpt-iter6155-s512",
+    "ckpt-iter6000-s512",
+    "cpp-alphabeta-d6",
+    "cpp-alphabeta-d4",
+    "tactical",
+    "threat-block",
+    "openspiel-mcts",
+    "utttai-128"
+  ],
+  "games_per_matchup": 20,
+  "total_games": 560,
+  "elapsed_seconds": 939.36,
+  "side_stats": {
+    "x_wins": 260,
+    "o_wins": 240,
+    "draws": 60,
+    "total_games": 560,
+    "x_win_rate": 0.4642857142857143,
+    "o_win_rate": 0.42857142857142855,
+    "draw_rate": 0.10714285714285714
+  },
+  "ratings": {
+    "ckpt-iter6155-s512": {
+      "elo": 1671.11,
+      "elo_ci95": 81.41,
+      "glicko2": 1667.98,
+      "glicko2_rd": 43.55,
+      "wins": 83,
+      "draws": 20,
+      "losses": 37,
+      "games": 140
+    },
+    "ckpt-iter6000-s512": {
+      "elo": 1654.18,
+      "elo_ci95": 80.71,
+      "glicko2": 1653.38,
+      "glicko2_rd": 43.55,
+      "wins": 84,
+      "draws": 14,
+      "losses": 42,
+      "games": 140
+    },
+    "cpp-alphabeta-d6": {
+      "elo": 1645.8,
+      "elo_ci95": 80.39,
+      "glicko2": 1646.07,
+      "glicko2_rd": 43.55,
+      "wins": 84,
+      "draws": 12,
+      "losses": 44,
+      "games": 140
+    },
+    "cpp-alphabeta-d4": {
+      "elo": 1476.1,
+      "elo_ci95": 77.72,
+      "glicko2": 1492.7,
+      "glicko2_rd": 43.55,
+      "wins": 57,
+      "draws": 24,
+      "losses": 59,
+      "games": 140
+    },
+    "tactical": {
+      "elo": 1245.27,
+      "elo_ci95": 84.43,
+      "glicko2": 1295.5,
+      "glicko2_rd": 43.55,
+      "wins": 31,
+      "draws": 22,
+      "losses": 87,
+      "games": 140
+    },
+    "threat-block": {
+      "elo": 883.79,
+      "elo_ci95": 119.98,
+      "glicko2": 1058.13,
+      "glicko2_rd": 43.55,
+      "wins": 3,
+      "draws": 13,
+      "losses": 124,
+      "games": 140
+    },
+    "openspiel-mcts": {
+      "elo": 1103.13,
+      "elo_ci95": 94.06,
+      "glicko2": 1189.6,
+      "glicko2_rd": 43.55,
+      "wins": 22,
+      "draws": 11,
+      "losses": 107,
+      "games": 140
+    },
+    "utttai-128": {
+      "elo": 2320.63,
+      "elo_ci95": 200.86,
+      "glicko2": 1996.64,
+      "glicko2_rd": 43.55,
+      "wins": 136,
+      "draws": 4,
+      "losses": 0,
+      "games": 140
+    }
+  },
+  "matrix": {
+    "ckpt-iter6155-s512": {
+      "ckpt-iter6155-s512": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 8,
+        "draws": 7,
+        "losses": 5
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 14,
+        "draws": 1,
+        "losses": 5
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 10,
+        "draws": 4,
+        "losses": 6
+      },
+      "tactical": {
+        "wins": 12,
+        "draws": 5,
+        "losses": 3
+      },
+      "threat-block": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "openspiel-mcts": {
+        "wins": 19,
+        "draws": 1,
+        "losses": 0
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 2,
+        "losses": 18
+      }
+    },
+    "ckpt-iter6000-s512": {
+      "ckpt-iter6155-s512": {
+        "wins": 5,
+        "draws": 7,
+        "losses": 8
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 10,
+        "draws": 2,
+        "losses": 8
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 13,
+        "draws": 4,
+        "losses": 3
+      },
+      "tactical": {
+        "wins": 18,
+        "draws": 0,
+        "losses": 2
+      },
+      "threat-block": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "openspiel-mcts": {
+        "wins": 18,
+        "draws": 0,
+        "losses": 2
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 1,
+        "losses": 19
+      }
+    },
+    "cpp-alphabeta-d6": {
+      "ckpt-iter6155-s512": {
+        "wins": 5,
+        "draws": 1,
+        "losses": 14
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 8,
+        "draws": 2,
+        "losses": 10
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 14,
+        "draws": 5,
+        "losses": 1
+      },
+      "tactical": {
+        "wins": 19,
+        "draws": 1,
+        "losses": 0
+      },
+      "threat-block": {
+        "wins": 18,
+        "draws": 2,
+        "losses": 0
+      },
+      "openspiel-mcts": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 1,
+        "losses": 19
+      }
+    },
+    "cpp-alphabeta-d4": {
+      "ckpt-iter6155-s512": {
+        "wins": 6,
+        "draws": 4,
+        "losses": 10
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 3,
+        "draws": 4,
+        "losses": 13
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 1,
+        "draws": 5,
+        "losses": 14
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "tactical": {
+        "wins": 14,
+        "draws": 5,
+        "losses": 1
+      },
+      "threat-block": {
+        "wins": 14,
+        "draws": 6,
+        "losses": 0
+      },
+      "openspiel-mcts": {
+        "wins": 19,
+        "draws": 0,
+        "losses": 1
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      }
+    },
+    "tactical": {
+      "ckpt-iter6155-s512": {
+        "wins": 3,
+        "draws": 5,
+        "losses": 12
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 18
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 0,
+        "draws": 1,
+        "losses": 19
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 1,
+        "draws": 5,
+        "losses": 14
+      },
+      "tactical": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "threat-block": {
+        "wins": 16,
+        "draws": 3,
+        "losses": 1
+      },
+      "openspiel-mcts": {
+        "wins": 9,
+        "draws": 8,
+        "losses": 3
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      }
+    },
+    "threat-block": {
+      "ckpt-iter6155-s512": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 0,
+        "draws": 2,
+        "losses": 18
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 0,
+        "draws": 6,
+        "losses": 14
+      },
+      "tactical": {
+        "wins": 1,
+        "draws": 3,
+        "losses": 16
+      },
+      "threat-block": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "openspiel-mcts": {
+        "wins": 2,
+        "draws": 2,
+        "losses": 16
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      }
+    },
+    "openspiel-mcts": {
+      "ckpt-iter6155-s512": {
+        "wins": 0,
+        "draws": 1,
+        "losses": 19
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 18
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 1,
+        "draws": 0,
+        "losses": 19
+      },
+      "tactical": {
+        "wins": 3,
+        "draws": 8,
+        "losses": 9
+      },
+      "threat-block": {
+        "wins": 16,
+        "draws": 2,
+        "losses": 2
+      },
+      "openspiel-mcts": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 20
+      }
+    },
+    "utttai-128": {
+      "ckpt-iter6155-s512": {
+        "wins": 18,
+        "draws": 2,
+        "losses": 0
+      },
+      "ckpt-iter6000-s512": {
+        "wins": 19,
+        "draws": 1,
+        "losses": 0
+      },
+      "cpp-alphabeta-d6": {
+        "wins": 19,
+        "draws": 1,
+        "losses": 0
+      },
+      "cpp-alphabeta-d4": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "tactical": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "threat-block": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "openspiel-mcts": {
+        "wins": 20,
+        "draws": 0,
+        "losses": 0
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      }
+    }
+  }
+}

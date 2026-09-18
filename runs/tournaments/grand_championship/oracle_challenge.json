@@ -1,0 +1,18 @@
+{
+  "ckpt-iter6155-s512": {
+    "simulations": 512,
+    "neural_wins": 3,
+    "draws": 3,
+    "oracle_wins": 14,
+    "score_pct": 22.5,
+    "elapsed_seconds": 148.53
+  },
+  "ckpt-iter6155-s2000": {
+    "simulations": 2000,
+    "neural_wins": 5,
+    "draws": 3,
+    "oracle_wins": 12,
+    "score_pct": 32.5,
+    "elapsed_seconds": 176.8
+  }
+}

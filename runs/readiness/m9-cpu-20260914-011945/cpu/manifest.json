@@ -1,0 +1,30 @@
+{
+  "stage": "cpu",
+  "status": "passed",
+  "duration_sec": 6.352236986160278,
+  "checks": {
+    "iteration": 3,
+    "replay_positions": 674,
+    "optimizer_param_groups": 1,
+    "lr_schedule": {
+      "kind": "constant",
+      "lr_start": 0.001,
+      "lr_min": 0.0,
+      "horizon": 0,
+      "completed": 3,
+      "phase": 0
+    },
+    "losses": [
+      2.8095552921295166,
+      2.543212056159973,
+      2.3420243859291077
+    ],
+    "model_changed": true,
+    "leftover_workers": []
+  },
+  "details": {
+    "checkpoint": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/readiness/m9-cpu-20260914-011945/cpu/run/latest.pt",
+    "initial_iterations": 2,
+    "resumed_iterations": 1
+  }
+}

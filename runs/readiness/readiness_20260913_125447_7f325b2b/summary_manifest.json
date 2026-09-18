@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-09-13T12:54:48.229892+00:00",
+  "duration_sec": 1.023388147354126,
+  "overall_status": "failed",
+  "requested_stage": "native",
+  "backend": "cpp",
+  "device": "cpu",
+  "stages": {
+    "native": {
+      "stage": "native",
+      "status": "failed",
+      "duration_sec": 1.0231313705444336,
+      "error": "No module named 'sttt.model'"
+    }
+  }
+}

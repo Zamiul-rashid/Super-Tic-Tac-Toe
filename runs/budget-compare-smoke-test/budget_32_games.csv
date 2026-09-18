@@ -1,0 +1,5 @@
+game_id,pair_id,opening_plies,opening_moves,player_x,player_o,winner,moves
+0,0,2,74 20,ckpt-iter4530-cb04e705-s32,utttai-128,0,46
+1,0,2,74 20,utttai-128,ckpt-iter4530-cb04e705-s32,1,41
+2,1,2,60 59,ckpt-iter4530-cb04e705-s32,utttai-128,-1,54
+3,1,2,60 59,utttai-128,ckpt-iter4530-cb04e705-s32,1,53

@@ -1,0 +1,7 @@
+Evaluation command: /home/mt/miniconda3/envs/sttt/bin/python -u scripts/evaluation_suite.py --checkpoint /tmp/claude-1000/-home-mt-Zami-Super-Tic-Tac-Toe/92191f58-bd66-4c5a-8167-fcc74627b753/scratchpad/iter4530.pt --output runs/budget-compare-iter4530-utttai128-20260918-par --budget-compare --budgets 128 512 2000 --opponent utttai:128 --pairs 50 --opening-plies 2 --seed 4242 --backend cpp --device cpu --leaf-batch 16 --workers 12
+==========================================================================================
+     MATCHED-OPENING SEARCH BUDGET COMPARISON (shared, saved opening corpus)
+==========================================================================================
+Checkpoint: /home/mt/Zami/Super-Tic-Tac-Toe/runs/budget-compare-iter4530-utttai128-20260918-par/evaluation-inputs/candidate/iter4530.pt
+Opponent:   utttai:128
+Budgets:    [128, 512, 2000]   Opening pairs: 50   Openings file: runs/budget-compare-iter4530-utttai128-20260918-par/openings.json

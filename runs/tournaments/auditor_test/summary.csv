@@ -1,0 +1,4 @@
+participant,elo,elo_ci95,glicko2,glicko2_rd,volatility,games,wins,draws,losses,win_rate,score_rate
+tactical,1790.52,124.96,1881.47,79.94,0.06,40,33,5,2,0.825,0.8875
+openspiel-mcts-20,1367.86,97.86,1327.72,79.94,0.06,40,9,8,23,0.225,0.325
+ckpt-iter0004,1341.62,99.67,1290.81,79.94,0.06,40,7,9,24,0.175,0.2875

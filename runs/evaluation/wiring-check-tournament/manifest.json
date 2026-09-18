@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "kind": "candidate-vs-reference",
+  "run_id": "9a0d4b7e544d4ebf9284a6eb7fb2a08e",
+  "created_at": "2026-09-13T20:27:06.745187+00:00",
+  "status": "completed",
+  "checkpoints": {
+    "candidate": {
+      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/evaluation/wiring-check-tournament/evaluation-inputs/candidate/best.pt",
+      "sha256": "d2ea24054637d145f1243bfc2647516e13aea743ab65ec209ea0d8b2672d0928",
+      "sha8": "d2ea2405",
+      "iteration": 1600,
+      "arch": "resnet"
+    },
+    "reference": {
+      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/runs/evaluation/wiring-check-tournament/evaluation-inputs/reference/best.pt",
+      "sha256": "72a7934c5fb1d39f1987397fef00aba1abafccb1c932afe218b3be597d6d5544",
+      "sha8": "72a7934c",
+      "iteration": 5750,
+      "arch": "resnet"
+    }
+  },
+  "config": {
+    "h2h_games": 10,
+    "round_robin_games": 4,
+    "simulations": 64,
+    "opening_plies": 2,
+    "candidate_source": "runs/run_v2/best.pt",
+    "reference_source": "runs/big_run/best.pt"
+  },
+  "seeds": {
+    "h2h": 4242,
+    "round_robin": 4300,
+    "oracle": 4242,
+    "bootstrap": 5242
+  },
+  "argv": [
+    "scripts/run_v2_vs_bigrun_comparison.py",
+    "--checkpoint",
+    "runs/run_v2/best.pt",
+    "--reference",
+    "runs/big_run/best.pt",
+    "--output",
+    "runs/evaluation/wiring-check-tournament",
+    "--h2h-games",
+    "10",
+    "--round-robin-games",
+    "4",
+    "--simulations",
+    "64",
+    "--seed",
+    "4242"
+  ],
+  "environment": {
+    "python": "3.14.6",
+    "executable": "/home/mt/miniconda3/envs/sttt/bin/python",
+    "torch": "2.14.0+cu130",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "native": {
+      "available": true,
+      "path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+      "version": "0.9.0",
+      "build_id": "20260913164113_35fd9f6",
+      "source_revision": "35fd9f6"
+    }
+  },
+  "summary": {
+    "head_to_head": {
+      "subject": "ckpt-iter1600-d2ea2405-s64",
+      "score_rate": 0.35,
+      "ci_low": 0.25,
+      "ci_high": 0.45,
+      "confidence": 0.95,
+      "pairs": 5,
+      "games": 10,
+      "iterations": 10000,
+      "seed": 5242,
+      "wins": 2,
+      "draws": 3,
+      "losses": 5,
+      "elapsed_seconds": 1.32
+    },
+    "round_robin": {
+      "elapsed_seconds": 97.05,
+      "participants": [
+        "ckpt-iter1600-d2ea2405-s64",
+        "ckpt-iter5750-72a7934c-s64",
+        "cpp-alphabeta-d6",
+        "cpp-alphabeta-d4",
+        "tactical",
+        "threat-block",
+        "openspiel-mcts",
+        "utttai-128"
+      ]
+    },
+    "alphabeta_challenge": {
+      "subject": "ckpt-iter1600-d2ea2405-s64",
+      "score_rate": 0.225,
+      "ci_low": 0.075,
+      "ci_high": 0.375,
+      "confidence": 0.95,
+      "pairs": 10,
+      "games": 20,
+      "iterations": 10000,
+      "seed": 5242,
+      "wins": 4,
+      "draws": 1,
+      "losses": 15,
+      "elapsed_seconds": 144.17,
+      "opponent": "cpp-alphabeta-d10"
+    }
+  }
+}

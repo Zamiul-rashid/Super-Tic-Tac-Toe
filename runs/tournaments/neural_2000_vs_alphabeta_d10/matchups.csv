@@ -1,0 +1,21 @@
+game_id,pair_id,opening_plies,opening_moves,player_x,player_o,winner,moves
+0,0,2,"[75, 31]",ckpt-iter6060,cpp-alphabeta-d10,0,54
+1,0,2,"[75, 31]",cpp-alphabeta-d10,ckpt-iter6060,1,55
+2,1,2,"[39, 32]",ckpt-iter6060,cpp-alphabeta-d10,0,55
+3,1,2,"[39, 32]",cpp-alphabeta-d10,ckpt-iter6060,0,51
+4,2,2,"[15, 56]",ckpt-iter6060,cpp-alphabeta-d10,0,56
+5,2,2,"[15, 56]",cpp-alphabeta-d10,ckpt-iter6060,1,53
+6,3,2,"[50, 48]",ckpt-iter6060,cpp-alphabeta-d10,0,59
+7,3,2,"[50, 48]",cpp-alphabeta-d10,ckpt-iter6060,1,53
+8,4,2,"[59, 45]",ckpt-iter6060,cpp-alphabeta-d10,1,39
+9,4,2,"[59, 45]",cpp-alphabeta-d10,ckpt-iter6060,0,56
+10,5,2,"[68, 47]",ckpt-iter6060,cpp-alphabeta-d10,-1,50
+11,5,2,"[68, 47]",cpp-alphabeta-d10,ckpt-iter6060,-1,44
+12,6,2,"[45, 6]",ckpt-iter6060,cpp-alphabeta-d10,0,62
+13,6,2,"[45, 6]",cpp-alphabeta-d10,ckpt-iter6060,-1,46
+14,7,2,"[53, 79]",ckpt-iter6060,cpp-alphabeta-d10,1,49
+15,7,2,"[53, 79]",cpp-alphabeta-d10,ckpt-iter6060,-1,44
+16,8,2,"[29, 18]",ckpt-iter6060,cpp-alphabeta-d10,-1,56
+17,8,2,"[29, 18]",cpp-alphabeta-d10,ckpt-iter6060,1,55
+18,9,2,"[18, 5]",ckpt-iter6060,cpp-alphabeta-d10,-1,52
+19,9,2,"[18, 5]",cpp-alphabeta-d10,ckpt-iter6060,1,57
