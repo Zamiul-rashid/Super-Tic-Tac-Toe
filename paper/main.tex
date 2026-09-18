@@ -601,6 +601,16 @@ iterations 1806 and 4193 scored 67.5\% and 65\% over 20-game sets. A
 20-game check of the 4530 checkpoint at 2{,}000 simulations against \utttai\
 scored 40\%, far too small a sample to say anything about search budget.
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{ratings-comparison-iter6000-budget.png}
+  \caption{Iteration 6000 rated in the same eight-entrant pool at two search
+  budgets. Every opponent's rating is essentially unchanged between the two
+  championships, which is what makes the two fits comparable; the agent alone
+  moves, by about 155 Elo.}
+  \label{fig:budget}
+\end{figure}
+
 \begin{table}[t]
   \centering\footnotesize
   \setlength{\tabcolsep}{4pt}
@@ -631,14 +641,15 @@ scored 40\%, far too small a sample to say anything about search budget.
 \paragraph{What search budget buys}
 The one knob we can turn at inference time is the simulation count, so we
 reran the same championship with the candidate at 2{,}000 simulations
-instead of 512 (Table~\ref{tab:budget}). Quadrupling the budget is worth
+instead of 512 (Table~\ref{tab:budget}, Fig.~\ref{fig:budget}). Quadrupling the budget is worth
 about 155 Elo, and it improves every matchup that was not already saturated:
 against depth-10 the score rises from 67.5\% to 90.0\%, and against \utttai\
 from 57.5\% to 70.0\%. It is enough to take first place in the pool outright,
 2473 against \utttai's 2344. The two ratings come from separate fits rather
-than one pool containing both budgets, but they share an anchor, an opponent
-set and an opening seed, and the per-matchup improvements are consistent in
-sign, which is the stronger evidence. The caveat is the obvious one: this
+than one pool containing both budgets, but Fig.~\ref{fig:budget} shows why
+they are nonetheless comparable: every opponent lands within a few Elo of
+its own rating in the other championship, so the pools themselves have not
+moved---only the agent has. The caveat is the obvious one: this
 buys strength with four times the compute per move, so it says what our
 search does with more thinking time, not that the agent is stronger at equal
 cost. It does, however, settle the question the underpowered 20-game check
@@ -704,8 +715,9 @@ these scores do not measure transfer to unseen opponents.
 rules in Python and C++, a two-level policy/value/action-value network,
 batched tree search with proofs, a bootstrapped and population-trained
 learning loop, and a paired evaluation harness. It dominates every
-classical baseline we could construct and, at iteration 6000, finishes
-level with the strongest public engine we integrated. The two most useful
+classical baseline we could construct and, at iteration 6000, wins its
+head-to-head against the strongest public engine we integrated---and leads
+the pool outright once its own search is raised to 2{,}000 simulations. The two most useful
 findings came from audits rather than training---a learning-rate-driven
 value-head collapse and a batched-search starvation bug---and both are now
 covered by tests. The next step is controlled experiments---above all a

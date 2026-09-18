@@ -46,5 +46,17 @@
     "runs/unet-pipeline-phase3-postfix/metrics.jsonl",
     "runs/unet-pipeline-phase3b-w16/metrics.jsonl",
     "runs/unet-pipeline-phase3c-reanalyse/metrics.jsonl"
+  ],
+  "rating_comparisons": [
+    {
+      "key": "iter6000-budget",
+      "label": "Iteration 6000: Bayesian Elo at two search budgets",
+      "a": "iter6000",
+      "b": "iter6000-s2000",
+      "labels": [
+        "512 simulations",
+        "2,000 simulations"
+      ]
+    }
   ]
 }

@@ -245,6 +245,56 @@ def new_evaluation_figures(data, output):
                        f"{entry['label']}: Bayesian Elo ratings")
 
 
+def rating_comparison_figure(data, output):
+    """Overlay the candidate ratings of two championships that share a pool.
+
+    Driven by a `rating_comparisons` list in the config, each entry naming two
+    championship keys and a label per arm. The candidate is matched by its
+    position in the roster, not by name, because each arm encodes its search
+    budget in the entrant name; opponents are matched by name and appear in
+    both arms, so the figure also shows how much of the difference is pool
+    noise rather than a change in the candidate.
+    """
+    by_key = {e.get("key", e["label"]): e for e in data.get("championships", [])}
+    CANDIDATE = "\x00candidate"
+
+    def canonical(name, candidate):
+        return CANDIDATE if name == candidate else name
+
+    for spec in data.get("config", {}).get("rating_comparisons", []):
+        arms = [by_key.get(spec["a"]), by_key.get(spec["b"])]
+        if not all(arms):
+            continue
+        labels = spec.get("labels", [spec["a"], spec["b"]])
+        base = arms[0]["championship"]
+        base_cand = base["participants"][0]
+        order = sorted(base["participants"], key=lambda n: -base["ratings"][n]["elo"])
+        keys = [canonical(n, base_cand) for n in order]
+        rows = [spec.get("candidate_label", "Our U-Net") if k == CANDIDATE
+                else NAMES.get(k, k) for k in keys]
+        fig, ax = plt.subplots(figsize=(8.2, 4.4), layout="constrained")
+        for k, (arm, label, color) in enumerate(zip(arms, labels, (BLUE, ORANGE))):
+            t = arm["championship"]
+            cand = t["participants"][0]
+            lookup = {canonical(n, cand): n for n in t["participants"]}
+            xs, ys, errs = [], [], []
+            for i, key in enumerate(keys):
+                name = lookup.get(key)
+                if name is None:
+                    continue
+                xs.append(t["ratings"][name]["elo"])
+                errs.append(t["ratings"][name]["elo_ci95"])
+                ys.append(i + (k - .5) * .28)
+            ax.errorbar(xs, ys, xerr=errs, fmt="none", ecolor="#bbbbbb", capsize=3, zorder=2)
+            ax.scatter(xs, ys, color=color, s=46, zorder=3, label=label)
+        ax.set(yticks=range(len(rows)), yticklabels=rows, title=spec["label"],
+               xlabel="Bayesian Elo (pool-relative; anchor = 1500)")
+        ax.invert_yaxis()
+        ax.legend(frameon=False, loc="lower right")
+        clean(ax, axis="x")
+        save(fig, output, f"ratings-comparison-{spec['key']}")
+
+
 def results_figures(data, output):
     latest = data["experiments"][-1]
     t = latest["championship"]
@@ -455,6 +505,7 @@ def main():
                          "svg.fonttype": "none", "savefig.facecolor": "white"})
     results_figures(data, figures)
     new_evaluation_figures(data, figures)
+    rating_comparison_figure(data, figures)
     training_figures(data, figures)
     diagrams(figures)
     write_summary(data, evidence / "summary.json")
