@@ -7,6 +7,7 @@
 - [Testing](testing.md) — test architecture and verification commands.
 - [C++ engine](engineering/cpp-engine.md) — native design and integration.
 - [C++ benchmarks](engineering/cpp-benchmarks.md) — measured native performance evidence.
+- [Search audit](engineering/search-audit-iter4530.md) — MCTS correctness checks, batched-search fix, iteration-4530 diagnostic.
 - [Adaptive-agent research](research/adaptive-agent.md) — longer-term research direction.
 - [External engines](../engines/README.md) — registry and protocol setup.
 

@@ -14,6 +14,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import re
 import subprocess
 
 import numpy as np
@@ -25,10 +26,29 @@ from matplotlib.patches import FancyBboxPatch
 ROOT = Path(__file__).resolve().parents[1]
 BLUE, GREEN, ORANGE, RED = "#426a9c", "#537d62", "#c18b43", "#ad5959"
 NAMES = {
+    "cpp-alphabeta-d10": "AlphaBeta d10",
     "cpp-alphabeta-d6": "AlphaBeta d6", "cpp-alphabeta-d4": "AlphaBeta d4",
     "tactical": "Tactical", "threat-block": "Threat-block",
-    "openspiel-mcts": "OpenSpiel MCTS (100)", "utttai-128": "uttt.ai (128)",
+    "openspiel-mcts": "OpenSpiel MCTS (100)", "openspiel-mcts-100": "OpenSpiel MCTS (100)",
+    "utttai-128": "uttt.ai (128)",
 }
+
+
+def participant_label(name, candidate):
+    """Display label for a championship participant; generic across any roster."""
+    if name != candidate:
+        return NAMES.get(name, name)
+    sims = re.search(r"-s(\d+)$", candidate)
+    return f"Our U-Net ({sims.group(1)})" if sims else "Our U-Net"
+
+
+def _load_games(read, championship_dir):
+    rows = list(csv.DictReader(io.StringIO(
+        read(str(Path(championship_dir) / "championship_games.csv")))))
+    for row in rows:
+        for key in ("game_id", "pair_id", "winner", "moves", "opening_plies"):
+            row[key] = int(row[key])
+    return rows
 
 
 def collect(config_path):
@@ -77,12 +97,19 @@ def collect(config_path):
         for key, filename in (("championship", "tournament.json"), ("sweep", "budget_sweep.json")):
             exp[key] = json.loads(read(str(Path(item[key]) / filename)))
             exp[key + "_manifest"] = json.loads(read(str(Path(item[key]) / "manifest.json")))
-        exp["games"] = list(csv.DictReader(io.StringIO(
-            read(str(Path(item["championship"]) / "championship_games.csv")))))
-        for row in exp["games"]:
-            for key in ("game_id", "pair_id", "winner", "moves", "opening_plies"):
-                row[key] = int(row[key])
+        exp["games"] = _load_games(read, item["championship"])
         result["experiments"].append(exp)
+    # Generic N-championship / N-spot-check evidence, any roster size, kept separate from
+    # the archived `experiments` comparison above so archived figures never change.
+    for group in ("championships", "spot_checks"):
+        result[group] = []
+        for item in config.get(group, []):
+            exp = {"label": item["label"], "key": item.get("key", item["label"]),
+                   "championship": json.loads(read(str(Path(item["championship"]) / "tournament.json"))),
+                   "championship_manifest": json.loads(
+                       read(str(Path(item["championship"]) / "manifest.json"))),
+                   "games": _load_games(read, item["championship"])}
+            result[group].append(exp)
     for path in ("sttt/unet.py", "sttt/learning.py", "sttt/search.py", "sttt/selfplay.py",
                  "sttt/ai.py", "sttt/bootstrap.py", "sttt/bots.py", "sttt/tournament.py",
                  "sttt/evaluation.py", "scripts/evaluation_suite.py"):
@@ -112,28 +139,39 @@ def interval(values):
     return np.quantile(samples, [.025, .975])
 
 
+def _validate_matrix(label, t, games):
+    """Cross-check one championship's matrix/ratings against its raw game rows.
+
+    Generic over roster size, so it covers the archived experiments as well as
+    any number of newly added championships or spot checks.
+    """
+    assert len(games) == t["total_games"], label
+    for a in t["participants"]:
+        totals = Counter()
+        for b in t["participants"]:
+            if a == b:
+                continue
+            rows = [r for r in games if {r["player_x"], r["player_o"]} == {a, b}]
+            counts = Counter(score(r, a) for r in rows)
+            observed = {"wins": counts[1.], "draws": counts[.5], "losses": counts[0.]}
+            assert observed == t["matrix"][a][b], (label, a, b)
+            totals.update(observed)
+            pair_scores(rows, a)
+        for key, value in totals.items():
+            assert value == t["ratings"][a][key], (label, a, key)
+
+
 def validate(data):
     """Cross-check aggregate artifacts against preserved per-game records."""
     for e in data["experiments"]:
-        t = e["championship"]
-        assert len(e["games"]) == t["total_games"]
-        for a in t["participants"]:
-            totals = Counter()
-            for b in t["participants"]:
-                if a == b:
-                    continue
-                rows = [r for r in e["games"] if {r["player_x"], r["player_o"]} == {a, b}]
-                counts = Counter(score(r, a) for r in rows)
-                observed = {"wins": counts[1.], "draws": counts[.5], "losses": counts[0.]}
-                assert observed == t["matrix"][a][b], (e["label"], a, b)
-                totals.update(observed)
-                pair_scores(rows, a)
-            for key, value in totals.items():
-                assert value == t["ratings"][a][key]
+        _validate_matrix(e["label"], e["championship"], e["games"])
         for arm in e["sweep"]["budgets"].values():
             p = pair_scores(arm["game_rows"], arm["entrant"])
             assert np.isclose(p.mean(), arm["score_rate"])
             assert np.allclose(interval(p), [arm["ci_low"], arm["ci_high"]])
+    for group in ("championships", "spot_checks"):
+        for e in data.get(group, []):
+            _validate_matrix(e["label"], e["championship"], e["games"])
     iterations = [r["iteration"] for p in data["training"] for r in p["rows"]]
     assert len(iterations) == len(set(iterations)), "Training segments overlap"
 
@@ -144,10 +182,67 @@ def save(fig, output, name):
     plt.close(fig)
 
 
-def clean(ax):
+def clean(ax, axis="y"):
     ax.spines[["top", "right"]].set_visible(False)
     ax.set_axisbelow(True)
-    ax.grid(axis="y", alpha=.18, linewidth=.5)
+    ax.grid(axis=axis, alpha=.18, linewidth=.5)
+
+
+def matrix_figure(t, output, name, title):
+    """Score matrix heatmap for one championship; generic over roster size."""
+    names = t["participants"]
+    candidate = names[0]
+    matrix = np.full((len(names), len(names)), np.nan)
+    for i, a in enumerate(names):
+        for j, b in enumerate(names):
+            if i != j:
+                r = t["matrix"][a][b]; n = sum(r.values())
+                matrix[i, j] = (r["wins"] + .5*r["draws"])/n
+    labels = [participant_label(n, candidate) for n in names]
+    fig, ax = plt.subplots(figsize=(8.4, 6.7), layout="constrained")
+    im = ax.imshow(matrix, cmap="Blues", vmin=0, vmax=1)
+    for i in range(len(names)):
+        for j in range(len(names)):
+            if i != j:
+                ax.text(j, i, f"{matrix[i,j]:.1%}", ha="center", va="center",
+                        color="white" if matrix[i,j] > .65 else "black", fontsize=10)
+    ax.set(xticks=range(len(names)), yticks=range(len(names)), yticklabels=labels, title=title)
+    ax.set_xticklabels(labels, rotation=35, ha="right")
+    fig.colorbar(im, ax=ax, fraction=.04, label="Score rate (win = 1, draw = ½)")
+    save(fig, output, name)
+
+
+def ratings_figure(t, output, name, title):
+    """Bayesian-Elo ratings with 95% CI for one championship; generic over roster size."""
+    candidate = t["participants"][0]
+    ranked = sorted(t["participants"], key=lambda n: -t["ratings"][n]["elo"])
+    elo = np.array([t["ratings"][n]["elo"] for n in ranked])
+    ci = np.array([t["ratings"][n]["elo_ci95"] for n in ranked])
+    labels = [participant_label(n, candidate) for n in ranked]
+    y = np.arange(len(ranked))
+    fig, ax = plt.subplots(figsize=(8.2, 4.6), layout="constrained")
+    colors = [BLUE if n == candidate else "#8a8a8a" for n in ranked]
+    ax.errorbar(elo, y, xerr=ci, fmt="none", ecolor="#999999", capsize=4, zorder=2)
+    ax.scatter(elo, y, color=colors, s=55, zorder=3)
+    for i, e in enumerate(elo):
+        ax.annotate(f"{e:.0f}", (e, y[i]), xytext=(0, 10), textcoords="offset points",
+                    ha="center", fontsize=8)
+    ax.set(yticks=y, yticklabels=labels, xlabel="Bayesian Elo (pool-relative; anchor = 1500)",
+           title=title)
+    ax.invert_yaxis()
+    clean(ax, axis="x")
+    save(fig, output, name)
+
+
+def new_evaluation_figures(data, output):
+    """Matrix + ratings figures for each generically-added new championship."""
+    for entry in data.get("championships", []):
+        t = entry["championship"]
+        key = entry.get("key", entry["label"])
+        matrix_figure(t, output, f"championship-matrix-{key}",
+                      f"{entry['label']}: row player's score against column player")
+        ratings_figure(t, output, f"championship-ratings-{key}",
+                       f"{entry['label']}: Bayesian Elo ratings")
 
 
 def results_figures(data, output):
@@ -164,32 +259,14 @@ def results_figures(data, output):
             if v:
                 ax.text(left[i] + v/2, i, str(v), ha="center", va="center", color="white", fontsize=10)
         left += values
-    ax.set(yticks=range(len(opponents)), yticklabels=[NAMES[o] for o in opponents],
+    ax.set(yticks=range(len(opponents)), yticklabels=[NAMES.get(o, o) for o in opponents],
            xlabel="Games (20 per opponent)", xlim=(0, 20), xticks=range(0, 21, 5),
            title=f"{latest['label']}: head-to-head outcomes")
     ax.invert_yaxis(); ax.legend(ncols=3, loc="lower center", bbox_to_anchor=(.5, 1.08), frameon=False)
     save(fig, output, "matchup-outcomes")
 
-    names = t["participants"]
-    matrix = np.full((len(names), len(names)), np.nan)
-    for i, a in enumerate(names):
-        for j, b in enumerate(names):
-            if i != j:
-                r = t["matrix"][a][b]; n = sum(r.values())
-                matrix[i, j] = (r["wins"] + .5*r["draws"])/n
-    labels = ["Our U-Net (512)" if n == candidate else NAMES[n] for n in names]
-    fig, ax = plt.subplots(figsize=(8.4, 6.7), layout="constrained")
-    im = ax.imshow(matrix, cmap="Blues", vmin=0, vmax=1)
-    for i in range(len(names)):
-        for j in range(len(names)):
-            if i != j:
-                ax.text(j, i, f"{matrix[i,j]:.1%}", ha="center", va="center",
-                        color="white" if matrix[i,j] > .65 else "black", fontsize=10)
-    ax.set(xticks=range(len(names)), yticks=range(len(names)), yticklabels=labels,
-           title=f"{latest['label']}: row player's score against column player")
-    ax.set_xticklabels(labels, rotation=35, ha="right")
-    fig.colorbar(im, ax=ax, fraction=.04, label="Score rate (win = 1, draw = ½)")
-    save(fig, output, "championship-matrix")
+    matrix_figure(t, output, "championship-matrix",
+                  f"{latest['label']}: row player's score against column player")
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.6), layout="constrained",
                              gridspec_kw={"width_ratios": [1.8, 1]})
@@ -322,6 +399,19 @@ def diagrams(output):
     save(fig, output, "evaluation-flow")
 
 
+def _matchup_summary(t, games, candidate):
+    """Candidate's per-opponent W/D/L/score/CI; generic over roster size."""
+    matchups = {}
+    for opp in t["participants"]:
+        if opp == candidate:
+            continue
+        rows_ = [r for r in games if {r["player_x"], r["player_o"]} == {candidate, opp}]
+        p = pair_scores(rows_, candidate)
+        matchups[opp] = {**t["matrix"][candidate][opp], "score": float(p.mean()),
+                          "pair_bootstrap_ci95": interval(p).tolist()}
+    return matchups
+
+
 def write_summary(data, dest):
     rows = [r for p in data["training"] for r in p["rows"]]
     summary = {"training_rows": len(rows), "first_iteration": rows[0]["iteration"],
@@ -329,20 +419,21 @@ def write_summary(data, dest):
                "recorded_training_games": sum(r["games"] for r in rows),
                "median_iteration_seconds": float(np.median([r["seconds"] for r in rows])),
                "evaluation_overhead_records": sum(len(p["overhead"]) for p in data["training"]),
-               "experiments": []}
+               "experiments": [], "championships": [], "spot_checks": []}
     for e in data["experiments"]:
         t = e["championship"]; c = t["participants"][0]
-        item = {"label": e["label"], "candidate": c, "matchups": {}, "depth10": {}}
-        for opp in t["participants"][1:]:
-            rows_ = [r for r in e["games"] if {r["player_x"], r["player_o"]} == {c, opp}]
-            p = pair_scores(rows_, c)
-            item["matchups"][opp] = {**t["matrix"][c][opp], "score": float(p.mean()),
-                                      "pair_bootstrap_ci95": interval(p).tolist()}
+        item = {"label": e["label"], "candidate": c,
+                "matchups": _matchup_summary(t, e["games"], c), "depth10": {}}
         for budget, arm in e["sweep"]["budgets"].items():
             counts = Counter(score(r, arm["entrant"]) for r in arm["game_rows"])
             item["depth10"][budget] = {"wins": counts[1.], "draws": counts[.5], "losses": counts[0.],
                                       "score": arm["score_rate"], "ci95": [arm["ci_low"], arm["ci_high"]]}
         summary["experiments"].append(item)
+    for group in ("championships", "spot_checks"):
+        for e in data.get(group, []):
+            t = e["championship"]; c = t["participants"][0]
+            summary[group].append({"label": e["label"], "key": e.get("key", e["label"]),
+                                    "candidate": c, "matchups": _matchup_summary(t, e["games"], c)})
     dest.write_text(json.dumps(summary, indent=2)+"\n")
 
 
@@ -363,6 +454,7 @@ def main():
                          "axes.titlesize": 11, "axes.linewidth": .7,
                          "svg.fonttype": "none", "savefig.facecolor": "white"})
     results_figures(data, figures)
+    new_evaluation_figures(data, figures)
     training_figures(data, figures)
     diagrams(figures)
     write_summary(data, evidence / "summary.json")

@@ -3,23 +3,23 @@
 ### An implementation study with reproducible local evaluation
 
 **Project:** Super Tic-Tac-Toe  
-**Report date:** 17 September 2026  
+**Report date:** 18 September 2026  
 **Status:** Engineering research report; not a peer-reviewed publication  
-**Evidence cutoff:** Evaluated checkpoint at iteration 4193; later training is outside this report  
-**Code inspected:** `feb5982c4d40a0500f0e1496d365b2b2b920a011`  
+**Evidence cutoff:** Archived evaluation at iteration 4193 (Sections 7–8.3); expanded evaluation added at iteration 4530 with an enlarged 8-entrant roster (Section 8.4). Later training beyond 4530 is outside this report.  
+**Code inspected:** `feb5982c4d40a0500f0e1496d365b2b2b920a011` (archived evidence); the iteration-4530 evaluation ran with native build `f770ec7`, an earlier commit — see [EVIDENCE.md](EVIDENCE.md#new-evidence-iteration-4530-evaluation)  
 **Authors and affiliations:** To be supplied by the project contributors before external submission.
 
 ## Abstract
 
 Ultimate Tic-Tac-Toe couples local tactical decisions with global strategic constraints: a move selects both a cell and the sub-board in which the opponent must respond. This report describes an implemented learning and search system that represents these two scales explicitly. A 1,560,835-parameter convolutional encoder–decoder maps a canonical state representation to policy, state-value, and auxiliary action-value predictions. Batched prior-guided Monte Carlo tree search generates learning targets; a quota-controlled population supplies self-play, classical search, historical networks, and external opponents. A C++ bitboard engine accelerates game operations and search, while spawned CPU workers share a single neural inference owner. The system also implements supervised bootstrap training, resumable optimization, and paired evaluation with frozen checkpoint inputs.
 
-We audit saved experiments rather than claim new experiments were conducted for this report. At iteration 4193, the agent obtains 97 wins, 14 draws, and 9 losses in its 120 games within a seven-player, 420-game round robin. Its score against the integrated uttt.ai stage-2 model at 128 simulations is 35%, despite using 512 simulations itself. In a separate 20-game comparison with a depth-10, 50-million-node-cap AlphaBeta opponent, its score is 65%, with a 95% opening-pair bootstrap interval of 50–80%. These findings support strong performance against the tested local baselines, while identifying a remaining gap to uttt.ai. They do not establish state-of-the-art strength, equal-compute superiority, or the causal benefit of individual components.
+We audit saved experiments rather than claim new experiments were conducted for this report. At iteration 4193, the agent obtains 97 wins, 14 draws, and 9 losses in its 120 games within a seven-player, 420-game round robin. Its score against the integrated uttt.ai stage-2 model at 128 simulations is 35%, despite using 512 simulations itself. In a separate 20-game comparison with a depth-10, 50-million-node-cap AlphaBeta opponent, its score is 65%, with a 95% opening-pair bootstrap interval of 50–80%. A later checkpoint, iteration 4530, was subsequently evaluated in a larger 8-entrant, 2,016-game championship (Section 8.4): it places second by score (85.8%) behind the integrated uttt.ai (91.3%), with a 9–41–22 record and a 41.0% pair-score against uttt.ai specifically; a follow-up 20-game check at 2,000 simulations against uttt.ai scores 40.0% and is too small to say whether the higher simulation budget changes anything. That championship ran concurrently with training under reduced CPU priority and used unequal per-entrant compute budgets throughout, so none of iteration 4530's numbers are directly comparable to iteration 4193's on either axis. Collectively, these findings support strong performance against the tested local baselines, while identifying a persistent gap to uttt.ai across both evaluated checkpoints. They do not establish state-of-the-art strength, equal-compute superiority, or the causal benefit of individual components.
 
 **Keywords:** Ultimate Tic-Tac-Toe; Monte Carlo tree search; policy–value network; population training; native search; reproducible evaluation.
 
 ## Reading guide
 
-Sections 1–3 explain the problem and prior work; Sections 4–6 describe the implementation; Sections 7–9 present evidence and limitations. Section 10 explains reproduction and maps the paper back to the repository. The companion [evidence guide](EVIDENCE.md) records data selection, provenance, figure generation, and image prompts. The existing [training guide](../training.md), [testing guide](../testing.md), and [engine guide](../../engines/README.md) remain the operational documentation.
+Sections 1–3 explain the problem and prior work; Sections 4–6 describe the implementation; Sections 7–9 present evidence and limitations. Section 8.4 adds the newer, separately-provenanced iteration-4530 evaluation next to the archived iteration-4193 results in Sections 8.1–8.3. Section 10 explains reproduction and maps the paper back to the repository. The companion [evidence guide](EVIDENCE.md) records data selection, provenance, figure generation, and image prompts, including a [dedicated provenance section](EVIDENCE.md#new-evidence-iteration-4530-evaluation) for the iteration-4530 evidence. The existing [training guide](../training.md), [testing guide](../testing.md), and [engine guide](../../engines/README.md) remain the operational documentation.
 
 ## 1. Introduction and problem statement
 
@@ -226,7 +226,7 @@ The generalized launchers freeze checkpoint inputs and take paths as arguments. 
 
 ### 7.1 Frozen artifacts
 
-The report uses two completed championships and two completed depth-10 match sets. Each championship contains seven entrants, 21 matchups, and 20 games per matchup, for 420 games total. Each candidate therefore plays 120 championship games. The depth-10 experiment adds 20 games per checkpoint and is **separate from** the round robin.
+The archived evidence in this section and in Sections 8.1–8.3 uses two completed championships and two completed depth-10 match sets, both against checkpoints at or before iteration 4193. Each championship contains seven entrants, 21 matchups, and 20 games per matchup, for 420 games total. Each candidate therefore plays 120 championship games. The depth-10 experiment adds 20 games per checkpoint and is **separate from** the round robin. A newer, separately provenanced championship and spot check against checkpoint iteration 4530 are described in Section 8.4 and are not part of the counts in this subsection.
 
 **Table 4. Evaluated checkpoint identity and settings.** Complete hashes and manifests are preserved in [the evidence snapshot](evidence/snapshot.json).
 
@@ -334,14 +334,55 @@ Against depth-10 AlphaBeta, the earlier candidate records 11 wins, 5 draws, and 
 
 Only the 512-simulation arm exists in these selected depth-10 artifacts. Although the harness supports multi-budget sweeps, we cannot draw a search-scaling curve or infer the benefit of 1,024 or 2,000 simulations from a one-arm experiment. The later sweep records 191.514 seconds for 20 games, approximately 9.576 seconds per game. This includes both agents and orchestration; it is not the U-Net's per-move inference latency.
 
+### 8.4 Iteration 4530 evaluation (new)
+
+After the archived evidence above was collected, checkpoint iteration 4530 was evaluated separately, on different hardware and under different conditions, in an enlarged 8-entrant round robin plus a small follow-up spot check. This subsection reports that evaluation on its own terms; it does not replace or get pooled with Sections 8.1–8.3, and its numbers should not be read as a controlled continuation of the iteration-1806/4193 comparison in Section 8.3. Full provenance, source paths, and hashes are in [EVIDENCE.md](EVIDENCE.md#new-evidence-iteration-4530-evaluation).
+
+The candidate is the same U-Net architecture, checkpoint SHA-256 prefix `cb04e705`, at 512 simulations. The roster grew to eight entrants by adding a `cpp-alphabeta-d10` (50-million-node cap) entrant alongside the six opponents used at 1806/4193. The round robin played 72 games per pairing (36 mirrored opening pairs, two-ply openings, seed 17092026) for 2,016 games total, so the candidate itself plays 504 games, not 120.
+
+![Complete eight-agent score matrix from the iteration-4530 championship.](figures/championship-matrix-iter4530.png)
+
+*Figure 10. Iteration-4530 round-robin score matrix, same construction as Figure 8 (row player's score against column player; diagonal undefined), generalized here to an eight-entrant roster.*
+
+![Bayesian-Elo ratings with 95% CI for the iteration-4530 championship.](figures/championship-ratings-iter4530.png)
+
+*Figure 11. Saved Bayesian-Elo ratings for the iteration-4530 championship, one point per entrant with its reported 95% CI. These are pool-relative ratings from this repository's rating implementation, anchored at AlphaBeta d4 = 1500, not an external or universal scale.*
+
+**Table 8. Candidate results at iteration 4530.** 72 games per opponent; score counts a draw as half a win. Intervals are report-derived opening-pair bootstrap estimates (seed 4243), not a multiple-comparison significance test.
+
+| Opponent | Wins | Draws | Losses | Score | 95% pair-bootstrap interval |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| AlphaBeta d10 | 46 | 11 | 15 | 71.5% | 63.9–79.2% |
+| AlphaBeta d6 | 63 | 5 | 4 | 91.0% | 85.4–95.8% |
+| AlphaBeta d4 | 70 | 1 | 1 | 97.9% | 94.4–100% |
+| Tactical | 71 | 1 | 0 | 99.3% | 97.9–100% |
+| Threat-block | 72 | 0 | 0 | 100.0% | 100–100%* |
+| OpenSpiel MCTS, 100/decision | 72 | 0 | 0 | 100.0% | 100–100%* |
+| uttt.ai stage 2, 128/move | 9 | 41 | 22 | 41.0% | 35.4–46.5% |
+| **All candidate championship games** | **403** | **59** | **42** | **85.8%** | Not pooled across heterogeneous opponents |
+
+*The degenerate intervals reflect identical scores in the observed sample, not zero uncertainty about future openings.*
+
+By the saved leaderboard, the integrated uttt.ai finishes first (91.3% score, Bayesian Elo 2303.0), the candidate second (85.8% score, Elo 2201.0), and AlphaBeta d10 third (71.2% score, Elo 1959.5). As at iteration 4193, the candidate dominates the shallower classical and rollout baselines but does not close the gap to uttt.ai; its pair-score against uttt.ai specifically is 41.0% (95% CI 35.4–46.5%), close to but not directly comparable with the 4193 championship's 35.0% given the different roster, opening corpus, and hardware conditions described below.
+
+A follow-up 20-game check ran the same iteration-4530 checkpoint against `utttai-128` at 2,000 simulations instead of 512 (seed 17098026): 4 wins, 8 draws, 8 losses, a 40.0% score (95% pair-bootstrap CI 25.0–55.0%, ten opening pairs). This is not a controlled comparison against the 512-simulation result above — see caveat 3 below.
+
+This subsection's evidence carries caveats that do not apply to Sections 8.1–8.3:
+
+1. **Not equal-time or equal-compute.** Neither the championship nor the spot check equalizes wall-clock time or hardware cost across entrants; fixed simulation/depth/node budgets are reported as configured, not as matched computation.
+2. **Concurrent with training.** The championship ran under reduced CPU priority (`nice -n 10`) on the same remote host as an active training job, not on isolated hardware, so its timing reflects that contention.
+3. **The 2,000-simulation spot check is underpowered for a budget comparison.** Twenty games is too small a sample to conclude that 2,000 simulations are no stronger than 512; its 40.0% score must not be read against the championship's 41.0% candidate-vs-uttt.ai pair-score as though the two experiments were a matched pair — they differ in opening corpus, sample size, and concurrent load.
+4. **A single integration's result, not a field-wide claim.** uttt.ai finishing ahead of the candidate in this pool means this specific integration, at this budget, scored higher here; it is not evidence that uttt.ai is the strongest Ultimate Tic-Tac-Toe engine that exists.
+5. **No full move sequences.** The saved game records for this evaluation preserve openings, seat assignments, and outcomes, not complete move-by-move trajectories.
+
 ## 9. Discussion, limitations, and future experiments
 
-The strongest supported conclusion is that the implemented system trains and evaluates a competitive local agent, with good results against the selected non-neural baselines and a measurable remaining gap to the integrated uttt.ai model. The evidence is narrower than a claim that any one architectural component is responsible.
+The strongest supported conclusion is that the implemented system trains and evaluates a competitive local agent, with good results against the selected non-neural baselines and a measurable remaining gap to the integrated uttt.ai model. This pattern holds across both evaluated checkpoints reported here, the archived iteration 4193 (Section 8.2) and the newer iteration 4530 (Section 8.4), under two evaluation setups that differ in roster size, opening corpus, and hardware conditions; it is not evidence of a trend fit across those two points. The evidence is narrower than a claim that any one architectural component is responsible.
 
 The present study has the following limitations:
 
-1. **Small samples and repeated openings.** Ten opening pairs per matchup provide limited coverage. The same corpus can be overused during development. Future evaluations need larger, held-out opening sets and multiple seeds.
-2. **Unequal compute.** Neural MCTS, rollout MCTS, and AlphaBeta have different costs. Equal simulation counts are not equal computation; here the counts are not even equal. A separate wall-time-controlled study is needed.
+1. **Small samples and repeated openings.** Ten opening pairs per matchup provide limited coverage in the archived 4193 evaluation and in the iteration-4530 spot check; the iteration-4530 championship itself uses a larger 36-pair corpus per matchup but still one fixed corpus. The same corpora can be overused during development. Future evaluations need larger, held-out opening sets and multiple seeds.
+2. **Unequal compute.** Neural MCTS, rollout MCTS, and AlphaBeta have different costs. Equal simulation counts are not equal computation; here the counts are not even equal, and the iteration-4530 championship additionally ran concurrently with an active training job under reduced CPU priority, adding further timing noise. A separate wall-time-controlled study is needed.
 3. **Training overlap with evaluation families.** uttt.ai, OpenSpiel, and AlphaBeta appear in the curriculum. The results do not measure transfer to wholly unseen opponent families.
 4. **No controlled ablations.** We do not know the isolated contribution of Q regression, GroupNorm, residual depth, population quotas, proof propagation, subtree reuse, or bootstrap initialization.
 5. **Historical provenance gaps.** Checkpoint hashes are preserved, but exact historical dependency versions, all entrant defaults, complete hardware identity, and early training lineage are not fully attested. Current code inspection is not proof of byte-identical historical execution.
@@ -418,11 +459,11 @@ scripts/evaluate.sh \
 
 ### 10.3 Verification performed for this report
 
-The report-generation workflow checks every preserved championship matchup against its raw game rows, compares row totals with the saved ratings, verifies two games per opening pair, and reproduces both saved depth-10 bootstrap intervals. Figures are rendered from those validated records and inspected for readability. Local Markdown links and figure references are checked before handoff. These checks validate the reporting pipeline; they are not a new certification of the full training or external-engine stack.
+The report-generation workflow checks every preserved championship matchup against its raw game rows, compares row totals with the saved ratings, verifies two games per opening pair, and reproduces both saved depth-10 bootstrap intervals. Figures are rendered from those validated records and inspected for readability. Local Markdown links and figure references are checked before handoff. These checks validate the reporting pipeline; they are not a new certification of the full training or external-engine stack. The same checks were re-run after adding the iteration-4530 evidence in Section 8.4, confirming that the archived iteration-1806/4193 data was carried forward unchanged (see [EVIDENCE.md](EVIDENCE.md#integrity-checks-and-uncertainty)).
 
 ## 11. Conclusion
 
-The repository implements a complete experimental pipeline for hierarchical neural search in Ultimate Tic-Tac-Toe: exact rules, compact native search, policy/value/Q learning, population game generation, resumable training, and paired evaluation. Its saved results show strong local baseline performance, while uttt.ai remains the strongest tested championship entrant. The main research opportunity is now controlled measurement: broader held-out evaluation, equal-time comparisons, stronger provenance, and ablations that determine which components produce reliable gains.
+The repository implements a complete experimental pipeline for hierarchical neural search in Ultimate Tic-Tac-Toe: exact rules, compact native search, policy/value/Q learning, population game generation, resumable training, and paired evaluation. Its saved results, at both the archived iteration 4193 and the newer iteration 4530, show strong local baseline performance while uttt.ai remains the strongest tested championship entrant in every evaluated pool; the iteration-4530 championship additionally ran under unequal, concurrently-loaded compute, so it sharpens the qualitative picture without licensing a stronger quantitative claim than the archived evidence already supported. The main research opportunity is now controlled measurement: broader held-out evaluation, equal-time comparisons, stronger provenance, and ablations that determine which components produce reliable gains.
 
 ## References
 

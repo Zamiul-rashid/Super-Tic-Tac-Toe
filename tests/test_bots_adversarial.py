@@ -59,13 +59,12 @@ class AdversarialExternalProcessBotTests(unittest.TestCase):
         finally:
             bot.close()
 
-    def test_timeout_hard_ceiling_cap_5s(self):
-        """Timeout argument > 5.0s (e.g. 10.0s) must be clamped to 5.0s."""
+    def test_configured_timeout_is_honored(self):
+        """A 30s budget must stay 30s; a hidden cap once killed a training run."""
         script = self._write_script("sleep10.py", "import time\ntime.sleep(10.0)\n")
-        bot = ExternalProcessBot([sys.executable, "-u", script], timeout=10.0)
+        bot = ExternalProcessBot([sys.executable, "-u", script], timeout=30.0)
         try:
-            self.assertLessEqual(bot.timeout, 5.0)
-            self.assertEqual(bot.timeout, 5.0)
+            self.assertEqual(bot.timeout, 30.0)
         finally:
             bot.close()
 

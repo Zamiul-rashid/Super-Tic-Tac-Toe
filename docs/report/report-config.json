@@ -17,5 +17,19 @@
       "championship": "runs/unet-pipeline-resume-20260916/championship-full-iter4193/championship",
       "sweep": "runs/unet-pipeline-resume-20260916/championship-full-iter4193/budget_sweep"
     }
+  ],
+  "championships": [
+    {
+      "label": "Iteration 4530 (new)",
+      "key": "iter4530",
+      "championship": "docs/report/evidence/iter4530-championship"
+    }
+  ],
+  "spot_checks": [
+    {
+      "label": "Iteration 4530 vs uttt.ai-128, 2000 simulations (new)",
+      "key": "iter4530-s2000-utttai128",
+      "championship": "docs/report/evidence/iter4530-s2000-utttai128"
+    }
   ]
 }

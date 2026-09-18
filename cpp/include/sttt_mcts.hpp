@@ -505,7 +505,8 @@ public:
                 MCTSNode& leaf_node = arena[leaf];
                 if (leaf_node.state.is_terminal() || (use_proofs() && leaf_node.solved != RESULT_ONGOING)) {
                     backup(path, static_cast<float>(leaf_node.solved));
-                    if (use_proofs() && arena[root_idx].solved != RESULT_ONGOING) {
+                    // Pending branches are blocked: flush rather than re-select this known leaf.
+                    if (!pending_paths.empty() || (use_proofs() && arena[root_idx].solved != RESULT_ONGOING)) {
                         break;
                     }
                 } else {

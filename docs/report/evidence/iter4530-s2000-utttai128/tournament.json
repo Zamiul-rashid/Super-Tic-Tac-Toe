@@ -1,0 +1,67 @@
+{
+  "participants": [
+    "ckpt-iter4530-cb04e705-s2000",
+    "utttai-128"
+  ],
+  "games_per_matchup": 20,
+  "total_games": 20,
+  "elapsed_seconds": 481.52,
+  "side_stats": {
+    "x_wins": 6,
+    "o_wins": 6,
+    "draws": 8,
+    "total_games": 20,
+    "x_win_rate": 0.3,
+    "o_win_rate": 0.3,
+    "draw_rate": 0.4
+  },
+  "anchor": "cpp-alphabeta-d4",
+  "ratings": {
+    "ckpt-iter4530-cb04e705-s2000": {
+      "elo": 1443.08,
+      "elo_ci95": 98.79,
+      "glicko2": 1406.43,
+      "glicko2_rd": 110.21,
+      "wins": 4,
+      "draws": 8,
+      "losses": 8,
+      "games": 20
+    },
+    "utttai-128": {
+      "elo": 1556.92,
+      "elo_ci95": 98.79,
+      "glicko2": 1593.57,
+      "glicko2_rd": 110.21,
+      "wins": 8,
+      "draws": 8,
+      "losses": 4,
+      "games": 20
+    }
+  },
+  "matrix": {
+    "ckpt-iter4530-cb04e705-s2000": {
+      "ckpt-iter4530-cb04e705-s2000": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      "utttai-128": {
+        "wins": 4,
+        "draws": 8,
+        "losses": 8
+      }
+    },
+    "utttai-128": {
+      "ckpt-iter4530-cb04e705-s2000": {
+        "wins": 8,
+        "draws": 8,
+        "losses": 4
+      },
+      "utttai-128": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      }
+    }
+  }
+}

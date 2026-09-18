@@ -401,11 +401,9 @@ class ExternalProcessBot(Bot):
         self.cmd = shlex.split(command) if isinstance(command, str) else list(command)
         if not self.cmd:
             raise ValueError("Command cannot be empty")
-        # External engines such as uttt.ai can legitimately need several
-        # seconds for a move when multiple training workers are active. Keep
-        # a finite safety cap, but do not turn the configured 30s budget into
-        # an accidental 5s budget.
-        self.timeout = max(0.001, min(float(timeout), 20.0))
+        # Honor the configured budget: a hidden 20s cap once turned a 30s
+        # uttt.ai budget into a run-ending timeout under CPU contention.
+        self.timeout = max(0.001, float(timeout))
         self.protocol = protocol
         self.fallback = fallback
         self.auto_restart = auto_restart

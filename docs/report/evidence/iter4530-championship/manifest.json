@@ -1,0 +1,290 @@
+{
+  "schema_version": 1,
+  "kind": "grand-championship",
+  "run_id": "64748eb2b94f4be283f1ced0cdc77ddd",
+  "created_at": "2026-09-17T02:51:35.449406+00:00",
+  "status": "completed",
+  "checkpoints": {
+    "candidate": {
+      "path": "/home/entropy/Code/Super-Tic-Tac-Toe/runs/report-championship-2016-20260917/championship/evaluation-inputs/candidate/latest.pt",
+      "sha256": "cb04e705a015be6fc1e3c244ffd4f0f23dc277fa99fb2798bfcc104a3f671c6d",
+      "sha8": "cb04e705",
+      "iteration": 4530,
+      "arch": "unet"
+    }
+  },
+  "config": {
+    "games_per_matchup": 72,
+    "simulations": 512,
+    "opening_plies": 2,
+    "backend": "cpp",
+    "device": "cpu",
+    "leaf_batch": 16,
+    "anchor": "cpp-alphabeta-d4",
+    "checkpoint_source": "runs/unet-pipeline-phase2/latest.pt",
+    "opponent_specs": [
+      "cpp-alphabeta:10:50000000",
+      "cpp-alphabeta:6:50000000",
+      "cpp-alphabeta:4:50000000",
+      "tactical",
+      "threat-block",
+      "openspiel-mcts:100",
+      "utttai:128"
+    ],
+    "equal_time_comparison": false,
+    "resolved_entrants": {
+      "ckpt-iter4530-cb04e705-s512": {
+        "spec": "/home/entropy/Code/Super-Tic-Tac-Toe/runs/report-championship-2016-20260917/championship/evaluation-inputs/candidate/latest.pt",
+        "type": "CheckpointBot",
+        "simulations": 512,
+        "leaf_batch": 16,
+        "device": "cpu",
+        "backend_info": {
+          "requested": "cpp",
+          "actual": "cpp",
+          "version": "20260916222904_f770ec7",
+          "fallback_reason": null,
+          "cpp_available": true
+        }
+      },
+      "cpp-alphabeta-d10": {
+        "spec": "cpp-alphabeta:10:50000000",
+        "type": "CppAlphaBetaBot",
+        "depth": 10,
+        "node_budget": 50000000
+      },
+      "cpp-alphabeta-d6": {
+        "spec": "cpp-alphabeta:6:50000000",
+        "type": "CppAlphaBetaBot",
+        "depth": 6,
+        "node_budget": 50000000
+      },
+      "cpp-alphabeta-d4": {
+        "spec": "cpp-alphabeta:4:50000000",
+        "type": "CppAlphaBetaBot",
+        "depth": 4,
+        "node_budget": 50000000
+      },
+      "tactical": {
+        "spec": "tactical",
+        "type": "TacticalBot",
+        "depth": 2,
+        "node_budget": 10000
+      },
+      "threat-block": {
+        "spec": "threat-block",
+        "type": "ThreatBlockBot",
+        "node_budget": 12000
+      },
+      "openspiel-mcts-100": {
+        "spec": "openspiel-mcts:100",
+        "type": "OpenSpielBot",
+        "simulations": 100,
+        "uct_c": 1.414,
+        "seed": null
+      },
+      "utttai-128": {
+        "spec": "utttai:128",
+        "type": "ExternalProcessBot",
+        "protocol": "state_json",
+        "timeout": 5.0
+      }
+    }
+  },
+  "seeds": {
+    "openings": 17092026
+  },
+  "argv": [
+    "scripts/evaluation_suite.py",
+    "--checkpoint",
+    "runs/unet-pipeline-phase2/latest.pt",
+    "--output",
+    "runs/report-championship-2016-20260917",
+    "--championship-games",
+    "72",
+    "--simulations",
+    "512",
+    "--budgets",
+    "512",
+    "1024",
+    "2000",
+    "--games",
+    "20",
+    "--opponent-depth",
+    "10",
+    "--opponent-nodes",
+    "50000000",
+    "--backend",
+    "cpp",
+    "--device",
+    "cpu",
+    "--leaf-batch",
+    "16",
+    "--seed",
+    "17092026",
+    "--skip-sweep",
+    "--championship-opponents",
+    "cpp-alphabeta:10:50000000",
+    "cpp-alphabeta:6:50000000",
+    "cpp-alphabeta:4:50000000",
+    "tactical",
+    "threat-block",
+    "openspiel-mcts:100",
+    "utttai:128"
+  ],
+  "environment": {
+    "python": "3.14.6",
+    "executable": "/home/entropy/miniconda3/envs/sttt/bin/python",
+    "torch": "2.14.0+cu130",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "native": {
+      "available": true,
+      "path": "/home/entropy/Code/Super-Tic-Tac-Toe/sttt_cpp.cpython-314-x86_64-linux-gnu.so",
+      "version": "0.9.0",
+      "build_id": "20260916222904_f770ec7",
+      "source_revision": "f770ec7"
+    },
+    "torch_threads": 1,
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+    "machine": "x86_64",
+    "packages": {
+      "numpy": "2.5.3",
+      "open-spiel": "2.0.2",
+      "onnxruntime": "1.30.0"
+    }
+  },
+  "source_sha256": {
+    "scripts/evaluation_suite.py": "e220542f3c5710aeb9caa0eb60e6c817b74b8254696f3203ed4e0483d26b1da9",
+    "sttt/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sttt/__main__.py": "08ae9b458fa4d97d72ded4e063a4ec89ebe49a5f95a2e8e541bb8f5b033005b7",
+    "sttt/ai.py": "3247b4934cb8ebca9045b40f8421622633be018c5dc9362f1f9d86de18ba0f39",
+    "sttt/backends.py": "aef1d501284882ac51e1d35c8af3b1d416bd108df5210f9be9ff7b22e6c4e45c",
+    "sttt/bootstrap.py": "0b9a95be79bc2bfc5fec572f0b04080b409be7ab0649f639f34cea852b85f0ae",
+    "sttt/bots.py": "aff7592fb6bd8d975785e9cc3ce3fd84c5a479baba4aa33c23c16f737e723db7",
+    "sttt/cpp_env.py": "c2a058114ff323698283faeb9dd30f8080200dedbfd1b0bda1c8543ae0e5da15",
+    "sttt/engine_registry.py": "b8331d9989513af8af66b3cf502ace26fd0292cd8d5ee1c02746ce738ae214b2",
+    "sttt/engine_runtime.py": "36fa09fbd01f033dfa60ba0426986e93354394349760a597a47464dbab97a5b4",
+    "sttt/env.py": "cd396a49eb1ead325b414b546a81430e2542ae5bf5b248b61961a9016706dc8c",
+    "sttt/evaluation.py": "36edf9c30f83a82895c9851ac5a7b3f097970c07d6ad8252f77cb6acaf0bf053",
+    "sttt/learning.py": "a6bf6736703761106dd89679d21f3bb11f70fcfeaa52ad0fa6d932e58af9813d",
+    "sttt/opponent.py": "928fad06e013594855567045cc9fc10dbac83e76a1befc02eb3d3ae5fb74dbc7",
+    "sttt/population.py": "4e9386c003991e924b7d295606fba60ee26199375fab1e96ec18f7d7cc4fb6f3",
+    "sttt/replay_sampling.py": "1bcbf4df0511fe64b9aa277f09e35c2529359afa7522af260c695ef0b7b05942",
+    "sttt/reports.py": "69b26527a41bf85485aa2602ed7d3859743be1a4b2d59c643625a80e68945302",
+    "sttt/search.py": "fe30e40a6bddc2906eb518bab55a4bf2f7376f009174316b27830c3c6c855b9c",
+    "sttt/selfplay.py": "95993ab854f96f29d54d97001e62e82ec538cb54129c9b7a1e98a28aa26a2f13",
+    "sttt/tournament.py": "674b755efd77f3242f258965ebd3f601126e1e46c452eab0ff248607533d5fe3",
+    "sttt/training_schedule.py": "7b92d6ce741deea5b53d2882c6690f69663c7e1b65f6a54d5fd59ce566cd0a0d",
+    "sttt/unet.py": "4e8f796fb58fdc93875f65518fecaf5a181ceec8bfb544d7a8b9fc6e70b398a1",
+    "sttt/utttai_wrapper.py": "93891975612aa1196344bf0b68102985150b37d20edf13e3cd2ab4e1cbfbf229",
+    "sttt/visualize.py": "8c299b552a2ddf4dafb4bcbd8a37669aefb664c554f4605e8f29c5f91258c554"
+  },
+  "summary": {
+    "participants": [
+      "ckpt-iter4530-cb04e705-s512",
+      "cpp-alphabeta-d10",
+      "cpp-alphabeta-d6",
+      "cpp-alphabeta-d4",
+      "tactical",
+      "threat-block",
+      "openspiel-mcts-100",
+      "utttai-128"
+    ],
+    "games_per_matchup": 72,
+    "total_games": 2016,
+    "elapsed_seconds": 11019.92,
+    "side_stats": {
+      "x_wins": 910,
+      "o_wins": 875,
+      "draws": 231,
+      "total_games": 2016,
+      "x_win_rate": 0.4513888888888889,
+      "o_win_rate": 0.4340277777777778,
+      "draw_rate": 0.11458333333333333
+    },
+    "anchor": "cpp-alphabeta-d4",
+    "ratings": {
+      "ckpt-iter4530-cb04e705-s512": {
+        "elo": 2201.03,
+        "elo_ci95": 60.97,
+        "glicko2": 1870.33,
+        "glicko2_rd": 23.08,
+        "wins": 403,
+        "draws": 59,
+        "losses": 42,
+        "games": 504
+      },
+      "cpp-alphabeta-d10": {
+        "elo": 1959.51,
+        "elo_ci95": 51.95,
+        "glicko2": 1719.53,
+        "glicko2_rd": 23.08,
+        "wins": 332,
+        "draws": 54,
+        "losses": 118,
+        "games": 504
+      },
+      "cpp-alphabeta-d6": {
+        "elo": 1716.42,
+        "elo_ci95": 47.29,
+        "glicko2": 1558.47,
+        "glicko2_rd": 23.08,
+        "wins": 249,
+        "draws": 63,
+        "losses": 192,
+        "games": 504
+      },
+      "cpp-alphabeta-d4": {
+        "elo": 1500.0,
+        "elo_ci95": 46.77,
+        "glicko2": 1405.62,
+        "glicko2_rd": 23.08,
+        "wins": 177,
+        "draws": 58,
+        "losses": 269,
+        "games": 504
+      },
+      "tactical": {
+        "elo": 1297.12,
+        "elo_ci95": 49.62,
+        "glicko2": 1253.8,
+        "glicko2_rd": 23.08,
+        "wins": 106,
+        "draws": 52,
+        "losses": 346,
+        "games": 504
+      },
+      "threat-block": {
+        "elo": 1092.64,
+        "elo_ci95": 56.97,
+        "glicko2": 1109.15,
+        "glicko2_rd": 23.08,
+        "wins": 25,
+        "draws": 73,
+        "losses": 406,
+        "games": 504
+      },
+      "openspiel-mcts-100": {
+        "elo": 1163.55,
+        "elo_ci95": 53.7,
+        "glicko2": 1156.34,
+        "glicko2_rd": 23.08,
+        "wins": 60,
+        "draws": 49,
+        "losses": 395,
+        "games": 504
+      },
+      "utttai-128": {
+        "elo": 2303.0,
+        "elo_ci95": 66.71,
+        "glicko2": 1926.75,
+        "glicko2_rd": 23.08,
+        "wins": 433,
+        "draws": 54,
+        "losses": 17,
+        "games": 504
+      }
+    }
+  }
+}

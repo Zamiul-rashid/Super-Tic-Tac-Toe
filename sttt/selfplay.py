@@ -6,6 +6,7 @@ services inference requests while games run, then trains only after all finish.
 import multiprocessing as mp
 from multiprocessing.connection import wait
 import time
+import sys
 import traceback
 from dataclasses import asdict
 import os
@@ -138,7 +139,13 @@ def _worker(connection):
                 }))
                 continue
             _, index, simulations, seed, config, leaf_batch, match, use_cpp = message
-            trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch, match, use_cpp=use_cpp)
+            try:
+                trajectory, outcome, stats = play_game(evaluator, simulations, seed, config, leaf_batch, match, use_cpp=use_cpp)
+            except Exception:
+                # Per-game failure (e.g. an external engine timeout): report it
+                # and stay alive so the pool can retry this one game.
+                connection.send(('game_error', index, traceback.format_exc()))
+                continue
             connection.send(('game', index, trajectory, outcome, stats))
     except (EOFError, BrokenPipeError):
         pass
@@ -152,10 +159,11 @@ def _worker(connection):
 
 
 class SelfPlayPool:
-    def __init__(self, workers, batch_size=128, wait_ms=2., timeout=120):
-        if workers < 1 or batch_size < 1 or wait_ms < 0:
+    def __init__(self, workers, batch_size=128, wait_ms=2., timeout=120, game_retries=1):
+        if workers < 1 or batch_size < 1 or wait_ms < 0 or game_retries < 0:
             raise ValueError('Invalid inference pool configuration')
         self.batch_size, self.wait_ms, self.timeout = batch_size, wait_ms, timeout
+        self.game_retries = game_retries
         self.connections, self.processes = [], []
         self.worker_capabilities = None
         ctx = mp.get_context('spawn')
@@ -237,17 +245,23 @@ class SelfPlayPool:
         if getattr(self, 'worker_capabilities', None) is None:
             self.verify_backend(use_cpp)
         results, active = {}, set()
-        next_game = 0
+        next_game, retry, attempts = 0, [], {}
         metrics = dict(inference_batches=0, inference_positions=0, max_inference_batch=0,
-                       inference_seconds=0.)
+                       inference_seconds=0., game_retries=0)
 
         def dispatch(connection):
             nonlocal next_game
-            if next_game < len(seeds):
-                match = matches[next_game] if matches is not None else None
-                connection.send(('start', next_game, simulations, int(seeds[next_game]), config, leaf_batch, match, use_cpp))
-                next_game += 1
-                active.add(connection)
+            if retry:
+                index = retry.pop()
+            elif next_game < len(seeds):
+                index, next_game = next_game, next_game + 1
+            else:
+                return
+            match = matches[index] if matches is not None else None
+            # A retry gets a derived seed so it is not a replay of the failure.
+            seed = int(seeds[index]) + 7919 * attempts.get(index, 0)
+            connection.send(('start', index, simulations, seed, config, leaf_batch, match, use_cpp))
+            active.add(connection)
 
         for connection in self.connections:
             dispatch(connection)
@@ -265,6 +279,19 @@ class SelfPlayPool:
                         raise RuntimeError('Self-play worker exited unexpectedly') from error
                     if message[0] == 'error':
                         raise RuntimeError('Self-play worker failed:\n' + message[1])
+                    if message[0] == 'game_error':
+                        _, index, trace = message
+                        attempts[index] = attempts.get(index, 0) + 1
+                        if attempts[index] > self.game_retries:
+                            raise RuntimeError(f'Self-play game {index} failed {attempts[index]} times:\n' + trace)
+                        print(f'WARNING: self-play game {index} failed '
+                              f'(attempt {attempts[index]}/{self.game_retries + 1}); retrying:\n{trace}',
+                              file=sys.stderr, flush=True)
+                        metrics['game_retries'] += 1
+                        retry.append(index)
+                        active.remove(connection)
+                        dispatch(connection)
+                        continue
                     if message[0] == 'game':
                         _, index, trajectory, outcome, stats = message
                         results[index] = (trajectory, outcome, stats)

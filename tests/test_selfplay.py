@@ -33,6 +33,25 @@ class SelfPlayTests(unittest.TestCase):
                 pool.run(Network().eval(),[0],0,SearchConfig(),4)
         self.assertTrue(all(not p.is_alive() for p in pool.processes))
 
+    def test_failed_game_is_retried_once_then_succeeds(self):
+        import os, sys, tempfile
+        from sttt.population import MatchSpec
+        marker = os.path.join(tempfile.mkdtemp(), 'crashed')
+        # Dies on its first move request ever, then plays the first legal move.
+        engine = ("import os,sys\n"
+                  f"m={marker!r}\n"
+                  "while True:\n"
+                  " sys.stdin.readline(); n=int(sys.stdin.readline())\n"
+                  " legal=[sys.stdin.readline().strip() for _ in range(n)]\n"
+                  " if not os.path.exists(m): open(m,'w').close(); sys.exit(1)\n"
+                  " print(legal[0], flush=True)\n")
+        match = MatchSpec(kind='utttai', learner_side=1, engine_command=(sys.executable, '-c', engine),
+                          engine_timeout=10.)
+        with SelfPlayPool(1, batch_size=4) as pool:
+            results, stats = pool.run(Network().eval(), [5], 4, SearchConfig(), 2, matches=[match])
+        self.assertEqual(stats['game_retries'], 1)
+        self.assertIn(results[0][1], (-1, 0, 1))
+
 
 if __name__ == '__main__':
     unittest.main()

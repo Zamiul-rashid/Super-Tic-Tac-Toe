@@ -1,0 +1,21 @@
+game_id,pair_id,opening_plies,opening_moves,player_x,player_o,winner,moves
+0,0,2,9 5,ckpt-iter4530-cb04e705-s2000,utttai-128,-1,56
+1,0,2,9 5,utttai-128,ckpt-iter4530-cb04e705-s2000,1,51
+2,1,2,80 76,ckpt-iter4530-cb04e705-s2000,utttai-128,1,53
+3,1,2,80 76,utttai-128,ckpt-iter4530-cb04e705-s2000,0,55
+4,2,2,63 3,ckpt-iter4530-cb04e705-s2000,utttai-128,0,56
+5,2,2,63 3,utttai-128,ckpt-iter4530-cb04e705-s2000,1,51
+6,3,2,75 34,ckpt-iter4530-cb04e705-s2000,utttai-128,-1,42
+7,3,2,75 34,utttai-128,ckpt-iter4530-cb04e705-s2000,0,51
+8,4,2,45 4,ckpt-iter4530-cb04e705-s2000,utttai-128,0,57
+9,4,2,45 4,utttai-128,ckpt-iter4530-cb04e705-s2000,1,53
+10,5,2,3 33,ckpt-iter4530-cb04e705-s2000,utttai-128,1,53
+11,5,2,3 33,utttai-128,ckpt-iter4530-cb04e705-s2000,0,49
+12,6,2,71 80,ckpt-iter4530-cb04e705-s2000,utttai-128,-1,52
+13,6,2,71 80,utttai-128,ckpt-iter4530-cb04e705-s2000,-1,46
+14,7,2,26 80,ckpt-iter4530-cb04e705-s2000,utttai-128,-1,54
+15,7,2,26 80,utttai-128,ckpt-iter4530-cb04e705-s2000,0,55
+16,8,2,22 40,ckpt-iter4530-cb04e705-s2000,utttai-128,0,53
+17,8,2,22 40,utttai-128,ckpt-iter4530-cb04e705-s2000,1,53
+18,9,2,41 51,ckpt-iter4530-cb04e705-s2000,utttai-128,0,54
+19,9,2,41 51,utttai-128,ckpt-iter4530-cb04e705-s2000,-1,46

@@ -192,7 +192,10 @@ class TreeSearch:
                 leaf = path[-1]
                 if leaf.state.result is not None or (self.use_proofs and leaf.solved is not None):
                     self._backup(path, leaf.solved)
-                    if self.use_proofs and self.root.solved is not None:
+                    # With evaluations outstanding, the pending branches are
+                    # blocked, so selection would return to this same known leaf
+                    # and spend the whole budget on it. Flush the batch instead.
+                    if pending or (self.use_proofs and self.root.solved is not None):
                         break
                 else:
                     leaf.pending = True

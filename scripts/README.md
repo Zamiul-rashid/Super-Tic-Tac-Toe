@@ -85,3 +85,14 @@ To collect evidence from other run paths, edit a copy of
 `docs/report/report-config.json` and pass it with `--config` instead of
 `--snapshot`. Use the same renderer for different runs rather than creating a
 new report script. See [the evidence guide](../docs/report/EVIDENCE.md).
+
+## Search diagnostics
+
+`search_diagnostics.py` records root policy, visits, Q, model value, simulation
+and evaluation counts, and timing for one checkpoint on fixed tactical and
+opening positions, for both search backends:
+
+```bash
+python scripts/search_diagnostics.py --checkpoint runs/current/latest.pt \
+  --output runs/current/search-diagnostics.json --budgets 128 512 2000 --leaf-batch 1 16
+```

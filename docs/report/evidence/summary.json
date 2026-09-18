@@ -162,5 +162,103 @@
         }
       }
     }
+  ],
+  "championships": [
+    {
+      "label": "Iteration 4530 (new)",
+      "key": "iter4530",
+      "candidate": "ckpt-iter4530-cb04e705-s512",
+      "matchups": {
+        "cpp-alphabeta-d10": {
+          "wins": 46,
+          "draws": 11,
+          "losses": 15,
+          "score": 0.7152777777777778,
+          "pair_bootstrap_ci95": [
+            0.6388888888888888,
+            0.7916666666666666
+          ]
+        },
+        "cpp-alphabeta-d6": {
+          "wins": 63,
+          "draws": 5,
+          "losses": 4,
+          "score": 0.9097222222222222,
+          "pair_bootstrap_ci95": [
+            0.8541666666666666,
+            0.9583333333333334
+          ]
+        },
+        "cpp-alphabeta-d4": {
+          "wins": 70,
+          "draws": 1,
+          "losses": 1,
+          "score": 0.9791666666666666,
+          "pair_bootstrap_ci95": [
+            0.9444444444444444,
+            1.0
+          ]
+        },
+        "tactical": {
+          "wins": 71,
+          "draws": 1,
+          "losses": 0,
+          "score": 0.9930555555555556,
+          "pair_bootstrap_ci95": [
+            0.9791666666666666,
+            1.0
+          ]
+        },
+        "threat-block": {
+          "wins": 72,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "openspiel-mcts-100": {
+          "wins": 72,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "utttai-128": {
+          "wins": 9,
+          "draws": 41,
+          "losses": 22,
+          "score": 0.4097222222222222,
+          "pair_bootstrap_ci95": [
+            0.3541666666666667,
+            0.4652777777777778
+          ]
+        }
+      }
+    }
+  ],
+  "spot_checks": [
+    {
+      "label": "Iteration 4530 vs uttt.ai-128, 2000 simulations (new)",
+      "key": "iter4530-s2000-utttai128",
+      "candidate": "ckpt-iter4530-cb04e705-s2000",
+      "matchups": {
+        "utttai-128": {
+          "wins": 4,
+          "draws": 8,
+          "losses": 8,
+          "score": 0.4,
+          "pair_bootstrap_ci95": [
+            0.25,
+            0.55
+          ]
+        }
+      }
+    }
   ]
 }

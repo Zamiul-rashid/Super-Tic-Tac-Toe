@@ -697,7 +697,9 @@ static PyObject* PyFastTreeSearch_run_impl(PyFastTreeSearch* self, PyObject* arg
                 MCTSNode& leaf_node = engine->arena[leaf];
                 if (leaf_node.state.is_terminal() || (engine->use_proofs() && leaf_node.solved != RESULT_ONGOING)) {
                     engine->backup(path, static_cast<float>(leaf_node.solved));
-                    if (engine->use_proofs() && engine->arena[engine->root_idx].solved != RESULT_ONGOING) break;
+                    // Pending branches are blocked: flush rather than re-select this known leaf.
+                    if (!pending.empty() ||
+                        (engine->use_proofs() && engine->arena[engine->root_idx].solved != RESULT_ONGOING)) break;
                 } else {
                     leaf_node.pending = true;
                     for (int32_t idx : path) engine->arena[idx].in_flight += 1;
@@ -740,7 +742,9 @@ static PyObject* PyFastTreeSearch_run_impl(PyFastTreeSearch* self, PyObject* arg
                 MCTSNode& leaf_node = engine->arena[leaf];
                 if (leaf_node.state.is_terminal() || (engine->use_proofs() && leaf_node.solved != RESULT_ONGOING)) {
                     engine->backup(path, static_cast<float>(leaf_node.solved));
-                    if (engine->use_proofs() && engine->arena[engine->root_idx].solved != RESULT_ONGOING) break;
+                    // Pending branches are blocked: flush rather than re-select this known leaf.
+                    if (!pending.empty() ||
+                        (engine->use_proofs() && engine->arena[engine->root_idx].solved != RESULT_ONGOING)) break;
                 } else {
                     leaf_node.pending = true;
                     for (int32_t idx : path) engine->arena[idx].in_flight += 1;

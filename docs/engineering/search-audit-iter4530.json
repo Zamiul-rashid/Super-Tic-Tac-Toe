@@ -1,0 +1,9854 @@
+{
+ "checkpoint": "/tmp/claude-1000/-home-mt-Zami-Super-Tic-Tac-Toe/92191f58-bd66-4c5a-8167-fcc74627b753/scratchpad/iter4530.pt",
+ "iteration": 4530,
+ "checkpoint_sha256": "cb04e705a015be6fc1e3c244ffd4f0f23dc277fa99fb2798bfcc104a3f671c6d",
+ "native": {
+  "available": true,
+  "version": "0.9.0",
+  "build_id": "20260918080519_b221f8b",
+  "source_revision": "b221f8b",
+  "compiler_flags": "-O3 -march=native -Wall -Wextra -Werror -std=c++17 -fPIC -pthread -I./include",
+  "binary_path": "/home/mt/Zami/Super-Tic-Tac-Toe/cpp/sttt_cpp.cpython-314-x86_64-linux-gnu.so"
+ },
+ "search_config": {
+  "soft_pruning": true,
+  "proofs": true,
+  "reuse": true,
+  "c_puct": 1.5,
+  "soft_margin": 0.2,
+  "soft_strength": 3.0,
+  "min_visits": 8,
+  "revisit_interval": 64
+ },
+ "torch_threads": 2,
+ "rows": [
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0012,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0011,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0011,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9985,
+    "21": 0.0004,
+    "22": 0.0003,
+    "24": 0.0002,
+    "26": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0013,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0012,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0012,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0012,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0012,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.0012,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "global-win-free-choice",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 1.0,
+   "model_prior": {
+    "20": 0.9961,
+    "26": 0.0003,
+    "22": 0.0003,
+    "24": 0.0002,
+    "21": 0.0002
+   },
+   "chosen": 20,
+   "seconds": 0.001,
+   "root_solved": 1,
+   "stats": {
+    "completed_simulations": 0,
+    "neural_positions": 1,
+    "inference_batches": 1,
+    "max_depth": 0,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 1
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 0,
+     "policy": 1.0,
+     "q": 1.0
+    },
+    {
+     "action": 21,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 22,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0154,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 15,
+    "inference_batches": 15,
+    "max_depth": 5,
+    "hard_pruned_choices": 211,
+    "soft_rechecks": 4,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 127,
+     "policy": 1.0,
+     "q": -0.0252
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 26,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0248,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 23,
+    "max_depth": 5,
+    "hard_pruned_choices": 1822,
+    "soft_rechecks": 18,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0355,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 25,
+    "max_depth": 5,
+    "hard_pruned_choices": 9436,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0198,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 22,
+    "inference_batches": 8,
+    "max_depth": 5,
+    "hard_pruned_choices": 939,
+    "soft_rechecks": 6,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 123,
+     "policy": 1.0,
+     "q": -0.0341
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0171,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 9,
+    "max_depth": 5,
+    "hard_pruned_choices": 2958,
+    "soft_rechecks": 20,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0278,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 11,
+    "max_depth": 5,
+    "hard_pruned_choices": 10572,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0129,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 15,
+    "inference_batches": 15,
+    "max_depth": 5,
+    "hard_pruned_choices": 211,
+    "soft_rechecks": 4,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 127,
+     "policy": 1.0,
+     "q": -0.0252
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 26,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0195,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 23,
+    "max_depth": 5,
+    "hard_pruned_choices": 1822,
+    "soft_rechecks": 18,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0213,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 25,
+    "max_depth": 5,
+    "hard_pruned_choices": 9436,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0119,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 22,
+    "inference_batches": 8,
+    "max_depth": 5,
+    "hard_pruned_choices": 939,
+    "soft_rechecks": 6,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 123,
+     "policy": 1.0,
+     "q": -0.0341
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0127,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 9,
+    "max_depth": 5,
+    "hard_pruned_choices": 2958,
+    "soft_rechecks": 20,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0145,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 11,
+    "max_depth": 5,
+    "hard_pruned_choices": 10572,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0151,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 15,
+    "inference_batches": 15,
+    "max_depth": 5,
+    "hard_pruned_choices": 211,
+    "soft_rechecks": 4,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 127,
+     "policy": 1.0,
+     "q": -0.0252
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 26,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0249,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 23,
+    "max_depth": 5,
+    "hard_pruned_choices": 1822,
+    "soft_rechecks": 18,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0355,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 25,
+    "max_depth": 5,
+    "hard_pruned_choices": 9436,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0136,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 22,
+    "inference_batches": 8,
+    "max_depth": 5,
+    "hard_pruned_choices": 939,
+    "soft_rechecks": 6,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 123,
+     "policy": 1.0,
+     "q": -0.0341
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0169,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 9,
+    "max_depth": 5,
+    "hard_pruned_choices": 2958,
+    "soft_rechecks": 20,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0275,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 11,
+    "max_depth": 5,
+    "hard_pruned_choices": 10572,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0128,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 15,
+    "inference_batches": 15,
+    "max_depth": 5,
+    "hard_pruned_choices": 211,
+    "soft_rechecks": 4,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 127,
+     "policy": 1.0,
+     "q": -0.0252
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 24,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 25,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    },
+    {
+     "action": 26,
+     "visits": 0,
+     "policy": 0.0,
+     "q": null
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0195,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 23,
+    "max_depth": 5,
+    "hard_pruned_choices": 1822,
+    "soft_rechecks": 18,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0213,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 25,
+    "max_depth": 5,
+    "hard_pruned_choices": 9436,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0119,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 22,
+    "inference_batches": 8,
+    "max_depth": 5,
+    "hard_pruned_choices": 939,
+    "soft_rechecks": 6,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 123,
+     "policy": 1.0,
+     "q": -0.0341
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0127,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 23,
+    "inference_batches": 9,
+    "max_depth": 5,
+    "hard_pruned_choices": 2958,
+    "soft_rechecks": 20,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 507,
+     "policy": 1.0,
+     "q": -0.0083
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-block-O",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    20
+   ],
+   "model_value": 0.0022,
+   "model_prior": {
+    "20": 0.9942,
+    "24": 0.0023,
+    "21": 0.0017,
+    "23": 0.0012,
+    "25": 0.0004
+   },
+   "chosen": 20,
+   "seconds": 0.0145,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 25,
+    "inference_batches": 11,
+    "max_depth": 5,
+    "hard_pruned_choices": 10572,
+    "soft_rechecks": 68,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 20,
+     "visits": 1995,
+     "policy": 1.0,
+     "q": -0.0031
+    },
+    {
+     "action": 21,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 23,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 24,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 25,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 26,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.0678,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 72,
+    "inference_batches": 72,
+    "max_depth": 9,
+    "hard_pruned_choices": 700,
+    "soft_rechecks": 4,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 126,
+     "policy": 1.0,
+     "q": -0.2725
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.1313,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 132,
+    "inference_batches": 132,
+    "max_depth": 10,
+    "hard_pruned_choices": 4971,
+    "soft_rechecks": 45,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 510,
+     "policy": 1.0,
+     "q": -0.1119
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.2701,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 251,
+    "inference_batches": 251,
+    "max_depth": 10,
+    "hard_pruned_choices": 25175,
+    "soft_rechecks": 213,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 1998,
+     "policy": 1.0,
+     "q": -0.0486
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.0422,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 101,
+    "inference_batches": 15,
+    "max_depth": 9,
+    "hard_pruned_choices": 1149,
+    "soft_rechecks": 7,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 126,
+     "policy": 1.0,
+     "q": -0.4666
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.1012,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 160,
+    "inference_batches": 65,
+    "max_depth": 10,
+    "hard_pruned_choices": 6267,
+    "soft_rechecks": 44,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 510,
+     "policy": 1.0,
+     "q": -0.1401
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.227,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 266,
+    "inference_batches": 160,
+    "max_depth": 10,
+    "hard_pruned_choices": 28115,
+    "soft_rechecks": 213,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 1998,
+     "policy": 1.0,
+     "q": -0.0523
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.0613,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 72,
+    "inference_batches": 72,
+    "max_depth": 9,
+    "hard_pruned_choices": 700,
+    "soft_rechecks": 4,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 126,
+     "policy": 1.0,
+     "q": -0.2725
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.1121,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 132,
+    "inference_batches": 132,
+    "max_depth": 10,
+    "hard_pruned_choices": 4971,
+    "soft_rechecks": 45,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 510,
+     "policy": 1.0,
+     "q": -0.1119
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.215,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 251,
+    "inference_batches": 251,
+    "max_depth": 10,
+    "hard_pruned_choices": 25175,
+    "soft_rechecks": 213,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 1998,
+     "policy": 1.0,
+     "q": -0.0486
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.0356,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 101,
+    "inference_batches": 15,
+    "max_depth": 9,
+    "hard_pruned_choices": 1149,
+    "soft_rechecks": 7,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 126,
+     "policy": 1.0,
+     "q": -0.4666
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.0865,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 160,
+    "inference_batches": 65,
+    "max_depth": 10,
+    "hard_pruned_choices": 6267,
+    "soft_rechecks": 44,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 510,
+     "policy": 1.0,
+     "q": -0.1401
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-to-threat",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    39
+   ],
+   "model_value": -0.9797,
+   "model_prior": {
+    "39": 0.9594,
+    "41": 0.0208,
+    "38": 0.0198,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 39,
+   "seconds": 0.1777,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 266,
+    "inference_batches": 160,
+    "max_depth": 10,
+    "hard_pruned_choices": 28115,
+    "soft_rechecks": 213,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 1998,
+     "policy": 1.0,
+     "q": -0.0523
+    },
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.0,
+     "q": -1.0
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.1339,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 5,
+    "hard_pruned_choices": 456,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 75,
+     "policy": 0.6,
+     "q": -0.9998
+    },
+    {
+     "action": 44,
+     "visits": 24,
+     "policy": 0.192,
+     "q": -0.9995
+    },
+    {
+     "action": 42,
+     "visits": 12,
+     "policy": 0.096,
+     "q": -0.9998
+    },
+    {
+     "action": 39,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9987
+    },
+    {
+     "action": 41,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 4,
+     "policy": 0.032,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.5332,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 7,
+    "hard_pruned_choices": 2344,
+    "soft_rechecks": 12,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 301,
+     "policy": 0.5914,
+     "q": -0.9997
+    },
+    {
+     "action": 44,
+     "visits": 97,
+     "policy": 0.1906,
+     "q": -0.9994
+    },
+    {
+     "action": 42,
+     "visits": 51,
+     "policy": 0.1002,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 23,
+     "policy": 0.0452,
+     "q": -0.9996
+    },
+    {
+     "action": 39,
+     "visits": 21,
+     "policy": 0.0413,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 16,
+     "policy": 0.0314,
+     "q": -0.9989
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 1.9649,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 9,
+    "hard_pruned_choices": 13375,
+    "soft_rechecks": 77,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1177,
+     "policy": 0.5894,
+     "q": -0.9995
+    },
+    {
+     "action": 44,
+     "visits": 383,
+     "policy": 0.1918,
+     "q": -0.999
+    },
+    {
+     "action": 42,
+     "visits": 201,
+     "policy": 0.1007,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 89,
+     "policy": 0.0446,
+     "q": -0.9995
+    },
+    {
+     "action": 39,
+     "visits": 84,
+     "policy": 0.0421,
+     "q": -0.9989
+    },
+    {
+     "action": 43,
+     "visits": 63,
+     "policy": 0.0315,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.0467,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 10,
+    "max_depth": 5,
+    "hard_pruned_choices": 379,
+    "soft_rechecks": 3,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 75,
+     "policy": 0.6,
+     "q": -0.9998
+    },
+    {
+     "action": 44,
+     "visits": 24,
+     "policy": 0.192,
+     "q": -0.9989
+    },
+    {
+     "action": 42,
+     "visits": 12,
+     "policy": 0.096,
+     "q": -0.9999
+    },
+    {
+     "action": 39,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9987
+    },
+    {
+     "action": 41,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 4,
+     "policy": 0.032,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.1716,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 34,
+    "max_depth": 7,
+    "hard_pruned_choices": 2303,
+    "soft_rechecks": 14,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 301,
+     "policy": 0.5914,
+     "q": -0.9997
+    },
+    {
+     "action": 44,
+     "visits": 97,
+     "policy": 0.1906,
+     "q": -0.9994
+    },
+    {
+     "action": 42,
+     "visits": 51,
+     "policy": 0.1002,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 23,
+     "policy": 0.0452,
+     "q": -0.9996
+    },
+    {
+     "action": 39,
+     "visits": 21,
+     "policy": 0.0413,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 16,
+     "policy": 0.0314,
+     "q": -0.9989
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.7035,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 127,
+    "max_depth": 9,
+    "hard_pruned_choices": 13399,
+    "soft_rechecks": 76,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1177,
+     "policy": 0.5894,
+     "q": -0.9994
+    },
+    {
+     "action": 44,
+     "visits": 383,
+     "policy": 0.1918,
+     "q": -0.999
+    },
+    {
+     "action": 42,
+     "visits": 201,
+     "policy": 0.1007,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 89,
+     "policy": 0.0446,
+     "q": -0.9995
+    },
+    {
+     "action": 39,
+     "visits": 84,
+     "policy": 0.0421,
+     "q": -0.9989
+    },
+    {
+     "action": 43,
+     "visits": 63,
+     "policy": 0.0315,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.1101,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 5,
+    "hard_pruned_choices": 456,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 75,
+     "policy": 0.6,
+     "q": -0.9998
+    },
+    {
+     "action": 44,
+     "visits": 24,
+     "policy": 0.192,
+     "q": -0.9995
+    },
+    {
+     "action": 42,
+     "visits": 12,
+     "policy": 0.096,
+     "q": -0.9998
+    },
+    {
+     "action": 39,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9987
+    },
+    {
+     "action": 41,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 4,
+     "policy": 0.032,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.4332,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 7,
+    "hard_pruned_choices": 2344,
+    "soft_rechecks": 12,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 301,
+     "policy": 0.5914,
+     "q": -0.9997
+    },
+    {
+     "action": 44,
+     "visits": 97,
+     "policy": 0.1906,
+     "q": -0.9994
+    },
+    {
+     "action": 42,
+     "visits": 51,
+     "policy": 0.1002,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 23,
+     "policy": 0.0452,
+     "q": -0.9996
+    },
+    {
+     "action": 39,
+     "visits": 21,
+     "policy": 0.0413,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 16,
+     "policy": 0.0314,
+     "q": -0.9989
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 1.6897,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 9,
+    "hard_pruned_choices": 13375,
+    "soft_rechecks": 77,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1177,
+     "policy": 0.5894,
+     "q": -0.9995
+    },
+    {
+     "action": 44,
+     "visits": 383,
+     "policy": 0.1918,
+     "q": -0.999
+    },
+    {
+     "action": 42,
+     "visits": 201,
+     "policy": 0.1007,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 89,
+     "policy": 0.0446,
+     "q": -0.9995
+    },
+    {
+     "action": 39,
+     "visits": 84,
+     "policy": 0.0421,
+     "q": -0.9989
+    },
+    {
+     "action": 43,
+     "visits": 63,
+     "policy": 0.0315,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.0361,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 10,
+    "max_depth": 5,
+    "hard_pruned_choices": 379,
+    "soft_rechecks": 3,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 75,
+     "policy": 0.6,
+     "q": -0.9998
+    },
+    {
+     "action": 44,
+     "visits": 24,
+     "policy": 0.192,
+     "q": -0.9989
+    },
+    {
+     "action": 42,
+     "visits": 12,
+     "policy": 0.096,
+     "q": -0.9999
+    },
+    {
+     "action": 39,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9987
+    },
+    {
+     "action": 41,
+     "visits": 5,
+     "policy": 0.04,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 4,
+     "policy": 0.032,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.1371,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 34,
+    "max_depth": 7,
+    "hard_pruned_choices": 2303,
+    "soft_rechecks": 14,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 301,
+     "policy": 0.5914,
+     "q": -0.9997
+    },
+    {
+     "action": 44,
+     "visits": 97,
+     "policy": 0.1906,
+     "q": -0.9994
+    },
+    {
+     "action": 42,
+     "visits": 51,
+     "policy": 0.1002,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 23,
+     "policy": 0.0452,
+     "q": -0.9996
+    },
+    {
+     "action": 39,
+     "visits": 21,
+     "policy": 0.0413,
+     "q": -0.9994
+    },
+    {
+     "action": 43,
+     "visits": 16,
+     "policy": 0.0314,
+     "q": -0.9989
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "avoid-sending-open-board",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "model_value": -0.9979,
+   "model_prior": {
+    "40": 0.5894,
+    "44": 0.1895,
+    "42": 0.102,
+    "41": 0.0451,
+    "39": 0.0417
+   },
+   "chosen": 40,
+   "seconds": 0.5298,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 127,
+    "max_depth": 9,
+    "hard_pruned_choices": 13399,
+    "soft_rechecks": 76,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1177,
+     "policy": 0.5894,
+     "q": -0.9994
+    },
+    {
+     "action": 44,
+     "visits": 383,
+     "policy": 0.1918,
+     "q": -0.999
+    },
+    {
+     "action": 42,
+     "visits": 201,
+     "policy": 0.1007,
+     "q": -0.9998
+    },
+    {
+     "action": 41,
+     "visits": 89,
+     "policy": 0.0446,
+     "q": -0.9995
+    },
+    {
+     "action": 39,
+     "visits": 84,
+     "policy": 0.0421,
+     "q": -0.9989
+    },
+    {
+     "action": 43,
+     "visits": 63,
+     "policy": 0.0315,
+     "q": -0.9993
+    }
+   ],
+   "ok": true
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0027,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 3,
+    "max_depth": 1,
+    "hard_pruned_choices": 1,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0027,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 3,
+    "max_depth": 1,
+    "hard_pruned_choices": 1,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0027,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 3,
+    "max_depth": 1,
+    "hard_pruned_choices": 1,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0026,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0026,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0026,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0027,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 3,
+    "max_depth": 1,
+    "hard_pruned_choices": 1,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0026,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 3,
+    "max_depth": 1,
+    "hard_pruned_choices": 1,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0026,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 3,
+    "max_depth": 1,
+    "hard_pruned_choices": 1,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0025,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0025,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "forced-loss",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.9761,
+   "model_prior": {
+    "41": 0.5818,
+    "38": 0.4182,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 38,
+   "seconds": 0.0025,
+   "root_solved": -1,
+   "stats": {
+    "completed_simulations": 2,
+    "neural_positions": 3,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": -1
+   },
+   "top": [
+    {
+     "action": 38,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    },
+    {
+     "action": 41,
+     "visits": 1,
+     "policy": 0.5,
+     "q": -1.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0018,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 6,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 5,
+     "policy": 0.8333,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1667,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0018,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 6,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 5,
+     "policy": 0.8333,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1667,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0018,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 6,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 5,
+     "policy": 0.8333,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1667,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0018,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 7,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 6,
+     "policy": 0.8571,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1429,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0018,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 7,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 6,
+     "policy": 0.8571,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1429,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0018,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 7,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 6,
+     "policy": 0.8571,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1429,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0018,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 6,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 5,
+     "policy": 0.8333,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1667,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0017,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 6,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 5,
+     "policy": 0.8333,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1667,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0017,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 6,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 5,
+     "policy": 0.8333,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1667,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0017,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 7,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 6,
+     "policy": 0.8571,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1429,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0017,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 7,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 6,
+     "policy": 0.8571,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1429,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "proven-draw",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8455,
+    "79": 0.1545,
+    "0": 0.0,
+    "1": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0017,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 7,
+    "neural_positions": 2,
+    "inference_batches": 2,
+    "max_depth": 1,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 0,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 6,
+     "policy": 0.8571,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 1,
+     "policy": 0.1429,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0049,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 5,
+    "inference_batches": 5,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8672,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0781,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": -0.0003
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0058,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 129,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8605,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0775,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.062,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0058,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 129,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8605,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0775,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.062,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0049,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 5,
+    "inference_batches": 5,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8672,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0781,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": -0.0003
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0058,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 130,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 112,
+     "policy": 0.8615,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0769,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.0615,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0057,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 130,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 112,
+     "policy": 0.8615,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0769,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.0615,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0043,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 5,
+    "inference_batches": 5,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8672,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0781,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": -0.0003
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0051,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 129,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8605,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0775,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.062,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0051,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 129,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8605,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0775,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.062,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0043,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 5,
+    "inference_batches": 5,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 111,
+     "policy": 0.8672,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0781,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": -0.0003
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0051,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 130,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 112,
+     "policy": 0.8615,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0769,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.0615,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "terminal-draw-option",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.0022,
+   "model_prior": {
+    "78": 0.8582,
+    "79": 0.0829,
+    "80": 0.0589,
+    "0": 0.0,
+    "4": 0.0
+   },
+   "chosen": 78,
+   "seconds": 0.0052,
+   "root_solved": 0,
+   "stats": {
+    "completed_simulations": 130,
+    "neural_positions": 6,
+    "inference_batches": 6,
+    "max_depth": 2,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": 0
+   },
+   "top": [
+    {
+     "action": 78,
+     "visits": 112,
+     "policy": 0.8615,
+     "q": -0.0
+    },
+    {
+     "action": 79,
+     "visits": 10,
+     "policy": 0.0769,
+     "q": -0.0
+    },
+    {
+     "action": 80,
+     "visits": 8,
+     "policy": 0.0615,
+     "q": -0.0
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.1235,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 6,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 116,
+     "policy": 0.9062,
+     "q": 0.2644
+    },
+    {
+     "action": 43,
+     "visits": 2,
+     "policy": 0.0156,
+     "q": 0.1221
+    },
+    {
+     "action": 0,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.2995
+    },
+    {
+     "action": 5,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.008
+    },
+    {
+     "action": 7,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.0022
+    },
+    {
+     "action": 12,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.0022
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.4945,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 9,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 17,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 428,
+     "policy": 0.8359,
+     "q": 0.2738
+    },
+    {
+     "action": 41,
+     "visits": 13,
+     "policy": 0.0254,
+     "q": 0.3207
+    },
+    {
+     "action": 43,
+     "visits": 3,
+     "policy": 0.0059,
+     "q": 0.107
+    },
+    {
+     "action": 23,
+     "visits": 2,
+     "policy": 0.0039,
+     "q": 0.0152
+    },
+    {
+     "action": 25,
+     "visits": 2,
+     "policy": 0.0039,
+     "q": 0.001
+    },
+    {
+     "action": 28,
+     "visits": 2,
+     "policy": 0.0039,
+     "q": 0.016
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 1.9791,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 87,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1560,
+     "policy": 0.78,
+     "q": 0.2433
+    },
+    {
+     "action": 41,
+     "visits": 59,
+     "policy": 0.0295,
+     "q": 0.2483
+    },
+    {
+     "action": 39,
+     "visits": 28,
+     "policy": 0.014,
+     "q": 0.2042
+    },
+    {
+     "action": 43,
+     "visits": 26,
+     "policy": 0.013,
+     "q": 0.1938
+    },
+    {
+     "action": 37,
+     "visits": 23,
+     "policy": 0.0115,
+     "q": 0.195
+    },
+    {
+     "action": 78,
+     "visits": 16,
+     "policy": 0.008,
+     "q": 0.1733
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.0445,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 9,
+    "max_depth": 3,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 17,
+     "policy": 0.1328,
+     "q": 0.3851
+    },
+    {
+     "action": 41,
+     "visits": 8,
+     "policy": 0.0625,
+     "q": 0.298
+    },
+    {
+     "action": 43,
+     "visits": 8,
+     "policy": 0.0625,
+     "q": 0.2841
+    },
+    {
+     "action": 37,
+     "visits": 6,
+     "policy": 0.0469,
+     "q": 0.1413
+    },
+    {
+     "action": 39,
+     "visits": 6,
+     "policy": 0.0469,
+     "q": 0.1954
+    },
+    {
+     "action": 16,
+     "visits": 3,
+     "policy": 0.0234,
+     "q": 0.0316
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.1751,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 33,
+    "max_depth": 6,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 10,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 213,
+     "policy": 0.416,
+     "q": 0.2909
+    },
+    {
+     "action": 41,
+     "visits": 65,
+     "policy": 0.127,
+     "q": 0.2508
+    },
+    {
+     "action": 39,
+     "visits": 34,
+     "policy": 0.0664,
+     "q": 0.1869
+    },
+    {
+     "action": 43,
+     "visits": 33,
+     "policy": 0.0645,
+     "q": 0.1571
+    },
+    {
+     "action": 37,
+     "visits": 26,
+     "policy": 0.0508,
+     "q": 0.1731
+    },
+    {
+     "action": 6,
+     "visits": 16,
+     "policy": 0.0312,
+     "q": 0.1595
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.7149,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 126,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 83,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1431,
+     "policy": 0.7155,
+     "q": 0.2399
+    },
+    {
+     "action": 41,
+     "visits": 129,
+     "policy": 0.0645,
+     "q": 0.254
+    },
+    {
+     "action": 39,
+     "visits": 34,
+     "policy": 0.017,
+     "q": 0.1869
+    },
+    {
+     "action": 43,
+     "visits": 34,
+     "policy": 0.017,
+     "q": 0.1514
+    },
+    {
+     "action": 37,
+     "visits": 26,
+     "policy": 0.013,
+     "q": 0.1731
+    },
+    {
+     "action": 2,
+     "visits": 17,
+     "policy": 0.0085,
+     "q": 0.1799
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.1093,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 6,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 116,
+     "policy": 0.9062,
+     "q": 0.2644
+    },
+    {
+     "action": 43,
+     "visits": 2,
+     "policy": 0.0156,
+     "q": 0.1221
+    },
+    {
+     "action": 0,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.2995
+    },
+    {
+     "action": 5,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.008
+    },
+    {
+     "action": 7,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.0022
+    },
+    {
+     "action": 12,
+     "visits": 1,
+     "policy": 0.0078,
+     "q": -0.0022
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.4325,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 9,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 17,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 428,
+     "policy": 0.8359,
+     "q": 0.2738
+    },
+    {
+     "action": 41,
+     "visits": 13,
+     "policy": 0.0254,
+     "q": 0.3207
+    },
+    {
+     "action": 43,
+     "visits": 3,
+     "policy": 0.0059,
+     "q": 0.107
+    },
+    {
+     "action": 23,
+     "visits": 2,
+     "policy": 0.0039,
+     "q": 0.0152
+    },
+    {
+     "action": 25,
+     "visits": 2,
+     "policy": 0.0039,
+     "q": 0.001
+    },
+    {
+     "action": 28,
+     "visits": 2,
+     "policy": 0.0039,
+     "q": 0.016
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 1.6903,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 87,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1560,
+     "policy": 0.78,
+     "q": 0.2433
+    },
+    {
+     "action": 41,
+     "visits": 59,
+     "policy": 0.0295,
+     "q": 0.2483
+    },
+    {
+     "action": 39,
+     "visits": 28,
+     "policy": 0.014,
+     "q": 0.2042
+    },
+    {
+     "action": 43,
+     "visits": 26,
+     "policy": 0.013,
+     "q": 0.1938
+    },
+    {
+     "action": 37,
+     "visits": 23,
+     "policy": 0.0115,
+     "q": 0.195
+    },
+    {
+     "action": 78,
+     "visits": 16,
+     "policy": 0.008,
+     "q": 0.1733
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.0348,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 9,
+    "max_depth": 3,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 17,
+     "policy": 0.1328,
+     "q": 0.3851
+    },
+    {
+     "action": 41,
+     "visits": 8,
+     "policy": 0.0625,
+     "q": 0.298
+    },
+    {
+     "action": 43,
+     "visits": 8,
+     "policy": 0.0625,
+     "q": 0.2841
+    },
+    {
+     "action": 37,
+     "visits": 6,
+     "policy": 0.0469,
+     "q": 0.1413
+    },
+    {
+     "action": 39,
+     "visits": 6,
+     "policy": 0.0469,
+     "q": 0.1954
+    },
+    {
+     "action": 16,
+     "visits": 3,
+     "policy": 0.0234,
+     "q": 0.0316
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.1349,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 33,
+    "max_depth": 6,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 10,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 213,
+     "policy": 0.416,
+     "q": 0.2909
+    },
+    {
+     "action": 41,
+     "visits": 65,
+     "policy": 0.127,
+     "q": 0.2508
+    },
+    {
+     "action": 39,
+     "visits": 34,
+     "policy": 0.0664,
+     "q": 0.1869
+    },
+    {
+     "action": 43,
+     "visits": 33,
+     "policy": 0.0645,
+     "q": 0.1571
+    },
+    {
+     "action": 37,
+     "visits": 26,
+     "policy": 0.0508,
+     "q": 0.1731
+    },
+    {
+     "action": 6,
+     "visits": 16,
+     "policy": 0.0312,
+     "q": 0.1595
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-empty",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.2136,
+   "model_prior": {
+    "40": 0.0476,
+    "41": 0.0182,
+    "43": 0.0177,
+    "25": 0.017,
+    "39": 0.0168
+   },
+   "chosen": 40,
+   "seconds": 0.5283,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 126,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 83,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 40,
+     "visits": 1431,
+     "policy": 0.7155,
+     "q": 0.2399
+    },
+    {
+     "action": 41,
+     "visits": 129,
+     "policy": 0.0645,
+     "q": 0.254
+    },
+    {
+     "action": 39,
+     "visits": 34,
+     "policy": 0.017,
+     "q": 0.1869
+    },
+    {
+     "action": 43,
+     "visits": 34,
+     "policy": 0.017,
+     "q": 0.1514
+    },
+    {
+     "action": 37,
+     "visits": 26,
+     "policy": 0.013,
+     "q": 0.1731
+    },
+    {
+     "action": 2,
+     "visits": 17,
+     "policy": 0.0085,
+     "q": 0.1799
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 42,
+   "seconds": 0.1183,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 5,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 42,
+     "visits": 23,
+     "policy": 0.1797,
+     "q": -0.2379
+    },
+    {
+     "action": 37,
+     "visits": 22,
+     "policy": 0.1719,
+     "q": -0.2209
+    },
+    {
+     "action": 39,
+     "visits": 22,
+     "policy": 0.1719,
+     "q": -0.2259
+    },
+    {
+     "action": 43,
+     "visits": 19,
+     "policy": 0.1484,
+     "q": -0.2433
+    },
+    {
+     "action": 36,
+     "visits": 13,
+     "policy": 0.1016,
+     "q": -0.321
+    },
+    {
+     "action": 38,
+     "visits": 12,
+     "policy": 0.0938,
+     "q": -0.3166
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.477,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 8,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 12,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 167,
+     "policy": 0.3262,
+     "q": -0.2305
+    },
+    {
+     "action": 37,
+     "visits": 95,
+     "policy": 0.1855,
+     "q": -0.2493
+    },
+    {
+     "action": 43,
+     "visits": 84,
+     "policy": 0.1641,
+     "q": -0.2248
+    },
+    {
+     "action": 42,
+     "visits": 48,
+     "policy": 0.0938,
+     "q": -0.2859
+    },
+    {
+     "action": 36,
+     "visits": 37,
+     "policy": 0.0723,
+     "q": -0.32
+    },
+    {
+     "action": 38,
+     "visits": 36,
+     "policy": 0.0703,
+     "q": -0.3155
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 1.884,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 85,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 1032,
+     "policy": 0.516,
+     "q": -0.1975
+    },
+    {
+     "action": 43,
+     "visits": 257,
+     "policy": 0.1285,
+     "q": -0.2382
+    },
+    {
+     "action": 42,
+     "visits": 205,
+     "policy": 0.1025,
+     "q": -0.2425
+    },
+    {
+     "action": 37,
+     "visits": 161,
+     "policy": 0.0805,
+     "q": -0.25
+    },
+    {
+     "action": 44,
+     "visits": 127,
+     "policy": 0.0635,
+     "q": -0.2723
+    },
+    {
+     "action": 41,
+     "visits": 109,
+     "policy": 0.0545,
+     "q": -0.2805
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.0424,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 10,
+    "max_depth": 5,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 19,
+     "policy": 0.1484,
+     "q": -0.2241
+    },
+    {
+     "action": 42,
+     "visits": 18,
+     "policy": 0.1406,
+     "q": -0.2301
+    },
+    {
+     "action": 43,
+     "visits": 18,
+     "policy": 0.1406,
+     "q": -0.2421
+    },
+    {
+     "action": 37,
+     "visits": 17,
+     "policy": 0.1328,
+     "q": -0.216
+    },
+    {
+     "action": 36,
+     "visits": 16,
+     "policy": 0.125,
+     "q": -0.2667
+    },
+    {
+     "action": 41,
+     "visits": 14,
+     "policy": 0.1094,
+     "q": -0.3506
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.1582,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 34,
+    "max_depth": 8,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 12,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 143,
+     "policy": 0.2793,
+     "q": -0.2075
+    },
+    {
+     "action": 37,
+     "visits": 94,
+     "policy": 0.1836,
+     "q": -0.247
+    },
+    {
+     "action": 43,
+     "visits": 90,
+     "policy": 0.1758,
+     "q": -0.2396
+    },
+    {
+     "action": 42,
+     "visits": 55,
+     "policy": 0.1074,
+     "q": -0.2879
+    },
+    {
+     "action": 36,
+     "visits": 40,
+     "policy": 0.0781,
+     "q": -0.3427
+    },
+    {
+     "action": 38,
+     "visits": 38,
+     "policy": 0.0742,
+     "q": -0.3153
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.6604,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 127,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 83,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 855,
+     "policy": 0.4275,
+     "q": -0.2114
+    },
+    {
+     "action": 43,
+     "visits": 390,
+     "policy": 0.195,
+     "q": -0.2109
+    },
+    {
+     "action": 42,
+     "visits": 213,
+     "policy": 0.1065,
+     "q": -0.2407
+    },
+    {
+     "action": 37,
+     "visits": 179,
+     "policy": 0.0895,
+     "q": -0.2515
+    },
+    {
+     "action": 44,
+     "visits": 140,
+     "policy": 0.07,
+     "q": -0.2651
+    },
+    {
+     "action": 41,
+     "visits": 110,
+     "policy": 0.055,
+     "q": -0.2803
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 42,
+   "seconds": 0.1093,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 5,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 1,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 42,
+     "visits": 23,
+     "policy": 0.1797,
+     "q": -0.2379
+    },
+    {
+     "action": 37,
+     "visits": 22,
+     "policy": 0.1719,
+     "q": -0.2209
+    },
+    {
+     "action": 39,
+     "visits": 22,
+     "policy": 0.1719,
+     "q": -0.2259
+    },
+    {
+     "action": 43,
+     "visits": 19,
+     "policy": 0.1484,
+     "q": -0.2433
+    },
+    {
+     "action": 36,
+     "visits": 13,
+     "policy": 0.1016,
+     "q": -0.321
+    },
+    {
+     "action": 38,
+     "visits": 12,
+     "policy": 0.0938,
+     "q": -0.3166
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.4315,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 8,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 12,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 167,
+     "policy": 0.3262,
+     "q": -0.2305
+    },
+    {
+     "action": 37,
+     "visits": 95,
+     "policy": 0.1855,
+     "q": -0.2493
+    },
+    {
+     "action": 43,
+     "visits": 84,
+     "policy": 0.1641,
+     "q": -0.2248
+    },
+    {
+     "action": 42,
+     "visits": 48,
+     "policy": 0.0938,
+     "q": -0.2859
+    },
+    {
+     "action": 36,
+     "visits": 37,
+     "policy": 0.0723,
+     "q": -0.32
+    },
+    {
+     "action": 38,
+     "visits": 36,
+     "policy": 0.0703,
+     "q": -0.3155
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 1.6829,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 85,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 1032,
+     "policy": 0.516,
+     "q": -0.1975
+    },
+    {
+     "action": 43,
+     "visits": 257,
+     "policy": 0.1285,
+     "q": -0.2382
+    },
+    {
+     "action": 42,
+     "visits": 205,
+     "policy": 0.1025,
+     "q": -0.2425
+    },
+    {
+     "action": 37,
+     "visits": 161,
+     "policy": 0.0805,
+     "q": -0.25
+    },
+    {
+     "action": 44,
+     "visits": 127,
+     "policy": 0.0635,
+     "q": -0.2723
+    },
+    {
+     "action": 41,
+     "visits": 109,
+     "policy": 0.0545,
+     "q": -0.2805
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.0359,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 10,
+    "max_depth": 5,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 19,
+     "policy": 0.1484,
+     "q": -0.2241
+    },
+    {
+     "action": 42,
+     "visits": 18,
+     "policy": 0.1406,
+     "q": -0.2301
+    },
+    {
+     "action": 43,
+     "visits": 18,
+     "policy": 0.1406,
+     "q": -0.2421
+    },
+    {
+     "action": 37,
+     "visits": 17,
+     "policy": 0.1328,
+     "q": -0.216
+    },
+    {
+     "action": 36,
+     "visits": 16,
+     "policy": 0.125,
+     "q": -0.2667
+    },
+    {
+     "action": 41,
+     "visits": 14,
+     "policy": 0.1094,
+     "q": -0.3506
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.1364,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 34,
+    "max_depth": 8,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 12,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 143,
+     "policy": 0.2793,
+     "q": -0.2075
+    },
+    {
+     "action": 37,
+     "visits": 94,
+     "policy": 0.1836,
+     "q": -0.247
+    },
+    {
+     "action": 43,
+     "visits": 90,
+     "policy": 0.1758,
+     "q": -0.2396
+    },
+    {
+     "action": 42,
+     "visits": 55,
+     "policy": 0.1074,
+     "q": -0.2879
+    },
+    {
+     "action": 36,
+     "visits": 40,
+     "policy": 0.0781,
+     "q": -0.3427
+    },
+    {
+     "action": 38,
+     "visits": 38,
+     "policy": 0.0742,
+     "q": -0.3153
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-center",
+   "turn": -1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": -0.3311,
+   "model_prior": {
+    "36": 0.131,
+    "43": 0.128,
+    "44": 0.1257,
+    "39": 0.1254,
+    "38": 0.1251
+   },
+   "chosen": 39,
+   "seconds": 0.5283,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 127,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 83,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 39,
+     "visits": 855,
+     "policy": 0.4275,
+     "q": -0.2114
+    },
+    {
+     "action": 43,
+     "visits": 390,
+     "policy": 0.195,
+     "q": -0.2109
+    },
+    {
+     "action": 42,
+     "visits": 213,
+     "policy": 0.1065,
+     "q": -0.2407
+    },
+    {
+     "action": 37,
+     "visits": 179,
+     "policy": 0.0895,
+     "q": -0.2515
+    },
+    {
+     "action": 44,
+     "visits": 140,
+     "policy": 0.07,
+     "q": -0.2651
+    },
+    {
+     "action": 41,
+     "visits": 110,
+     "policy": 0.055,
+     "q": -0.2803
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.1192,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 7,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 96,
+     "policy": 0.75,
+     "q": 0.6113
+    },
+    {
+     "action": 73,
+     "visits": 8,
+     "policy": 0.0625,
+     "q": 0.3939
+    },
+    {
+     "action": 75,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": 0.3514
+    },
+    {
+     "action": 80,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": 0.1579
+    },
+    {
+     "action": 77,
+     "visits": 3,
+     "policy": 0.0234,
+     "q": 0.2048
+    },
+    {
+     "action": 79,
+     "visits": 3,
+     "policy": 0.0234,
+     "q": 0.2597
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.4774,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 9,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 17,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 345,
+     "policy": 0.6738,
+     "q": 0.4647
+    },
+    {
+     "action": 80,
+     "visits": 37,
+     "policy": 0.0723,
+     "q": 0.2737
+    },
+    {
+     "action": 74,
+     "visits": 31,
+     "policy": 0.0605,
+     "q": 0.3777
+    },
+    {
+     "action": 75,
+     "visits": 31,
+     "policy": 0.0605,
+     "q": 0.3503
+    },
+    {
+     "action": 73,
+     "visits": 28,
+     "policy": 0.0547,
+     "q": 0.3321
+    },
+    {
+     "action": 78,
+     "visits": 19,
+     "policy": 0.0371,
+     "q": 0.2911
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 1.8943,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 12,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 109,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 1376,
+     "policy": 0.688,
+     "q": 0.4092
+    },
+    {
+     "action": 74,
+     "visits": 211,
+     "policy": 0.1055,
+     "q": 0.3844
+    },
+    {
+     "action": 80,
+     "visits": 106,
+     "policy": 0.053,
+     "q": 0.2745
+    },
+    {
+     "action": 78,
+     "visits": 94,
+     "policy": 0.047,
+     "q": 0.3454
+    },
+    {
+     "action": 77,
+     "visits": 75,
+     "policy": 0.0375,
+     "q": 0.3251
+    },
+    {
+     "action": 75,
+     "visits": 62,
+     "policy": 0.031,
+     "q": 0.2673
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.041,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 10,
+    "max_depth": 4,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 35,
+     "policy": 0.2734,
+     "q": 0.6003
+    },
+    {
+     "action": 74,
+     "visits": 19,
+     "policy": 0.1484,
+     "q": 0.3898
+    },
+    {
+     "action": 73,
+     "visits": 17,
+     "policy": 0.1328,
+     "q": 0.4839
+    },
+    {
+     "action": 75,
+     "visits": 15,
+     "policy": 0.1172,
+     "q": 0.4034
+    },
+    {
+     "action": 80,
+     "visits": 13,
+     "policy": 0.1016,
+     "q": 0.2512
+    },
+    {
+     "action": 78,
+     "visits": 12,
+     "policy": 0.0938,
+     "q": 0.4698
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.16,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 34,
+    "max_depth": 8,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 16,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 325,
+     "policy": 0.6348,
+     "q": 0.4984
+    },
+    {
+     "action": 80,
+     "visits": 40,
+     "policy": 0.0781,
+     "q": 0.2594
+    },
+    {
+     "action": 74,
+     "visits": 36,
+     "policy": 0.0703,
+     "q": 0.4172
+    },
+    {
+     "action": 75,
+     "visits": 36,
+     "policy": 0.0703,
+     "q": 0.3377
+    },
+    {
+     "action": 73,
+     "visits": 30,
+     "policy": 0.0586,
+     "q": 0.3001
+    },
+    {
+     "action": 78,
+     "visits": 20,
+     "policy": 0.0391,
+     "q": 0.2946
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "python",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.6385,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 127,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 101,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 1353,
+     "policy": 0.6765,
+     "q": 0.4045
+    },
+    {
+     "action": 74,
+     "visits": 199,
+     "policy": 0.0995,
+     "q": 0.3862
+    },
+    {
+     "action": 80,
+     "visits": 112,
+     "policy": 0.056,
+     "q": 0.2695
+    },
+    {
+     "action": 78,
+     "visits": 104,
+     "policy": 0.052,
+     "q": 0.3294
+    },
+    {
+     "action": 77,
+     "visits": 86,
+     "policy": 0.043,
+     "q": 0.3202
+    },
+    {
+     "action": 75,
+     "visits": 65,
+     "policy": 0.0325,
+     "q": 0.2831
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.1096,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 129,
+    "max_depth": 7,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 96,
+     "policy": 0.75,
+     "q": 0.6113
+    },
+    {
+     "action": 73,
+     "visits": 8,
+     "policy": 0.0625,
+     "q": 0.3939
+    },
+    {
+     "action": 75,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": 0.3514
+    },
+    {
+     "action": 80,
+     "visits": 7,
+     "policy": 0.0547,
+     "q": 0.1579
+    },
+    {
+     "action": 77,
+     "visits": 3,
+     "policy": 0.0234,
+     "q": 0.2048
+    },
+    {
+     "action": 79,
+     "visits": 3,
+     "policy": 0.0234,
+     "q": 0.2597
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.4322,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 513,
+    "max_depth": 9,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 17,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 345,
+     "policy": 0.6738,
+     "q": 0.4647
+    },
+    {
+     "action": 80,
+     "visits": 37,
+     "policy": 0.0723,
+     "q": 0.2737
+    },
+    {
+     "action": 74,
+     "visits": 31,
+     "policy": 0.0605,
+     "q": 0.3777
+    },
+    {
+     "action": 75,
+     "visits": 31,
+     "policy": 0.0605,
+     "q": 0.3503
+    },
+    {
+     "action": 73,
+     "visits": 28,
+     "policy": 0.0547,
+     "q": 0.3321
+    },
+    {
+     "action": 78,
+     "visits": 19,
+     "policy": 0.0371,
+     "q": 0.2911
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 1,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 1.6879,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 2001,
+    "max_depth": 12,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 109,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 1376,
+     "policy": 0.688,
+     "q": 0.4092
+    },
+    {
+     "action": 74,
+     "visits": 211,
+     "policy": 0.1055,
+     "q": 0.3844
+    },
+    {
+     "action": 80,
+     "visits": 106,
+     "policy": 0.053,
+     "q": 0.2745
+    },
+    {
+     "action": 78,
+     "visits": 94,
+     "policy": 0.047,
+     "q": 0.3454
+    },
+    {
+     "action": 77,
+     "visits": 75,
+     "policy": 0.0375,
+     "q": 0.3251
+    },
+    {
+     "action": 75,
+     "visits": 62,
+     "policy": 0.031,
+     "q": 0.2673
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 128,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.0358,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 128,
+    "neural_positions": 129,
+    "inference_batches": 10,
+    "max_depth": 4,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 2,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 35,
+     "policy": 0.2734,
+     "q": 0.6003
+    },
+    {
+     "action": 74,
+     "visits": 19,
+     "policy": 0.1484,
+     "q": 0.3898
+    },
+    {
+     "action": 73,
+     "visits": 17,
+     "policy": 0.1328,
+     "q": 0.4839
+    },
+    {
+     "action": 75,
+     "visits": 15,
+     "policy": 0.1172,
+     "q": 0.4034
+    },
+    {
+     "action": 80,
+     "visits": 13,
+     "policy": 0.1016,
+     "q": 0.2512
+    },
+    {
+     "action": 78,
+     "visits": 12,
+     "policy": 0.0938,
+     "q": 0.4698
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 512,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.1365,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 512,
+    "neural_positions": 513,
+    "inference_batches": 34,
+    "max_depth": 8,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 16,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 325,
+     "policy": 0.6348,
+     "q": 0.4984
+    },
+    {
+     "action": 80,
+     "visits": 40,
+     "policy": 0.0781,
+     "q": 0.2594
+    },
+    {
+     "action": 74,
+     "visits": 36,
+     "policy": 0.0703,
+     "q": 0.4172
+    },
+    {
+     "action": 75,
+     "visits": 36,
+     "policy": 0.0703,
+     "q": 0.3377
+    },
+    {
+     "action": 73,
+     "visits": 30,
+     "policy": 0.0586,
+     "q": 0.3001
+    },
+    {
+     "action": 78,
+     "visits": 20,
+     "policy": 0.0391,
+     "q": 0.2946
+    }
+   ],
+   "ok": null
+  },
+  {
+   "position": "opening-4ply",
+   "turn": 1,
+   "backend": "cpp",
+   "leaf_batch": 16,
+   "simulations": 2000,
+   "expected": null,
+   "model_value": 0.7423,
+   "model_prior": {
+    "80": 0.2104,
+    "72": 0.1505,
+    "75": 0.121,
+    "73": 0.117,
+    "77": 0.0999
+   },
+   "chosen": 72,
+   "seconds": 0.5278,
+   "root_solved": null,
+   "stats": {
+    "completed_simulations": 2000,
+    "neural_positions": 2001,
+    "inference_batches": 127,
+    "max_depth": 11,
+    "hard_pruned_choices": 0,
+    "soft_rechecks": 101,
+    "retained_visits": 0,
+    "root_solved": null
+   },
+   "top": [
+    {
+     "action": 72,
+     "visits": 1353,
+     "policy": 0.6765,
+     "q": 0.4045
+    },
+    {
+     "action": 74,
+     "visits": 199,
+     "policy": 0.0995,
+     "q": 0.3862
+    },
+    {
+     "action": 80,
+     "visits": 112,
+     "policy": 0.056,
+     "q": 0.2695
+    },
+    {
+     "action": 78,
+     "visits": 104,
+     "policy": 0.052,
+     "q": 0.3294
+    },
+    {
+     "action": 77,
+     "visits": 86,
+     "policy": 0.043,
+     "q": 0.3202
+    },
+    {
+     "action": 75,
+     "visits": 65,
+     "policy": 0.0325,
+     "q": 0.2831
+    }
+   ],
+   "ok": null
+  }
+ ]
+}
