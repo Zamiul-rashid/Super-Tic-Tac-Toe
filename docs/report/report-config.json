@@ -23,6 +23,11 @@
       "label": "Iteration 4530 (new)",
       "key": "iter4530",
       "championship": "docs/report/evidence/iter4530-championship"
+    },
+    {
+      "label": "Iteration 6000 (new)",
+      "key": "iter6000",
+      "championship": "docs/report/evidence/iter6000-championship"
     }
   ],
   "spot_checks": [
@@ -31,5 +36,10 @@
       "key": "iter4530-s2000-utttai128",
       "championship": "docs/report/evidence/iter4530-s2000-utttai128"
     }
+  ],
+  "training_post4530": [
+    "runs/unet-pipeline-phase3-postfix/metrics.jsonl",
+    "runs/unet-pipeline-phase3b-w16/metrics.jsonl",
+    "runs/unet-pipeline-phase3c-reanalyse/metrics.jsonl"
   ]
 }

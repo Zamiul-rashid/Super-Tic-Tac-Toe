@@ -1,10 +1,10 @@
 {
-  "training_rows": 4007,
+  "training_rows": 5222,
   "first_iteration": 187,
-  "last_iteration": 4193,
-  "recorded_training_games": 64112,
-  "median_iteration_seconds": 19.41,
-  "evaluation_overhead_records": 13,
+  "last_iteration": 6000,
+  "recorded_training_games": 83552,
+  "median_iteration_seconds": 18.8,
+  "evaluation_overhead_records": 17,
   "experiments": [
     {
       "label": "Iteration 1806",
@@ -237,6 +237,73 @@
           "pair_bootstrap_ci95": [
             0.3541666666666667,
             0.4652777777777778
+          ]
+        }
+      }
+    },
+    {
+      "label": "Iteration 6000 (new)",
+      "key": "iter6000",
+      "candidate": "ckpt-iter6000-e943b3ba-s512",
+      "matchups": {
+        "cpp-alphabeta-d6": {
+          "wins": 19,
+          "draws": 0,
+          "losses": 1,
+          "score": 0.95,
+          "pair_bootstrap_ci95": [
+            0.85,
+            1.0
+          ]
+        },
+        "cpp-alphabeta-d4": {
+          "wins": 19,
+          "draws": 1,
+          "losses": 0,
+          "score": 0.975,
+          "pair_bootstrap_ci95": [
+            0.925,
+            1.0
+          ]
+        },
+        "tactical": {
+          "wins": 20,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "threat-block": {
+          "wins": 20,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "openspiel-mcts": {
+          "wins": 20,
+          "draws": 0,
+          "losses": 0,
+          "score": 1.0,
+          "pair_bootstrap_ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "utttai-128": {
+          "wins": 5,
+          "draws": 12,
+          "losses": 3,
+          "score": 0.55,
+          "pair_bootstrap_ci95": [
+            0.425,
+            0.7
           ]
         }
       }
