@@ -690,3 +690,39 @@ dependency the runtime image does not carry.
 - Nothing has been pushed to GHCR. The workflow exists and has never run.
   Package visibility must be set to public after the first push.
 - The UI has been exercised through its API, not clicked through in a browser.
+
+## 17. Design revision after the first real screenshot (2026-09-23)
+
+The first deployed build was screenshotted in a real browser and it was bad.
+The board had no drawn lines of its own -- §11 relied on the printed
+graph-paper rule to imply the grid, but the board's cells did not align with
+that rule, so the 3x3-of-3x3 structure was invisible: marks floating on a grid,
+and a red ring around nothing. The full-page grid also dominated in dark mode
+and related to nothing on the page. This is precisely the failure the
+frontend-design brief's "take screenshots to review" step exists to catch, and
+it was skipped because no screenshot path was set up. It is set up now (headless
+Chrome against the running container) and §11's direction has been replaced:
+
+- **The printed grid is gone.** The surface is a flat colour. The paper is
+  conveyed by the drawing on it, not by a texture under it.
+- **The board is drawn as a #, never a box.** A light # inside each small board
+  and a heavy # for the big one, built with `:nth-child` borders on the right
+  and bottom edges only. This is how the game is actually drawn by hand, and it
+  is unmistakable at a glance.
+- **Dark mode is chalk on slate**, not blueprint. Without the grid, "blueprint"
+  had nothing left to say; slate is the other surface the game is really played
+  on and uses the same drawn-by-hand language.
+- **Colour means sides, not symbols.** Your marks are pencil (or white chalk),
+  the network's are ink (or blue chalk), whichever symbol each of you holds.
+  The margin log uses the same two colours.
+- **A decided board fades and the winner is drawn large over it** -- what you
+  do on paper -- rather than a flat fill.
+- **The title moved into the margin** above the move log, where you would write
+  it. On phones it sits above the board.
+- **The page loads a game.** No start button, and a refresh resumes the game in
+  progress via `sessionStorage` (server: `GET /api/game/{id}` now returns
+  `human_side` and `history`).
+
+Kept from §11: one typeface, hand-drawn SVG marks, the red pencil loop as the
+sole bold element and the page's only non-user-triggered motion, the marginal
+move log, and the ban on paper kitsch.

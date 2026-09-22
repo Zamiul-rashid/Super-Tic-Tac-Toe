@@ -110,7 +110,10 @@ def create_app(evaluator=None, tiers=None, store=None):
 
     @app.get("/api/game/{session_id}")
     def read_game(session=Depends(session_or_404)):
+        # Enough to rebuild the page after a refresh: whose seat, and every
+        # move so far (X moves first, so sides alternate from index 0).
         return {"state": serialize(session.state), "difficulty": session.tier,
+                "human_side": session.human_side, "history": list(session.history),
                 "backend": session.backend}
 
     @app.post("/api/game/{session_id}/move")

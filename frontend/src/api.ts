@@ -52,6 +52,11 @@ export const newGame = (difficulty: string, humanSide: number) =>
     body: JSON.stringify({ difficulty, human_side: humanSide }),
   })
 
+export const getGame = (session: string) =>
+  request<{ state: GameState; difficulty: string; human_side: number; history: number[] }>(
+    `/api/game/${session}`,
+  )
+
 export const playMove = (session: string, action: number) =>
   request<{ state: GameState; engine_action: number | null }>(
     `/api/game/${session}/move`,

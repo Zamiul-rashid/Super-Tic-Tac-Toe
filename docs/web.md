@@ -96,7 +96,7 @@ never decides legality itself.
 ```
 GET  /api/health
 POST /api/game                 {difficulty, human_side}  -> {session, state, engine_action}
-GET  /api/game/{session}                                 -> {state}
+GET  /api/game/{session}          -> {state, difficulty, human_side, history, backend}
 POST /api/game/{session}/move  {action}                  -> {state, engine_action}
 DELETE /api/game/{session}
 ```
@@ -109,6 +109,11 @@ DELETE /api/game/{session}
 | Move in a finished game | 409 |
 | Body over 4 KiB | 413 |
 | Concurrent-game cap reached | 429 |
+
+The page remembers its game in `sessionStorage`, so a refresh resumes it; an
+expired game quietly starts a fresh one. Two query parameters exist for
+previews: `?session=<id>` opens an existing game, and `?theme=light|dark`
+forces a surface instead of following the OS.
 
 ## Using your own checkpoint
 

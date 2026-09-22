@@ -108,6 +108,14 @@ class MoveTests(unittest.TestCase):
             self.assertEqual(state["forced"], target)
             self.assertTrue(all(a // 9 == target for a in state["legal"]))
 
+    def test_reading_a_game_returns_what_a_refresh_needs(self):
+        self.client.post(f"/api/game/{self.session}/move", json={"action": 40})
+        body = self.client.get(f"/api/game/{self.session}").json()
+        self.assertEqual(body["human_side"], 1)
+        self.assertEqual(body["difficulty"], "casual")
+        self.assertEqual(body["history"][0], 40)
+        self.assertEqual(len(body["history"]), 2)   # your move, then the network's
+
     def test_unknown_session_is_404(self):
         response = self.client.post("/api/game/nope/move", json={"action": 0})
         self.assertEqual(response.status_code, 404)
