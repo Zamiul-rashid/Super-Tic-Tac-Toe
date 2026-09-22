@@ -8,7 +8,7 @@ EXT_SUFFIX ?= $(shell $(PYTHON) -c "import sysconfig; print(sysconfig.get_config
 
 GIT_REV ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_ID ?= $(shell date -u +'%Y%m%d%H%M%S')_$(GIT_REV)
-VERSION ?= 0.9.0
+VERSION ?= 1.1.0
 
 CPP_DEFINES = -DSTTT_CPP_VERSION=\"$(VERSION)\" \
               -DSTTT_BUILD_ID=\"$(BUILD_ID)\" \

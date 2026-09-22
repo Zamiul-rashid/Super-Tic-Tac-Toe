@@ -1,3 +1,5 @@
+# Build the image from this checkout. Most people want the published image
+# instead: `docker compose up` from the repository root (see ../compose.yaml).
 services:
   sttt:
     build:

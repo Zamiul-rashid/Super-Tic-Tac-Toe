@@ -60,7 +60,7 @@ jobs:
           for i in $(seq 30); do
             curl -sf localhost:8000/api/health >/dev/null && break || sleep 2
           done
-          python - <<'PY'
+          python3 - <<'PY'
           import random, sys, urllib.request, json
           def call(path, body=None):
               data = json.dumps(body).encode() if body is not None else None
@@ -83,12 +83,12 @@ jobs:
           docker rm -f smoke
 
   publish:
-    needs: build
+    needs: [build, tests]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: write   # the release
+      packages: write   # the image
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -115,6 +115,31 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
+
+      # The tag is the release. Notes lead with the one command that matters.
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE }}
+        run: |
+          image="$(echo "$IMAGE_REF" | tr '[:upper:]' '[:lower:]')"
+          version="${GITHUB_REF_NAME#v}"
+          cat > notes.md <<EOF
+          Play Ultimate Tic-Tac-Toe in your browser against the iteration-6000 self-play network.
+
+          \`\`\`bash
+          docker run -p 8000:8000 --cpus 4 ${image}:${version}
+          \`\`\`
+
+          Then open http://localhost:8000. One CPU image, ~385 MB: the network as ONNX, the native C++ search, and the board UI. No GPU, no PyTorch, no account.
+
+          Also tagged \`${image}:latest\`. Full instructions, configuration and limits: [docs/web.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/web.md).
+          EOF
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME — self-hosted web frontend" \
+            --notes-file notes.md \
+            --generate-notes
 
   tests:
     runs-on: ubuntu-latest

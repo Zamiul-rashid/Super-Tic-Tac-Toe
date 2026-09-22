@@ -19,13 +19,66 @@ The console game is available as `sttt` after installation.
 
 ## Play it in a browser
 
+A self-hosted container: the iteration-6000 network, the native C++ search, and
+a board UI. One CPU image, about 385 MB. No GPU, no PyTorch, no account.
+
+### Run the published image
+
 ```bash
-docker run -p 8000:8000 --cpus 4 ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
+docker run -d --name sttt -p 8000:8000 --cpus 4 \
+  ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
 ```
 
-A 385 MB self-hosted container: the iteration-6000 network, the native search,
-and a board UI. No GPU and no PyTorch — inference runs on ONNX Runtime. See
-[docs/web.md](docs/web.md).
+Open <http://localhost:8000>. To play from another device on your network, use
+this machine's address instead of `localhost` — the container listens on every
+interface. Stop it with `docker rm -f sttt`.
+
+### Run with Docker Compose
+
+From a clone of this repository:
+
+```bash
+docker compose up -d        # pulls ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
+docker compose logs -f      # follow
+docker compose down         # stop
+```
+
+The root [compose.yaml](compose.yaml) pins the thread count and the concurrent
+game cap; edit it there.
+
+### Build from source
+
+```bash
+docker compose -f docker/docker-compose.yml up --build
+```
+
+This compiles the native search, builds the React bundle, and packages the
+converted network from `models/`. Nothing is downloaded from a registry.
+
+### Configure
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `STTT_WEB_THREADS` | `4` | Threads for inference. Left unset, ONNX Runtime takes every core. |
+| `STTT_WEB_MAX_SESSIONS` | `8` | Concurrent games before new ones are refused. |
+| `STTT_WEB_SESSION_TTL` | `1800` | Seconds an idle game is kept. |
+| `STTT_WEB_MODEL` | baked-in `model-6000.onnx` | Path to a different `.onnx` (mount it). |
+
+Pass them with `-e` to `docker run` or under `environment:` in compose.
+
+### Difficulty
+
+Four tiers, all on CPU: Casual (128 simulations, ~30 ms a move), Standard (512,
+~100 ms), Strong (2048, ~350 ms) and Championship (4096, ~600 ms). Standard is
+the exact configuration the network won its championship at.
+
+### Good to know
+
+- The page keeps your game across a refresh.
+- There is no login. Run it on your own machine or a trusted network; put a
+  reverse proxy in front before exposing it to the internet.
+- linux/amd64 only. Bringing your own checkpoint, the HTTP API, and the rest are
+  in [docs/web.md](docs/web.md).
 
 ## Stable commands
 

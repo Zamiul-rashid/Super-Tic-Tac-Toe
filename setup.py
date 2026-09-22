@@ -15,7 +15,7 @@ def get_git_rev() -> str:
 
 git_rev = get_git_rev()
 build_id = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}_{git_rev}"
-version = "0.9.0"
+version = "1.1.0"
 
 cflags = ["-O3", "-march=native", "-Wall", "-Wextra", "-Werror", "-std=c++17", "-fPIC", "-pthread"]
 py_include = sysconfig.get_path("include")
@@ -47,7 +47,7 @@ if os.path.exists("cpp/src/python_module.cpp") and os.path.exists("cpp/src/sttt_
 
 setup(
     name="STTT",
-    version="0.9",
+    version="1.1.0",
     description='CLI implementation of the game "Super Tic Tac Toe" written in python',
     packages=['sttt'],
     ext_modules=ext_modules,
