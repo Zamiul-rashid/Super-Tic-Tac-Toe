@@ -1,0 +1,221 @@
+/* Graph-paper duel.
+ *
+ * Light mode is the notebook; dark mode is the blueprint -- the same artefact
+ * seen the other way round, not a recoloured theme. The paper is conveyed by
+ * grid geometry alone: no texture, no noise, no drop shadow under the sheet,
+ * no torn edges. --circle is the entire boldness budget and appears on exactly
+ * one element.
+ */
+:root {
+  --ground: #FBFAF6;
+  --rule: #D3E4EA;
+  --rule-major: #A8CBD8;
+  --graphite: #3A3F46;
+  --ink: #17365D;
+  --circle: #C2352B;
+  --dead: #E4E6E7;
+  --cell: 34px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #0E2233;
+    --rule: #1C3C55;
+    --rule-major: #2E5A79;
+    --graphite: #C8D6DF;
+    --ink: #7FC4E8;
+    --circle: #FF6B5A;
+    --dead: #16304A;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --ground: #0E2233;
+  --rule: #1C3C55;
+  --rule-major: #2E5A79;
+  --graphite: #C8D6DF;
+  --ink: #7FC4E8;
+  --circle: #FF6B5A;
+  --dead: #16304A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--ground);
+  /* The printed rule. 4mm squares, every third line heavier, as on the real
+   * thing -- and it lines up with the 3x3 structure of the game. */
+  background-image:
+    linear-gradient(var(--rule-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-major) 1px, transparent 1px),
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size: 102px 102px, 102px 102px, 34px 34px, 34px 34px;
+  color: var(--graphite);
+  font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sheet {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 32px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 16px 72px;
+}
+
+/* --- the margin, where you write things down ------------------------- */
+
+.margin { border-right: 1px solid var(--rule-major); padding-right: 20px; }
+
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.9;
+  text-align: right;
+}
+.log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-you { color: var(--graphite); }
+.log-net { color: var(--ink); }
+.log-n {
+  display: inline-block;
+  min-width: 2.1em;
+  margin-right: 6px;
+  opacity: .45;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* --- the board ------------------------------------------------------- */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 372px;
+}
+.board-empty { aspect-ratio: 1; opacity: .3; }
+
+.local {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 4px;
+}
+.local-closed { background: var(--dead); }
+.local-open, .local-forced { }
+
+.cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+  color: inherit;
+}
+.cell-open { cursor: pointer; }
+.cell-open:hover::after, .cell-open:focus-visible::after {
+  content: '';
+  width: 42%;
+  height: 42%;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .16;
+}
+.cell:focus-visible { outline: 2px solid var(--circle); outline-offset: -2px; }
+
+.mark { width: 78%; height: 78%; fill: none; stroke-linecap: round; }
+.mark-x { stroke: var(--graphite); stroke-width: 9; }
+.mark-o { stroke: var(--ink); stroke-width: 9; }
+
+.claim {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.claim .mark { width: 62%; height: 62%; stroke-width: 6; opacity: .9; }
+
+/* The one animation on the page: the circle redrawing when the network's
+ * reply sends you somewhere new. */
+.pencil-circle {
+  position: absolute;
+  inset: -7px;
+  width: calc(100% + 14px);
+  height: calc(100% + 14px);
+  fill: none;
+  stroke: var(--circle);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  pointer-events: none;
+  stroke-dasharray: 360;
+  animation: draw .32s ease-out forwards;
+}
+@keyframes draw { from { stroke-dashoffset: 360; } to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pencil-circle { animation: none; stroke-dashoffset: 0; }
+}
+
+/* --- words ----------------------------------------------------------- */
+
+.status { margin: 26px 0 0; font-size: 18px; font-weight: 600; max-width: 62ch; }
+.title { margin: 34px 0 6px; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+.blurb { margin: 0; max-width: 62ch; font-size: 15px; opacity: .78; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-end; margin-top: 30px; }
+fieldset { border: 0; margin: 0; padding: 0; }
+legend { font-size: 13px; opacity: .6; padding: 0 0 6px; }
+
+.tiers { display: flex; flex-wrap: wrap; gap: 4px; }
+.tier {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.tier svg { width: 52px; height: 11px; fill: none; stroke: var(--graphite); stroke-linecap: round; opacity: .5; }
+.tier-on { border-color: var(--rule-major); }
+.tier-on svg { opacity: 1; }
+.tier:disabled { cursor: progress; opacity: .5; }
+
+.seats { display: flex; gap: 4px; }
+.seat, .restart {
+  padding: 6px 12px;
+  border: 1px solid var(--rule-major);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.seat-on { border-color: var(--graphite); }
+.seat:disabled, .restart:disabled { cursor: progress; opacity: .5; }
+
+.colophon { margin: 28px 0 0; font-size: 13px; opacity: .55; }
+
+@media (max-width: 640px) {
+  .sheet { grid-template-columns: 1fr; gap: 20px; padding: 24px 16px 56px; }
+  .margin { order: 2; border-right: 0; border-top: 1px solid var(--rule-major); padding: 14px 0 0; }
+  .log { text-align: left; max-height: 5.7em; overflow: hidden; }
+  .board { max-width: none; }
+}

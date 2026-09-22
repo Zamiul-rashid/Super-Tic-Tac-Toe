@@ -1,0 +1,131 @@
+name: image
+
+on:
+  push:
+    tags: ["v*"]
+    branches: ["frontend"]
+  pull_request:
+    branches: ["frontend"]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build (load locally so the smoke test runs before anything is pushed)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          tags: sttt:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # The image is built on GitHub's CPU and pulled onto strangers' CPUs. If
+      # the -march override ever regresses to `native`, the published image
+      # starts dying with SIGILL on older hardware, for some users only.
+      - name: Assert the native search is built for a portable baseline
+        run: |
+          docker run --rm sttt:ci python -c "
+          import sys; sys.path.append('/app/cpp')
+          import sttt_cpp
+          flags = sttt_cpp.COMPILER_FLAGS
+          assert 'x86-64-v2' in flags, flags
+          assert 'march=native' not in flags, flags
+          print('compiler flags OK:', flags)"
+
+      # The whole point of the ONNX runtime is that torch is not in the image.
+      - name: Assert PyTorch is absent
+        run: |
+          if docker run --rm sttt:ci python -c "import torch" 2>/dev/null; then
+            echo "PyTorch is in the image; the size win is gone" && exit 1
+          fi
+          echo "no torch, as intended"
+
+      - name: Smoke test -- play a full game against the real network
+        run: |
+          docker run -d --name smoke -p 8000:8000 sttt:ci
+          for i in $(seq 30); do
+            curl -sf localhost:8000/api/health >/dev/null && break || sleep 2
+          done
+          python - <<'PY'
+          import random, sys, urllib.request, json
+          def call(path, body=None):
+              data = json.dumps(body).encode() if body is not None else None
+              request = urllib.request.Request(f"http://localhost:8000{path}", data=data,
+                                               headers={"Content-Type": "application/json"})
+              return json.load(urllib.request.urlopen(request, timeout=60))
+          health = call("/api/health")
+          assert health["model"]["arch"] == "unet", health
+          game = call("/api/game", {"difficulty": "casual"})
+          session, state = game["session"], game["state"]
+          random.seed(0)
+          for _ in range(81):
+              if state["result"] is not None:
+                  print("game finished, result", state["result"]); sys.exit(0)
+              state = call(f"/api/game/{session}/move",
+                           {"action": random.choice(state["legal"])})["state"]
+          sys.exit("game never terminated")
+          PY
+          docker logs smoke | tail -20
+          docker rm -f smoke
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          # linux/amd64 only: the native search is built with an x86-64 -march
+          # baseline and there is no arm64 story yet. See docs/web.md.
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy onnxruntime fastapi uvicorn httpx torch onnxscript --extra-index-url https://download.pytorch.org/whl/cpu
+      - run: make -C cpp sttt_cpp.so PYTHON=python3
+      # Parity is the only thing standing between "the container plays the
+      # network we measured" and "the container plays something else".
+      - run: python -m unittest tests.test_onnx_parity tests.test_web_api tests.test_encoding -v

@@ -3,6 +3,7 @@
 ## Active guides
 
 - [Research report](report/README.md) — end-to-end explanation, literature review, methodology, and evidence-backed comparisons with uttt.ai, OpenSpiel, and AlphaBeta.
+- [Web frontend](web.md) — self-hosted Docker container for playing the network in a browser.
 - [Training and evaluation](training.md) — launchers, bootstrap flow, population curriculum, and evaluation rules.
 - [Testing](testing.md) — test architecture and verification commands.
 - [C++ engine](engineering/cpp-engine.md) — native design and integration.

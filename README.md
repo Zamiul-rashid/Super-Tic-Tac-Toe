@@ -17,6 +17,16 @@ python -m unittest discover -s tests
 
 The console game is available as `sttt` after installation.
 
+## Play it in a browser
+
+```bash
+docker run -p 8000:8000 --cpus 4 ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
+```
+
+A 385 MB self-hosted container: the iteration-6000 network, the native search,
+and a board UI. No GPU and no PyTorch — inference runs on ONNX Runtime. See
+[docs/web.md](docs/web.md).
+
 ## Stable commands
 
 Resume a full checkpoint into a new run directory:

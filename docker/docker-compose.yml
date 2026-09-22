@@ -1,0 +1,13 @@
+services:
+  sttt:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: sttt:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # Left unset, ONNX Runtime takes every core on the host.
+      STTT_WEB_THREADS: "4"
+      STTT_WEB_MAX_SESSIONS: "8"
+    restart: unless-stopped

@@ -19,6 +19,11 @@ This file applies to the entire repository. Follow direct user instructions firs
 | `sttt/evaluation.py`, `sttt/tournament.py`, `sttt/reports.py` | Match evaluation, championships, and result reporting. |
 | `sttt/bootstrap.py` | Runtime/bootstrap helpers. |
 | `cpp/` | Native engine source, build files, and native benchmarks/tests. |
+| `sttt/web/` | FastAPI server, ONNX evaluator, and game sessions for the self-hosted browser frontend (`docs/web.md`). |
+| `sttt/encoding.py` | Torch-free state encoding shared by training, search, and the ONNX serving path. `learning.py` re-exports it. |
+| `frontend/` | Vite + React source for the board UI. Builds into `sttt/web/static/`. |
+| `docker/` | Dockerfile, compose file, and serving requirements for the self-hosted image. |
+| `models/` | Converted `.onnx` networks plus their provenance sidecars. Produced by `scripts/export_onnx.py`. |
 | `configs/` | Versioned runtime configuration. `configs/population/*.json` is the source of truth for named populations. |
 | `scripts/` | Reusable operational entry points for training, evaluation, readiness checks, and benchmarks. |
 | `tests/` | Automated Python tests. Add regression coverage here for behavioral changes. |
