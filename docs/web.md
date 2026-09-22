@@ -4,7 +4,7 @@ Play Ultimate Tic-Tac-Toe in a browser against the iteration-6000 self-play
 network. One container, no GPU, no PyTorch.
 
 ```bash
-docker run -p 8000:8000 --cpus 4 ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
+docker run -p 8000:8000 --cpus 4 ghcr.io/zamiul-rashid/moja:latest
 ```
 
 Then open <http://localhost:8000>.
@@ -128,7 +128,7 @@ python scripts/export_onnx.py \
 docker run -p 8000:8000 \
     -v "$PWD/models:/models:ro" \
     -e STTT_WEB_MODEL=/models/model-9000.onnx \
-    ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
+    ghcr.io/zamiul-rashid/moja:latest
 ```
 
 `export_onnx.py` refuses to write anything if the exported network disagrees with

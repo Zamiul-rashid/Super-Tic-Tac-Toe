@@ -5,7 +5,7 @@
 # To build from source instead: docker compose -f docker/docker-compose.yml up --build
 services:
   sttt:
-    image: ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
+    image: ghcr.io/zamiul-rashid/moja:latest
     container_name: sttt
     ports:
       - "8000:8000"
