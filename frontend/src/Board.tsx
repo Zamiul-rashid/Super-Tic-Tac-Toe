@@ -32,7 +32,6 @@ function PencilLoop() {
     <svg className="pencil-loop" viewBox="0 0 120 120" aria-hidden="true">
       <path
         pathLength={100}
-        vectorEffect="non-scaling-stroke"
         d="M 24 12 C 48 7, 78 6, 104 11 C 112 14, 115 22, 114 34 C 116 60, 115 84, 110 106 C 106 113, 96 114, 84 113 C 60 116, 36 115, 18 111 C 9 108, 6 98, 7 86 C 4 62, 5 38, 9 20 C 11 12, 18 9, 30 9 C 42 8, 56 8, 66 9"
       />
     </svg>
