@@ -5,8 +5,8 @@ through self-play — playable in your browser from a single Docker container �
 plus the training, search and evaluation pipeline that produced it.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Zamiul-rashid/Super-Tic-Tac-Toe/frontend/docs/images/board-dark.png">
-  <img src="https://raw.githubusercontent.com/Zamiul-rashid/Super-Tic-Tac-Toe/frontend/docs/images/board-light.png" alt="A game in progress against the network: a hand-drawn 3x3-of-3x3 board, the move log in the margin, and a red pencil loop around the board you must play in." width="820">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Zamiul-rashid/Super-Tic-Tac-Toe/main/docs/images/board-dark.png">
+  <img src="https://raw.githubusercontent.com/Zamiul-rashid/Super-Tic-Tac-Toe/main/docs/images/board-light.png" alt="A game in progress against the network: a hand-drawn 3x3-of-3x3 board, the move log in the margin, and a red pencil loop around the board you must play in." width="820">
 </picture>
 
 - **Play it** — one command, no GPU, no account, ~385 MB. [Jump to Quick start.](#quick-start)
