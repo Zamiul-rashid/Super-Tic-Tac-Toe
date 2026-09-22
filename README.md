@@ -26,7 +26,7 @@ a board UI. One CPU image, about 385 MB. No GPU, no PyTorch, no account.
 
 ```bash
 docker run -d --name sttt -p 8000:8000 --cpus 4 \
-  ghcr.io/zamiul-rashid/moja:latest
+  ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
 ```
 
 Open <http://localhost:8000>. To play from another device on your network, use
@@ -38,7 +38,7 @@ interface. Stop it with `docker rm -f sttt`.
 From a clone of this repository:
 
 ```bash
-docker compose up -d        # pulls ghcr.io/zamiul-rashid/moja:latest
+docker compose up -d        # pulls ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
 docker compose logs -f      # follow
 docker compose down         # stop
 ```
