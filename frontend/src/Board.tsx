@@ -6,8 +6,8 @@ import type { GameState } from './api'
 function Cross({ className }: { className: string }) {
   return (
     <svg className={className} viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M22 19 C 40 38, 62 60, 79 82" />
-      <path d="M80 21 C 61 41, 39 61, 21 80" />
+      <path pathLength={100} d="M22 19 C 40 38, 62 60, 79 82" />
+      <path pathLength={100} d="M80 21 C 61 41, 39 61, 21 80" />
     </svg>
   )
 }
@@ -15,7 +15,7 @@ function Cross({ className }: { className: string }) {
 function Ring({ className }: { className: string }) {
   return (
     <svg className={className} viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M68 26 C 44 12, 18 30, 20 53 C 22 77, 50 90, 70 79 C 88 69, 89 40, 72 27" />
+      <path pathLength={100} d="M68 26 C 44 12, 18 30, 20 53 C 22 77, 50 90, 70 79 C 88 69, 89 40, 72 27" />
     </svg>
   )
 }
@@ -32,7 +32,6 @@ function PencilLoop() {
     <svg className="pencil-loop" viewBox="0 0 120 120" aria-hidden="true">
       <path
         pathLength={100}
-        vectorEffect="non-scaling-stroke"
         d="M 24 12 C 48 7, 78 6, 104 11 C 112 14, 115 22, 114 34 C 116 60, 115 84, 110 106 C 106 113, 96 114, 84 113 C 60 116, 36 115, 18 111 C 9 108, 6 98, 7 86 C 4 62, 5 38, 9 20 C 11 12, 18 9, 30 9 C 42 8, 56 8, 66 9"
       />
     </svg>
@@ -45,9 +44,10 @@ type Props = {
   onPlay: (action: number) => void
   busy: boolean
   lastEngineAction: number | null
+  moveCount: number
 }
 
-export function Board({ state, humanSide, onPlay, busy, lastEngineAction }: Props) {
+export function Board({ state, humanSide, onPlay, busy, lastEngineAction, moveCount }: Props) {
   const legal = new Set(state.legal)
   const playable = state.result === null && !busy
   const sideClass = (value: number) => (value === humanSide ? 'mark-you' : 'mark-net')
@@ -86,7 +86,9 @@ export function Board({ state, humanSide, onPlay, busy, lastEngineAction }: Prop
                 </button>
               )
             })}
-            {forced && <PencilLoop />}
+            {/* Keyed on the move count so the loop redraws every turn, even
+                when the network sends you back to the same board. */}
+            {forced && <PencilLoop key={moveCount} />}
             {(won === 1 || won === -1) && (
               <div className="claim"><Mark value={won} className={`mark ${sideClass(won)}`} /></div>
             )}

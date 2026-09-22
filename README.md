@@ -1,164 +1,145 @@
 # Super Tic-Tac-Toe
 
-Ultimate Tic-Tac-Toe with a Python rules engine, native C++ search backend,
-neural self-play training, external-engine adapters, and reproducible tournament
-evaluation.
+Ultimate Tic-Tac-Toe against a neural network that taught itself the game
+through self-play — playable in your browser from a single Docker container —
+plus the training, search and evaluation pipeline that produced it.
 
-## Setup
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Zamiul-rashid/Super-Tic-Tac-Toe/main/docs/images/board-dark.png">
+  <img src="https://raw.githubusercontent.com/Zamiul-rashid/Super-Tic-Tac-Toe/main/docs/images/board-light.png" alt="A game in progress against the network: a hand-drawn 3x3-of-3x3 board, the move log in the margin, and a red pencil loop around the board you must play in." width="820">
+</picture>
 
-```bash
-conda create -n sttt python=3.14 pip -y
-conda activate sttt
-python -m pip install -r requirements.txt
-python -m pip install -e . --no-deps
-make -C cpp
-python -m unittest discover -s tests
-```
+- **Play it** — one command, no GPU, no account, ~385 MB. [Jump to Quick start.](#quick-start)
+- **Train and evaluate** — the self-play pipeline, native C++ search, and tournament tooling. [Jump to Development.](#development)
 
-The console game is available as `sttt` after installation.
+---
 
-## Play it in a browser
-
-A self-hosted container: the iteration-6000 network, the native C++ search, and
-a board UI. One CPU image, about 385 MB. No GPU, no PyTorch, no account.
-
-### Run the published image
+## Quick start
 
 ```bash
 docker run -d --name sttt -p 8000:8000 --cpus 4 \
   ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
 ```
 
-Open <http://localhost:8000>. To play from another device on your network, use
-this machine's address instead of `localhost` — the container listens on every
-interface. Stop it with `docker rm -f sttt`.
+Open <http://localhost:8000> and play. To reach it from another device on your
+network, use this machine's address instead of `localhost`.
 
-### Run with Docker Compose
+Take it down when you're done:
+
+```bash
+docker rm -f sttt                                          # stop and remove the container
+docker rmi ghcr.io/zamiul-rashid/super-tic-tac-toe:latest  # (optional) delete the image too
+```
+
+### With Docker Compose
 
 From a clone of this repository:
 
 ```bash
-docker compose up -d        # pulls ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
-docker compose logs -f      # follow
-docker compose down         # stop
+docker compose up -d      # start (pulls the published image)
+docker compose logs -f    # watch the logs
+docker compose down       # stop and remove
 ```
 
-The root [compose.yaml](compose.yaml) pins the thread count and the concurrent
-game cap; edit it there.
+The root [compose.yaml](compose.yaml) is where the thread count and the game
+cap live. Add `--rmi all` to `down` to delete the image as well.
 
-### Build from source
+### Build it yourself
 
 ```bash
 docker compose -f docker/docker-compose.yml up --build
 ```
 
-This compiles the native search, builds the React bundle, and packages the
-converted network from `models/`. Nothing is downloaded from a registry.
+Compiles the native search, builds the React bundle, and packages the converted
+network from [`models/`](models/). Nothing is pulled from a registry.
 
-### Configure
+### Settings
 
-| Variable | Default | Meaning |
+Pass these with `-e` to `docker run`, or under `environment:` in compose.
+
+| Variable | Default | What it does |
 | --- | --- | --- |
-| `STTT_WEB_THREADS` | `4` | Threads for inference. Left unset, ONNX Runtime takes every core. |
-| `STTT_WEB_MAX_SESSIONS` | `8` | Concurrent games before new ones are refused. |
+| `STTT_WEB_THREADS` | `4` | Inference threads. **Set this** — left unset, ONNX Runtime takes every core. |
+| `STTT_WEB_MAX_SESSIONS` | `8` | Games in progress before new ones are refused. |
 | `STTT_WEB_SESSION_TTL` | `1800` | Seconds an idle game is kept. |
-| `STTT_WEB_MODEL` | baked-in `model-6000.onnx` | Path to a different `.onnx` (mount it). |
+| `STTT_WEB_MODEL` | built-in `model-6000.onnx` | A different network to play (mount it; see [docs/web.md](docs/web.md)). |
 
-Pass them with `-e` to `docker run` or under `environment:` in compose.
+### How strong is it?
 
-### Difficulty
+Four opponents, all on CPU. Pick one in the page.
 
-Four tiers, all on CPU: Casual (128 simulations, ~30 ms a move), Standard (512,
-~100 ms), Strong (2048, ~350 ms) and Championship (4096, ~600 ms). Standard is
-the exact configuration the network won its championship at.
+| Opponent | Search per move | Thinks for |
+| --- | --- | --- |
+| Casual | 128 simulations | ~30 ms |
+| Standard | 512 simulations | ~100 ms |
+| Strong | 2048 simulations | ~350 ms |
+| Championship | 4096 simulations | ~600 ms |
 
-### Good to know
+**Standard** is the exact configuration the network won its championship at
+against AlphaBeta, uttt.ai and OpenSpiel opponents — see the
+[research report](docs/report/README.md).
 
-- The page keeps your game across a refresh.
-- There is no login. Run it on your own machine or a trusted network; put a
-  reverse proxy in front before exposing it to the internet.
-- linux/amd64 only. Bringing your own checkpoint, the HTTP API, and the rest are
-  in [docs/web.md](docs/web.md).
+### Worth knowing
 
-## Stable commands
+- Refreshing the page keeps your game.
+- There is **no login**. Run it on your own machine or a trusted network, and
+  put a reverse proxy in front before exposing it to the internet.
+- The image is linux/amd64 only.
+- Everything else — the HTTP API, bringing your own checkpoint, how the image is
+  built — is in [docs/web.md](docs/web.md).
 
-Resume a full checkpoint into a new run directory:
+---
+
+## Development
+
+### Set up
 
 ```bash
+conda create -n sttt python=3.14 pip -y
+conda activate sttt
+python -m pip install -r requirements.txt
+python -m pip install -e . --no-deps
+make -C cpp                            # native search engine
+python -m unittest discover -s tests   # 680+ tests
+```
+
+The original console game is available as `sttt` after installation.
+
+### Train
+
+Everything goes through two launchers. They take paths and settings as
+arguments; a new checkpoint or output directory never needs a new script.
+
+```bash
+# Resume a checkpoint into a new run directory
 scripts/train.sh \
   --checkpoint runs/source/latest.pt \
   --output runs/continuation \
   --iterations 1000 \
   --lr-horizon 5000
-```
 
-Run the grand championship and AlphaBeta depth-10 sweep:
-
-```bash
+# Grand championship + AlphaBeta depth-10 sweep
 scripts/evaluate.sh \
   --checkpoint runs/continuation/latest.pt \
   --output runs/continuation/evaluation
 ```
 
-These launchers accept paths and settings as arguments. A checkpoint or output
-change should never require another script. See [scripts/README.md](scripts/README.md)
-for all modes and examples.
-
-## Training pipeline
-
-The production launcher freezes the source checkpoint before loading it, refuses
+The training launcher freezes the source checkpoint before loading it, refuses
 to write into an existing run, and defaults to CUDA, FP16, the native backend,
-cosine learning-rate scheduling, population training, and symmetry augmentation.
+cosine learning-rate scheduling, population training and symmetry augmentation.
 
-To bootstrap a new U-Net before online self-play:
+To bootstrap a fresh U-Net before online self-play:
 
 ```bash
-python -m sttt.ai generate-dataset \
-  --output data/bootstrap --games 50000 --workers 8
-
-python -m sttt.ai pretrain \
-  --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
-
-scripts/train.sh \
-  --checkpoint runs/bootstrap/latest.pt \
-  --output runs/main
+python -m sttt.ai generate-dataset --output data/bootstrap --games 50000 --workers 8
+python -m sttt.ai pretrain --dataset data/bootstrap --output runs/bootstrap --arch unet --fp16
+scripts/train.sh --checkpoint runs/bootstrap/latest.pt --output runs/main
 ```
 
-See [docs/training.md](docs/training.md) for the curriculum, checkpoint rules,
-configuration, and evaluation guidance.
+Details: [docs/training.md](docs/training.md) for the curriculum and checkpoint
+rules, [scripts/README.md](scripts/README.md) for every launcher mode.
 
-## Repository layout
-
-| Path | Purpose |
-| --- | --- |
-| `sttt/` | Python game, search, training, evaluation, and adapters |
-| `cpp/` | Native bitboard engine, MCTS, bindings, and benchmarks |
-| `scripts/` | Stable launchers and reusable readiness/evaluation harnesses |
-| `configs/` | Versioned training configuration |
-| `engines/` | External-engine registry, wrappers, and vendored provenance |
-| `tests/` | Unit, integration, adversarial, native, and E2E tests |
-| `docs/` | Active documentation and historical engineering records |
-| `runs/` | Generated checkpoints, metrics, and evaluation artifacts; ignored by Git |
-| `data/` | Generated bootstrap datasets; ignored by Git |
-
-## Documentation
-
-- [Research report: methodology, literature, and measured results](docs/report/README.md)
-- [Documentation index](docs/README.md)
-- [Training and evaluation](docs/training.md)
-- [Testing](docs/testing.md)
-- [C++ engine design](docs/engineering/cpp-engine.md)
-- [Native benchmark evidence](docs/engineering/cpp-benchmarks.md)
-- [External engines](engines/README.md)
-
-Historical requests, readiness ledgers, handovers, and implementation plans are
-kept under [`docs/history/`](docs/history/) so they remain auditable without
-cluttering the operational documentation.
-
-## Direct CLI
-
-The launchers cover repeatable production workflows. Lower-level commands remain
-available for focused work:
+### Lower-level commands
 
 ```bash
 python -m sttt.ai --help
@@ -168,5 +149,49 @@ python -m sttt.ai tournament --checkpoint runs/main/latest.pt \
 python -m sttt.visualize runs/main --output runs/main/charts
 ```
 
-Evaluation ratings are local to the selected pool, budgets, and opening corpus.
-Use mirrored openings and identical settings when comparing checkpoints.
+Ratings are local to the chosen pool, budgets and opening corpus; compare
+checkpoints with mirrored openings and identical settings.
+
+### Ship the network to the browser
+
+The container serves the network through ONNX Runtime and carries no PyTorch.
+Converting a checkpoint is one command, and it refuses to write anything unless
+the exported network agrees with the original:
+
+```bash
+python scripts/export_onnx.py \
+  --checkpoint runs/main/model-9000.pt \
+  --output models/model-9000.onnx
+```
+
+---
+
+## Repository layout
+
+| Path | What's there |
+| --- | --- |
+| `sttt/` | Rules, search, training, evaluation, adapters |
+| `sttt/web/` | The browser frontend's server: FastAPI, ONNX evaluator, game sessions |
+| `frontend/` | The board UI (Vite + React) |
+| `cpp/` | Native bitboard engine, MCTS and Python bindings |
+| `docker/` | Dockerfile and build-from-source compose file |
+| `models/` | Converted `.onnx` networks with provenance sidecars |
+| `scripts/` | Launchers, the ONNX exporter, readiness and benchmark harnesses |
+| `configs/` | Versioned training and web configuration |
+| `engines/` | External-engine registry and wrappers |
+| `tests/` | Unit, integration, adversarial, native and end-to-end tests |
+| `docs/` | Documentation — start at [docs/README.md](docs/README.md) |
+| `runs/`, `data/` | Generated checkpoints, metrics, datasets; ignored by Git |
+
+## Documentation
+
+- [Web frontend](docs/web.md) — running, configuring and building the container; the HTTP API
+- [Research report](docs/report/README.md) — methodology, literature, measured results
+- [Training and evaluation](docs/training.md)
+- [Testing](docs/testing.md)
+- [C++ engine design](docs/engineering/cpp-engine.md) and [benchmarks](docs/engineering/cpp-benchmarks.md)
+- [External engines](engines/README.md)
+
+Historical plans, handovers and readiness ledgers live in
+[`docs/history/`](docs/history/); they explain how things got here and are not
+operating instructions.

@@ -200,7 +200,10 @@ button { font: inherit; color: inherit; }
   overflow: visible;
   fill: none;
   stroke: var(--circle);
-  stroke-width: 2.5px;
+  /* Path units, not px, and no non-scaling-stroke: with non-scaling-stroke
+   * Chrome measures the dash in screen pixels and ignores pathLength, so the
+   * 100-unit dash covered only part of the loop on a desktop-sized board. */
+  stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
@@ -208,10 +211,23 @@ button { font: inherit; color: inherit; }
 .pencil-loop path {
   stroke-dasharray: 100;
   stroke-dashoffset: 0;
-  animation: draw .38s ease-out;
+  /* Starts only after the network's mark has been written (below), and takes
+   * long enough to be watched: the point of the loop is that you see it move. */
+  animation: draw .7s ease-out .42s backwards;
 }
 @keyframes draw { from { stroke-dashoffset: 100; } }
-@media (prefers-reduced-motion: reduce) { .pencil-loop path { animation: none; } }
+
+/* The network's newest mark is written in stroke by stroke, not popped in. */
+.cell-latest .mark path {
+  stroke-dasharray: 100;
+  animation: write .3s ease-out backwards;
+}
+.cell-latest .mark path:nth-child(2) { animation-delay: .18s; }
+@keyframes write { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pencil-loop path, .cell-latest .mark path { animation: none; }
+}
 
 /* --- beneath the board ----------------------------------------------- */
 

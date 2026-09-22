@@ -103,12 +103,22 @@ export default function App() {
   }, [])
 
   async function play(action: number) {
-    if (!session) return
+    if (!session || !state) return
     setBusy(true)
     setError(null)
+    // Your mark goes down at once. The network's reply is held back for a
+    // beat even when the search answers in a tenth of a second: a reply that
+    // lands in the same frame as your own move cannot be seen as a reply.
+    const cells = state.cells.slice()
+    cells[action] = humanSide
+    setState({ ...state, cells, forced: -1, legal: [] })
+    setLastEngine(null)
     const entries = [{ action, side: humanSide }]
     try {
-      const result = await playMove(session, action)
+      const [result] = await Promise.all([
+        playMove(session, action),
+        new Promise((resolve) => setTimeout(resolve, 450)),
+      ])
       if (result.engine_action !== null) entries.push({ action: result.engine_action, side: -humanSide })
       setState(result.state)
       setLastEngine(result.engine_action)
@@ -147,7 +157,7 @@ export default function App() {
 
         {state ? (
           <Board state={state} humanSide={humanSide} onPlay={play} busy={busy}
-                 lastEngineAction={lastEngine} />
+                 lastEngineAction={lastEngine} moveCount={log.length} />
         ) : (
           <div className="board" aria-hidden="true">
             {Array.from({ length: 9 }, (_, b) => (
