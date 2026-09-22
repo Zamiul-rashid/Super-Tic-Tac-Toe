@@ -1,0 +1,24 @@
+# The build context must not carry the research artifacts: runs/ is ~7.8 GB and
+# .git ~264 MB. Without this file the context transfer alone kills the build.
+.git
+runs/
+data/
+tournaments/
+profiles/
+docs/report/
+engines/runtime/
+frontend/node_modules/
+frontend/dist/
+sttt/web/static/
+**/__pycache__/
+*.pyc
+*.so
+build/
+build_cmake/
+dist/
+STTT.egg-info/
+.venv/
+.serena/
+.superpowers/
+scratch/
+cpp/bench_main

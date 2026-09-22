@@ -30,14 +30,17 @@ def planes_from_flat(x):
     5 theirs, 6 drawn (boards, each tiled over its 3x3 cells); 7 forced board
     (ones over the forced mini-board, ones everywhere when any board is legal).
     """
-    n = x.shape[0]
-    cells = x[:, :243].reshape(n, 3, 81)
+    # -1 rather than a captured x.shape[0]: a traced batch size becomes a
+    # constant in the exported ONNX graph, so the model would only ever accept
+    # the batch it was exported with. leaf_batch varies per difficulty tier and
+    # the last batch of a search is partial. Identical arithmetic either way.
+    cells = x[:, :243].reshape(-1, 3, 81)
     grid = torch.empty_like(cells)
     grid[:, :, CELL_TO_GRID.to(x.device)] = cells
-    cells9 = grid.reshape(n, 3, 9, 9)
-    boards9 = x[:, 243:279].reshape(n, 4, 3, 3).repeat_interleave(3, 2).repeat_interleave(3, 3)
+    cells9 = grid.reshape(-1, 3, 9, 9)
+    boards9 = x[:, 243:279].reshape(-1, 4, 3, 3).repeat_interleave(3, 2).repeat_interleave(3, 3)
     forced = x[:, 279:289]
-    forced3 = forced[:, 1:].reshape(n, 1, 3, 3) + forced[:, :1].reshape(n, 1, 1, 1)
+    forced3 = forced[:, 1:].reshape(-1, 1, 3, 3) + forced[:, :1].reshape(-1, 1, 1, 1)
     forced9 = forced3.repeat_interleave(3, 2).repeat_interleave(3, 3)
     return torch.cat([cells9, boards9, forced9], dim=1)
 

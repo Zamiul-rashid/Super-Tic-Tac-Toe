@@ -1,0 +1,16 @@
+# Run the published image. From a clone of the repo:
+#
+#     docker compose up -d
+#
+# To build from source instead: docker compose -f docker/docker-compose.yml up --build
+services:
+  sttt:
+    image: ghcr.io/zamiul-rashid/super-tic-tac-toe:latest
+    container_name: sttt
+    ports:
+      - "8000:8000"
+    environment:
+      STTT_WEB_THREADS: "4"        # left unset, ONNX Runtime takes every core
+      STTT_WEB_MAX_SESSIONS: "8"   # concurrent games
+    cpus: 4
+    restart: unless-stopped

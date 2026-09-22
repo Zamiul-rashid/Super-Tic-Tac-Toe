@@ -14,3 +14,5 @@ profiles/
 scratch/
 build_cmake/
 cpp/bench_main
+node_modules/
+sttt/web/static/

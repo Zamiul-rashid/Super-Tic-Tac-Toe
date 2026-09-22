@@ -1,0 +1,8 @@
+# Serving dependencies. Note what is absent: PyTorch. Inference runs on ONNX
+# Runtime (~50 MB) rather than torch (~1.2 GB installed), which is most of the
+# difference between a ~250 MB image and a ~800 MB one. The .onnx is converted
+# ahead of time by scripts/export_onnx.py, outside this image.
+numpy==2.5.3
+onnxruntime==1.30.0
+fastapi==0.141.1
+uvicorn==0.53.0

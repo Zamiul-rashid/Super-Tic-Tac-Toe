@@ -1,0 +1,292 @@
+/* Pencil on paper; chalk on slate.
+ *
+ * The board is drawn by hand on a plain surface. Light mode is pencil on
+ * paper, dark mode is chalk on a slate board -- the two surfaces the game is
+ * actually played on, in the same drawn-by-hand language. No printed grid,
+ * no texture, no shadow: the surface is a flat colour and the board carries
+ * all the structure.
+ *
+ * On paper a tic-tac-toe board is a #, never a box. So: a light # inside each
+ * small board, a heavy # for the big one, marks by hand. Colour means sides,
+ * not symbols: your marks are the pencil, the network's are ink (or blue
+ * chalk), and the red pencil loop -- the one bold thing on the page -- marks
+ * the board you must play in.
+ */
+:root {
+  --ground: #FBFAF6;
+  --pen: #2A2F34;           /* heavy drawn lines */
+  --pen-light: #B6BDC3;     /* light drawn lines inside each small board */
+  --you: #2A2F34;           /* your marks, and text */
+  --net: #1B3F6E;           /* the network's marks */
+  --net-wash: rgba(27, 63, 110, .13);
+  --circle: #C6392E;        /* red pencil: the forced board, nothing else */
+  --muted: #6B7279;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #1C2928;
+    --pen: #D3DDD8;
+    --pen-light: #566965;
+    --you: #F1F4F2;
+    --net: #9BCBE8;
+    --net-wash: rgba(155, 203, 232, .17);
+    --circle: #F47B67;
+    --muted: #97A8A3;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --ground: #1C2928;
+  --pen: #D3DDD8;
+  --pen-light: #566965;
+  --you: #F1F4F2;
+  --net: #9BCBE8;
+  --net-wash: rgba(155, 203, 232, .17);
+  --circle: #F47B67;
+  --muted: #97A8A3;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--you);
+  font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; }
+
+.sheet {
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  gap: 44px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 52px 24px 72px;
+}
+
+/* --- the margin: title at the top, moves written down beneath --------- */
+
+.margin {
+  border-right: 1.5px solid var(--pen-light);
+  padding-right: 24px;
+  text-align: right;
+}
+.wordmark {
+  margin: 0 0 26px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13.5px;
+  line-height: 1.9;
+}
+.log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-you { color: var(--you); }
+.log-net { color: var(--net); }
+.log-n {
+  display: inline-block;
+  min-width: 2.1em;
+  margin-right: 6px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.log-empty { color: var(--muted); font-size: 13.5px; }
+
+.play { min-width: 0; }
+.title-mobile { display: none; }
+
+/* --- the board ------------------------------------------------------- */
+
+.board {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.local {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  padding: 8%;
+  min-width: 0;
+}
+/* The heavy #: a right edge on every board but the last in its row, a
+ * bottom edge on every board but the last row. No outer box. */
+.local:not(:nth-child(3n)) { border-right: 3px solid var(--pen); }
+.local:nth-child(-n + 6)  { border-bottom: 3px solid var(--pen); }
+
+.cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+  min-width: 0;
+}
+/* The light # inside each small board, same construction. */
+.cell:not(:nth-child(3n)) { border-right: 1.5px solid var(--pen-light); }
+.cell:nth-child(-n + 6)  { border-bottom: 1.5px solid var(--pen-light); }
+.cell > * { grid-area: 1 / 1; }
+
+.cell-open { cursor: pointer; }
+.cell:focus-visible { outline: 2px solid var(--circle); outline-offset: -3px; }
+
+.mark {
+  width: 66%;
+  height: 66%;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 8;
+}
+.mark-you { stroke: var(--you); }
+.mark-net { stroke: var(--net); }
+
+/* Your mark, faintly, where you are about to put it. */
+.ghost { opacity: 0; }
+.cell-open:hover .ghost,
+.cell-open:focus-visible .ghost { opacity: .3; }
+
+/* Where the network just played: a wash of its colour under the mark. */
+.cell-latest::before {
+  content: '';
+  grid-area: 1 / 1;
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  background: var(--net-wash);
+}
+
+/* A decided board: the small game fades and whoever took it is drawn large
+ * over the top -- which is exactly what you do on paper. */
+.local-closed .cell { opacity: .18; }
+.claim {
+  position: absolute;
+  inset: 2%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.claim .mark { width: 84%; height: 84%; stroke-width: 5.5; }
+
+/* The red pencil loop around the board you must play in. Its drawing pass is
+ * the one non-user-triggered motion on the page. */
+.pencil-loop {
+  position: absolute;
+  inset: -5%;
+  width: 110%;
+  height: 110%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--circle);
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.pencil-loop path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  animation: draw .38s ease-out;
+}
+@keyframes draw { from { stroke-dashoffset: 100; } }
+@media (prefers-reduced-motion: reduce) { .pencil-loop path { animation: none; } }
+
+/* --- beneath the board ----------------------------------------------- */
+
+.status {
+  margin: 28px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.35;
+  max-width: 34ch;
+}
+.status-over { color: var(--net); }
+.status-error { color: var(--circle); }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 22px 32px;
+  margin-top: 30px;
+}
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { font-size: 13px; color: var(--muted); padding: 0 0 6px; }
+
+.tiers { display: flex; flex-wrap: wrap; gap: 4px; }
+.tier {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 7px 10px 6px;
+  border: 1.5px solid transparent;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+/* Stroke weight carries the strength; the word carries the meaning. */
+.tier svg { width: 58px; height: 12px; overflow: visible; }
+.tier svg path { fill: none; stroke: var(--pen); stroke-linecap: round; }
+.tier-on { border-color: var(--pen); font-weight: 600; }
+.tier:disabled { cursor: progress; opacity: .55; }
+
+.seats { display: flex; gap: 4px; }
+.seat, .restart {
+  padding: 7px 13px;
+  border: 1.5px solid transparent;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+.seat-on { border-color: var(--pen); font-weight: 600; }
+.restart { border-color: var(--pen-light); margin-top: 26px; }
+.seat:disabled, .restart:disabled { cursor: progress; opacity: .55; }
+
+.rules {
+  margin: 38px 0 0;
+  max-width: 56ch;
+  font-size: 14.5px;
+  color: var(--muted);
+}
+.colophon { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 700px) {
+  .sheet { grid-template-columns: 1fr; gap: 16px; padding: 18px 14px 56px; }
+  .margin {
+    order: 2;
+    border-right: 0;
+    border-top: 1.5px solid var(--pen-light);
+    padding: 14px 0 0;
+    text-align: left;
+  }
+  .wordmark { display: none; }
+  .log { display: flex; flex-wrap: wrap; gap: 0 16px; }
+  .board { max-width: none; }
+  .local:not(:nth-child(3n)) { border-right-width: 2.5px; }
+  .local:nth-child(-n + 6)  { border-bottom-width: 2.5px; }
+  .status { font-size: 19px; }
+  .title-mobile { display: block; margin: 0 0 12px; font-size: 17px; font-weight: 700; }
+}

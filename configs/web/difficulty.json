@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "default": "standard",
+  "tiers": {
+    "casual": {
+      "label": "Casual",
+      "simulations": 128,
+      "leaf_batch": 8,
+      "stroke": 1.5
+    },
+    "standard": {
+      "label": "Standard",
+      "simulations": 512,
+      "leaf_batch": 16,
+      "stroke": 2.5
+    },
+    "strong": {
+      "label": "Strong",
+      "simulations": 2048,
+      "leaf_batch": 64,
+      "stroke": 4
+    },
+    "championship": {
+      "label": "Championship",
+      "simulations": 4096,
+      "leaf_batch": 128,
+      "stroke": 6.5
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "source_checkpoint": "runs/grand-championship-6000/championship/evaluation-inputs/candidate/model-6000.pt",
+  "source_sha256": "e943b3ba6b5e2bd843e0a2552b59decfc1bfc36a174a370d893b00781f2e97a7",
+  "iteration": 6000,
+  "arch": "unet",
+  "opset": 18,
+  "torch_version": "2.14.0+cu130",
+  "exported_at": "2026-09-22T20:19:31.472623+00:00",
+  "parity": {
+    "positions": 512,
+    "tolerance": 0.0001,
+    "max_logit_abs_diff": 1.2576580047607422e-05,
+    "max_value_abs_diff": 4.76837158203125e-06
+  }
+}
